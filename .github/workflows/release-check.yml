@@ -10,7 +10,7 @@ jobs:
         shell: bash
       - uses: actions/checkout@v3
       - id: go-mod
-        uses: pl-strflt/uci/shared/.github/actions/read-go-mod@v1.0.0
+        uses: pl-strflt/uci/shared/.github/actions/read-go-mod@main
       - uses: actions/setup-go@v3
         with:
           go-version: ${{ fromJSON(steps.go-mod.outputs.json).Go }}.x

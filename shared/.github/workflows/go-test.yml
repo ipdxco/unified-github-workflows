@@ -34,9 +34,9 @@ jobs:
         with:
           submodules: recursive
       - id: config
-        uses: pl-strflt/uci/shared/.github/actions/read-config@v1.0.0
+        uses: pl-strflt/uci/shared/.github/actions/read-config@main
       - id: go-mod
-        uses: pl-strflt/uci/shared/.github/actions/read-go-mod@v1.0.0
+        uses: pl-strflt/uci/shared/.github/actions/read-go-mod@main
       - id: go
         env:
           MATRIX_GO: ${{ matrix.go }}
