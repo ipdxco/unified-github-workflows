@@ -6,8 +6,8 @@ on:
       branch:
         description: "Branch from which to merge PRs"
         required: false
-  schedule:
-    - cron: "0 0 * * *" # https://crontab.guru/every-day
+  # schedule:
+  #   - cron: "0 0 * * *" # https://crontab.guru/every-day
 
 jobs:
   dispatch:
