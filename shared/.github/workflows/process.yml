@@ -92,8 +92,8 @@ jobs:
         DEFAULTS: ${{ fromJSON(github.event.inputs.defaults)[fromJSON(steps.github.outputs.json).languages[0]] || github.event.inputs.defaults || '{}' }}
         OVERRIDE: ${{ fromJSON(github.event.inputs.override)[fromJSON(steps.github.outputs.json).languages[0]] || github.event.inputs.override || '{}' }}
       run: |
-        if [[ -f uci.yml ]]; then
-          echo "json=$(yq -c --argjson defaults "$DEFAULTS" --argjson override "$OVERRIDE" '$defaults + . + $override' uci.yml)" >> $GITHUB_OUTPUT
+        if [[ -f .github/ucibot.yml ]]; then
+          echo "json=$(yq -c --argjson defaults "$DEFAULTS" --argjson override "$OVERRIDE" '$defaults + . + $override' .github/ucibot.yml)" >> $GITHUB_OUTPUT
         else
           echo "json=$(jq -c --argjson defaults "$DEFAULTS" --argjson override "$OVERRIDE" -n '$defaults + $override')" >> $GITHUB_OUTPUT
     - name: Prepare ${{ matrix.repository }} for deployment
