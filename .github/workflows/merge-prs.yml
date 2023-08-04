@@ -5,7 +5,7 @@ on:
     inputs:
       branch:
         description: "Branch from which to merge PRs"
-        required: true
+        required: false
   schedule:
     - cron: "0 0 * * *" # https://crontab.guru/every-day
 
@@ -16,7 +16,8 @@ jobs:
     steps:
       - name: Merge PRs
         env:
-          QUERY: is:pr author:web3-bot state:open head:${{ github.event.inputs.branch || 'ucibot/copy-templates' }} archived:false
+          QUERY: is:pr author:web3-bot state:open archived:false
+          BRANCH: ${{ github.event.inputs.branch }}
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.UCIBOT_GITHUB_TOKEN }}
@@ -46,9 +47,14 @@ jobs:
             }
             github.hook.wrap('request', request)
 
-            core.info(`Looking for PRs matching the query: ${process.env.QUERY}`)
+            let q = process.env.QUERY
+            if (process.env.BRANCH) {
+              q += ` head:${process.env.BRANCH}`
+            }
+
+            core.info(`Looking for PRs matching the query: ${q}`)
             const items = await github.paginate(github.rest.search.issuesAndPullRequests, {
-              q: process.env.QUERY
+              q
             })
             core.info(`Filtering out the PRs that cannot be merged`)
             const prs = []

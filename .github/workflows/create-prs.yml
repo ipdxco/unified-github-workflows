@@ -5,7 +5,7 @@ on:
     inputs:
       branch:
         description: "Branch from which to merge PRs"
-        required: true
+        required: false
   schedule:
     - cron: "0 0 * * *" # https://crontab.guru/every-day
 
@@ -16,7 +16,7 @@ jobs:
     steps:
       - name: Create PRs
         env:
-          BRANCH: ${{ github.event.inputs.branch || 'ucibot/copy-templates' }}
+          BRANCH: ${{ github.event.inputs.branch }}
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.UCIBOT_GITHUB_TOKEN }}
@@ -51,71 +51,66 @@ jobs:
               affiliation: 'collaborator'
             })
             core.info(`Filtering out the repositories without unmerged branches`)
-            const repos = []
+            const repoBranches = []
             for (const item of items) {
               if (item.archived) {
                 core.info(`Skipping archived repository ${item.html_url}`)
                 continue
               }
-              core.info(`Checking if a PR can be created for ${item.html_url}`)
-              let branch
-              try {
-                branch = (await github.rest.repos.getBranch({
+              core.info(`Looking for matching branches for ${item.html_url}`)
+              const branches = (await github.paginate(github.rest.repos.listBranches, {
+                owner: item.owner.login,
+                repo: item.name
+              })).filter(branch => {
+                if (process.env.BRANCH) {
+                  return branch.name == process.env.BRANCH
+                } else {
+                  return branch.name.startsWith('ucibot/')
+                }
+              })
+              for (const branch of branches) {
+                core.info(`Checking if ${branch.html_url} requires a PR to be created`)
+                const {data: compare} = await github.rest.repos.compareCommitsWithBasehead({
                   owner: item.owner.login,
                   repo: item.name,
-                  branch: process.env.BRANCH
-                }))?.data
-              } catch(error) {
-                if (error.status != 404) {
-                  throw error
+                  basehead: `${item.default_branch}...${branch.name}`
+                })
+                if (compare.status == 'ahead') {
+                  core.info(`PR for ${branch.html_url} should exist`)
+                } else {
+                  core.info(`PR for ${branch.html_url} is not needed`)
+                  continue
                 }
-              }
-              if (branch != undefined) {
-                core.info(`The branch exists in ${item.html_url}`)
-              } else {
-                core.info(`The branch does not exist in ${item.html_url}`)
-                continue
-              }
-              const {data: compare} = await github.rest.repos.compareCommitsWithBasehead({
-                owner: item.owner.login,
-                repo: item.name,
-                basehead: `${item.default_branch}...${branch.name}`
-              })
-              if (compare.status == 'ahead') {
-                core.info(`PR for ${item.html_url} can be created`)
-              } else {
-                core.info(`PR for ${item.html_url} cannot be created`)
-                continue
-              }
-              const {data: pulls} = await github.rest.repos.listPullRequestsAssociatedWithCommit({
-                owner: item.owner.login,
-                repo: item.name,
-                commit_sha: branch.commit.sha
-              })
-              if (pulls.length == 0) {
-                core.info(`The PR does not exist yet in ${item.html_url}`)
-                repos.push(item)
-              } else {
-                core.info(`The PR already exists at ${pulls[0].html_url}`)
+                const {data: pulls} = await github.rest.repos.listPullRequestsAssociatedWithCommit({
+                  owner: item.owner.login,
+                  repo: item.name,
+                  commit_sha: branch.commit.sha
+                })
+                if (pulls.length == 0) {
+                  core.info(`PR for ${branch.html_url} should be created`)
+                  repoBranches.push({repo: item, branch})
+                } else {
+                  core.info(`PR for ${branch.html_url} already exists`)
+                }
               }
             }
             core.info(`Attempting to create the PRs`)
             const failed = []
-            for (const repo of repos) {
-              core.info(`Creating PR in ${repo.html_url}`)
+            for (const {repo, branch} of repoBranches) {
+              core.info(`Creating PR for ${branch.html_url}`)
               try {
                 const pr = await octokit.rest.pulls.create({
                   owner: repo.owner.login,
                   repo: repo.name,
-                  head: process.env.BRANCH,
+                  head: branch.name,
                   base: repo.default_branch
                 })
                 core.info(`${pr.html_url} created successfully`)
               } catch(error) {
-                core.error(`Couldn't create a PR for ${repo.html_url}, got: ${error}`)
-                failed.push(repo)
+                core.error(`Couldn't create a PR for ${branch.html_url}, got: ${error}`)
+                failed.push({repo, branch})
               }
             }
             if (failed.length != 0) {
-              throw new Error(`Failed to create PRs in ${failed.length} repos`)
+              throw new Error(`Failed to create ${failed.length} PRs`)
             }
