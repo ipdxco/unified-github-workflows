@@ -6,7 +6,7 @@ force="$(jq -r '.force' <<< "$CONTEXT")"
 
 root="$(pwd)"
 
-pushd "$REPO" > /dev/null
+pushd "$TARGET" > /dev/null
 
 for f in $(jq -r '.config.files[]' <<< "$CONTEXT"); do
   if [[ -f "$f" && "$force" != "true" ]]; then
@@ -15,7 +15,7 @@ for f in $(jq -r '.config.files[]' <<< "$CONTEXT"); do
   fi
 
   echo "Rendering template..."
-  $root/protocol/.github/scripts/render-template.sh "$root/protocol/.github/templates/$f" "$CONTEXT" "$f"
+  $root/$SOURCE/scripts/render-template.sh "$root/$SOURCE/templates/$f" "$CONTEXT" "$f"
 
   git add "$f"
   git commit -m "chore: add or force update $f"
@@ -35,7 +35,7 @@ if [[ "$force" != "true" ]]; then
 
   tmp="$(mktemp)"
 
-  dependabot update github_actions  "$REPO" --local "$REPO" --output "$tmp"
+  dependabot update github_actions  "$TARGET" --local "$TARGET" --output "$tmp"
 
   branch="$(git branch --show-current)"
   sha="$(git rev-parse HEAD)"
@@ -44,7 +44,7 @@ if [[ "$force" != "true" ]]; then
     title="$(jq -r '.pr-title' <<< "$pr")"
     git checkout -b "$title" "$branch"
     for f in $(jq -r '.updated-dependency-files[]' <<< "$pr"); do
-      jq -r '.content' <<< "$f" > "$REPO/$(jq -r '.name' <<< "$f")"
+      jq -r '.content' <<< "$f" > "$TARGET/$(jq -r '.name' <<< "$f")"
     done
     git add .
     git commit -m "$(jq -r '.commit-message' <<< "$pr")"
@@ -55,7 +55,7 @@ if [[ "$force" != "true" ]]; then
   git reset "$sha"
 
   for f in $(jq -r '.config.files[]' <<< "$CONTEXT"); do
-    if [[ ! -f "$REPO/$f" ]]; then
+    if [[ ! -f "$TARGET/$f" ]]; then
       echo "$f does not exist. Skipping."
       continue
     fi

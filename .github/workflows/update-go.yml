@@ -12,11 +12,11 @@ on:
 
 jobs:
   copy:
-    uses: ./.github/workflows/process.yml
+    uses: ./shared/.github/workflows/process.yml
     with:
       targets: ${{ github.event.inputs.targets }}
       branch: web3-bot/update-go
-      script: copy-templates.sh
+      script: update-go.sh
       defaults: |
         {
           "Go": {
