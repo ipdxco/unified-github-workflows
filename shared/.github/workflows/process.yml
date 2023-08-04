@@ -45,7 +45,7 @@ jobs:
       with:
         path: ${{ matrix.repository }}
         repository: ${{ matrix.repository }}
-        token: ${{ secrets.WEB3_BOT_GITHUB_TOKEN }}
+        token: ${{ secrets.UCIBOT_GITHUB_TOKEN }}
         persist-credentials: true
         submodules: recursive
     - name: Checkout ${{ github.repository }}
@@ -58,7 +58,7 @@ jobs:
       working-directory: ${{ matrix.repository }}
       env:
         REPO: ${{ matrix.repository }}
-        GITHUB_TOKEN: ${{ secrets.WEB3_BOT_GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.UCIBOT_GITHUB_TOKEN }}
       run: |
         eof="EOF$RANDOM"
         default_branch="$(git remote show origin | awk '/HEAD branch/ {print $NF}')"
@@ -102,11 +102,11 @@ jobs:
         BRANCH: ${{ github.event.inputs.branch }}
         DEFAULT_BRANCH: ${{ fromJSON(steps.github.outputs.json).default_branch }}
       # If the branch already exists, check it out; otherwise, create it.
-      # Then, try rebasing the web3-bot/* branch onto the default branch.
-      # If that fails, reset the web3-bot/* branch to the default branch.
+      # Then, try rebasing the ucibot/* branch onto the default branch.
+      # If that fails, reset the ucibot/* branch to the default branch.
       run: |
-        git config user.name web3-bot
-        git config user.email web3-bot@users.noreply.github.com
+        git config user.name ucibot
+        git config user.email ucibot@users.noreply.github.com
         git checkout "$BRANCH" || git checkout -B "$BRANCH"
         git rebase "$DEFAULT_BRANCH" || (git rebase --abort && git reset --hard "$DEFAULT_BRANCH")
     - env:

@@ -15,7 +15,7 @@ jobs:
     uses: ./shared/.github/workflows/process.yml
     with:
       targets: ${{ github.event.inputs.targets }}
-      branch: web3-bot/delete-templates
+      branch: ucibot/delete-templates
       script: delete-templates.sh
       override: |
         {

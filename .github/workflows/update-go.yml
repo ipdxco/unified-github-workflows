@@ -15,7 +15,7 @@ jobs:
     uses: ./shared/.github/workflows/process.yml
     with:
       targets: ${{ github.event.inputs.targets }}
-      branch: web3-bot/update-go
+      branch: ucibot/update-go
       script: update-go.sh
       defaults: |
         {

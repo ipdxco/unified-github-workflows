@@ -16,10 +16,10 @@ jobs:
     steps:
       - name: Merge PRs
         env:
-          QUERY: is:pr author:web3-bot state:open head:${{ github.event.inputs.branch || 'web3-bot/copy-templates' }} archived:false
+          QUERY: is:pr author:web3-bot state:open head:${{ github.event.inputs.branch || 'ucibot/copy-templates' }} archived:false
         uses: actions/github-script@v6
         with:
-          github-token: ${{ secrets.WEB3_BOT_GITHUB_TOKEN }}
+          github-token: ${{ secrets.UCIBOT_GITHUB_TOKEN }}
           retries: 0
           script: |
             const request = async function(req, opts) {
