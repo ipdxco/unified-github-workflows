@@ -2,23 +2,25 @@
 
 set -euo pipefail -o nounset
 
-force="$(jq -r '.force' <<< "$CONTEXT")"
+force="$(jq -r '.config.force' <<< "$CONTEXT")"
 
 root="$(pwd)"
 
 pushd "$TARGET" > /dev/null
 
-for f in $(jq -r '.config.files[]' <<< "$CONTEXT"); do
+for f in $(jq -r '.config.files[] // []' <<< "$CONTEXT"); do
   if [[ -f "$f" && "$force" != "true" ]]; then
     echo "$f already exists. Skipping."
     continue
   fi
 
-  echo "Rendering template..."
+  echo "Rendering template $f..."
   $root/$SOURCE/scripts/render-template.sh "$root/$SOURCE/templates/$f" "$CONTEXT" "$f"
 
   git add "$f"
-  git commit -m "chore: add or force update $f"
+  if ! git diff-index --quiet HEAD; then
+    git commit -m "chore: add or force update $f"
+  fi
 done
 
 if [[ "$force" != "true" ]]; then
@@ -35,33 +37,37 @@ if [[ "$force" != "true" ]]; then
 
   tmp="$(mktemp)"
 
-  dependabot update github_actions  "$TARGET" --local "$TARGET" --output "$tmp"
+  dependabot update github_actions "$TARGET" --local . --output "$tmp"
 
   branch="$(git branch --show-current)"
   sha="$(git rev-parse HEAD)"
 
-  for pr in $(yq -c '.output | map(select(.type == "create_pull_request")) | .[]' "$tmp"); do
-    title="$(jq -r '.pr-title' <<< "$pr")"
+  for pr in $(yq -c '.output | map(select(.type == "create_pull_request")) | map(.expect.data) | .[]' "$tmp"); do
+    title="$(jq -r '.["pr-title"]' <<< "$pr")"
     git checkout -b "$title" "$branch"
-    for f in $(jq -r '.updated-dependency-files[]' <<< "$pr"); do
-      jq -r '.content' <<< "$f" > "$TARGET/$(jq -r '.name' <<< "$f")"
+    for f in $(jq -r '.updated-dependency-files[] // []' <<< "$pr"); do
+      jq -r '.content' <<< "$f" > "$(jq -r '.name' <<< "$f")"
     done
     git add .
-    git commit -m "$(jq -r '.commit-message' <<< "$pr")"
-    git checout "$branch"
+    if ! git diff-index --quiet HEAD; then
+      git commit -m "$(jq -r '.["commit-message"]' <<< "$pr")"
+    fi
+    git checkout "$branch"
     git merge "$title" --strategy-option theirs
   done
 
   git reset "$sha"
 
-  for f in $(jq -r '.config.files[]' <<< "$CONTEXT"); do
-    if [[ ! -f "$TARGET/$f" ]]; then
+  for f in $(jq -r '.config.files[] // []' <<< "$CONTEXT"); do
+    if [[ ! -f "$f" ]]; then
       echo "$f does not exist. Skipping."
       continue
     fi
 
     git add "$f"
-    git commit -m "chore: update $f"
+    if ! git diff-index --quiet HEAD; then
+      git commit -m "chore: update $f"
+    fi
   done
 
   git reset --hard
