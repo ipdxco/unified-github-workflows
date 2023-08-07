@@ -52,7 +52,7 @@ if [[ "$force" != "true" ]]; then
     if ! git diff-index --quiet HEAD; then
       git commit -m "$(jq -r '.commit-message' <<< "$pr")"
     fi
-    git checout "$branch"
+    git checkout "$branch"
     git merge "$title" --strategy-option theirs
   done
 
