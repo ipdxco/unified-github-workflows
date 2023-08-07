@@ -2,7 +2,7 @@
 
 set -euo pipefail -o nounset
 
-force="$(jq -r '.force' <<< "$CONTEXT")"
+force="$(jq -r '.config.force' <<< "$CONTEXT")"
 
 root="$(pwd)"
 
