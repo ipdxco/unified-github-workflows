@@ -103,7 +103,8 @@ jobs:
                   owner: repo.owner.login,
                   repo: repo.name,
                   head: branch.name,
-                  base: repo.default_branch
+                  base: repo.default_branch,
+                  title: `ci: ${branch.name}`
                 })
                 core.info(`${pr.html_url} created successfully`)
               } catch(error) {
