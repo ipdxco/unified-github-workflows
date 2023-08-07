@@ -9,7 +9,7 @@ on:
 
 jobs:
   copy:
-    uses: ./shared/.github/workflows/process.yml
+    uses: ./.github/workflows/process.yml
     with:
       targets: ${{ github.event.inputs.targets }}
       branch: ucibot/copy-templates
