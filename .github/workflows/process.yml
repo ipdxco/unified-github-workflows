@@ -81,7 +81,7 @@ jobs:
         default_branch="$(git remote show origin | awk '/HEAD branch/ {print $NF}')"
         protected_branches="$(gh api -X GET "/repos/$REPO/branches" -f protected=true | jq -c 'map(.name)')"
         languages="$(gh api -X GET "/repos/$REPO/languages" | jq -c 'to_entries | sort_by(.value) | reverse | map(.key)')"
-        tag="$(git describe --tags --abbrev=0 || true)"
+        tag="$(git tag --points-at $(git describe --tags --abbrev=0 || true) | sort -V | tail -n-1)"
         echo "json<<$eof" >> $GITHUB_OUTPUT
         echo '{' >> $GITHUB_OUTPUT
         echo '"default_branch":"'"$default_branch"'",' >> $GITHUB_OUTPUT
@@ -96,7 +96,7 @@ jobs:
       run: |
         git fetch origin --tags
         eof="EOF$RANDOM"
-        tag="$(git describe --tags --abbrev=0 || true)"
+        tag="$(git tag --points-at $(git describe --tags --abbrev=0 || true) | sort -V | tail -n-1)"
         echo "json<<$eof" >> $GITHUB_OUTPUT
         echo '{' >> $GITHUB_OUTPUT
         echo '"tag":"'"$tag"'"' >> $GITHUB_OUTPUT
