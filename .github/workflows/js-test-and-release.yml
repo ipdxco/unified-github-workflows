@@ -1,6 +1,15 @@
 name: test & maybe release
 on:
   workflow_call:
+    secrets:
+      DOCKER_TOKEN:
+        required: false
+      DOCKER_USERNAME:
+        required: false
+      NPM_TOKEN:
+        required: false
+      UCI_GITHUB_TOKEN:
+        required: false
 
 jobs:
 

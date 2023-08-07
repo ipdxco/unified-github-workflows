@@ -11,8 +11,9 @@ on:
         required: true
 
 jobs:
-  copy:
+  delete-templates:
     uses: ./.github/workflows/process.yml
+    secrets: inherit
     with:
       targets: ${{ github.event.inputs.targets }}
       branch: ucibot/delete-templates

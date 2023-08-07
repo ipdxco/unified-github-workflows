@@ -25,6 +25,9 @@ on:
         required: false
         default: '{}'
         type: string
+    secrets:
+      UCIBOT_GITHUB_TOKEN:
+        required: true
 
 defaults:
   run:
