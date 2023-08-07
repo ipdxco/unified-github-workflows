@@ -114,6 +114,7 @@ jobs:
           echo "json=$(yq -c --argjson defaults "$DEFAULTS" --argjson override "$OVERRIDE" '$defaults + . + $override' .github/ucibot.yml)" >> $GITHUB_OUTPUT
         else
           echo "json=$(jq -c --argjson defaults "$DEFAULTS" --argjson override "$OVERRIDE" -n '$defaults + $override')" >> $GITHUB_OUTPUT
+        fi
     - name: Prepare ${{ matrix.repository }} for deployment
       working-directory: ${{ matrix.repository }}
       env:
