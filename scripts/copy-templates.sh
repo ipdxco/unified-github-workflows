@@ -42,7 +42,7 @@ if [[ "$force" != "true" ]]; then
   branch="$(git branch --show-current)"
   sha="$(git rev-parse HEAD)"
 
-  for pr in $(yq -c '.output | map(select(.type == "create_pull_request")) | map(.expect.data) | .[] // []' "$tmp"); do
+  for pr in $(yq -c '.output | map(select(.type == "create_pull_request")) | map(.expect.data) | .[]' "$tmp"); do
     title="$(jq -r '.["pr-title"]' <<< "$pr")"
     git checkout -b "$title" "$branch"
     for f in $(jq -r '.updated-dependency-files[] // []' <<< "$pr"); do
