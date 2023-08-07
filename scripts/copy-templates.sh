@@ -42,15 +42,15 @@ if [[ "$force" != "true" ]]; then
   branch="$(git branch --show-current)"
   sha="$(git rev-parse HEAD)"
 
-  for pr in $(yq -c '.output | map(select(.type == "create_pull_request")) | .[] // []' "$tmp"); do
-    title="$(jq -r '.pr-title' <<< "$pr")"
+  for pr in $(yq -c '.output | map(select(.type == "create_pull_request")) | map(.expect.data) | .[] // []' "$tmp"); do
+    title="$(jq -r '.["pr-title"]' <<< "$pr")"
     git checkout -b "$title" "$branch"
     for f in $(jq -r '.updated-dependency-files[] // []' <<< "$pr"); do
       jq -r '.content' <<< "$f" > "$(jq -r '.name' <<< "$f")"
     done
     git add .
     if ! git diff-index --quiet HEAD; then
-      git commit -m "$(jq -r '.commit-message' <<< "$pr")"
+      git commit -m "$(jq -r '.["commit-message"]' <<< "$pr")"
     fi
     git checkout "$branch"
     git merge "$title" --strategy-option theirs
