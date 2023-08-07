@@ -49,7 +49,9 @@ if [[ "$force" != "true" ]]; then
       jq -r '.content' <<< "$f" > "$(jq -r '.name' <<< "$f")"
     done
     git add .
-    git commit -m "$(jq -r '.commit-message' <<< "$pr")"
+    if ! git diff-index --quiet HEAD; then
+      git commit -m "$(jq -r '.commit-message' <<< "$pr")"
+    fi
     git checout "$branch"
     git merge "$title" --strategy-option theirs
   done
@@ -63,7 +65,9 @@ if [[ "$force" != "true" ]]; then
     fi
 
     git add "$f"
-    git commit -m "chore: update $f"
+    if ! git diff-index --quiet HEAD; then
+      git commit -m "chore: update $f"
+    fi
   done
 
   git reset --hard
