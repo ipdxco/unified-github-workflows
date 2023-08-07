@@ -39,17 +39,17 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        repository: ${{ fromJSON(github.event.inputs.targets) }}
+        repository: ${{ fromJSON(inputs.targets) }}
       max-parallel: 10
     name: ${{ matrix.repository }}
     steps:
     - name: Show inputs
       env:
-        TARGETS: ${{ github.event.inputs.targets }}
-        BRANCH: ${{ github.event.inputs.branch }}
-        SCRIPT: ${{ github.event.inputs.script }}
-        DEFAULTS: ${{ github.event.inputs.defaults }}
-        OVERRIDE: ${{ github.event.inputs.override }}
+        TARGETS: ${{ inputs.targets }}
+        BRANCH: ${{ inputs.branch }}
+        SCRIPT: ${{ inputs.script }}
+        DEFAULTS: ${{ inputs.defaults }}
+        OVERRIDE: ${{ inputs.override }}
       run: |
         echo "TARGETS=$TARGETS"
         echo "BRANCH=$BRANCH"
@@ -107,8 +107,8 @@ jobs:
       working-directory: ${{ matrix.repository }}
       env:
         REPO: ${{ matrix.repository }}
-        DEFAULTS: ${{ fromJSON(github.event.inputs.defaults)[fromJSON(steps.github.outputs.json).languages[0]] || github.event.inputs.defaults || '{}' }}
-        OVERRIDE: ${{ fromJSON(github.event.inputs.override)[fromJSON(steps.github.outputs.json).languages[0]] || github.event.inputs.override || '{}' }}
+        DEFAULTS: ${{ fromJSON(inputs.defaults)[fromJSON(steps.github.outputs.json).languages[0]] || inputs.defaults || '{}' }}
+        OVERRIDE: ${{ fromJSON(inputs.override)[fromJSON(steps.github.outputs.json).languages[0]] || inputs.override || '{}' }}
       run: |
         if [[ -f .github/ucibot.yml ]]; then
           echo "json=$(yq -c --argjson defaults "$DEFAULTS" --argjson override "$OVERRIDE" '$defaults + . + $override' .github/ucibot.yml)" >> $GITHUB_OUTPUT
@@ -117,7 +117,7 @@ jobs:
     - name: Prepare ${{ matrix.repository }} for deployment
       working-directory: ${{ matrix.repository }}
       env:
-        BRANCH: ${{ github.event.inputs.branch }}
+        BRANCH: ${{ inputs.branch }}
         DEFAULT_BRANCH: ${{ fromJSON(steps.github.outputs.json).default_branch }}
       # If the branch already exists, check it out; otherwise, create it.
       # Then, try rebasing the ucibot/* branch onto the default branch.
@@ -136,18 +136,18 @@ jobs:
             "github": ${{ toJSON(fromJSON(steps.github.outputs.json)) }},
             "source": ${{ toJSON(fromJSON(steps.source.outputs.json)) }}
           }
-        SCRIPT: ./$SOURCE/scripts/${{ github.event.inputs.script }}
+        SCRIPT: ./$SOURCE/scripts/${{ inputs.script }}
       run: $SCRIPT
     - id: ahead
       name: Check if push is needed
       working-directory: ${{ matrix.repository }}
       env:
-        BRANCH: ${{ github.event.inputs.branch }}
+        BRANCH: ${{ inputs.branch }}
         DEFAULT_BRANCH: ${{ fromJSON(steps.github.outputs.json).default_branch }}
       run: git rev-list --count "$BRANCH".."$DEFAULT_BRANCH" | xargs -I{} echo "ahead={}" | tee -a $GITHUB_ENV
     - name: Push changes
       if: steps.ahead.outputs.ahead != '0'
       working-directory: ${{ matrix.repository }}
       env:
-        BRANCH: ${{ github.event.inputs.branch }}
+        BRANCH: ${{ inputs.branch }}
       run: git push origin "$BRANCH" -f
