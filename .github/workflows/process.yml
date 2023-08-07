@@ -145,7 +145,7 @@ jobs:
       env:
         BRANCH: ${{ inputs.branch }}
         DEFAULT_BRANCH: ${{ fromJSON(steps.github.outputs.json).default_branch }}
-      run: git rev-list --count "$DEFAULT_BRANCH".."$BRANCH" | xargs -I{} echo "ahead={}" | tee -a $GITHUB_ENV
+      run: git rev-list --count "$DEFAULT_BRANCH".."$BRANCH" | xargs -I{} echo "ahead={}" | tee -a $GITHUB_OUTPUT
     - name: Push changes
       if: steps.ahead.outputs.ahead != '0'
       working-directory: ${{ matrix.repository }}
