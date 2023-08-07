@@ -8,7 +8,7 @@ root="$(pwd)"
 
 pushd "$TARGET" > /dev/null
 
-for f in $(jq -r '.config.files[]' <<< "$CONTEXT"); do
+for f in $(jq -r '.config.files[] // []' <<< "$CONTEXT"); do
   if [[ -f "$f" && "$force" != "true" ]]; then
     echo "$f already exists. Skipping."
     continue
@@ -42,10 +42,10 @@ if [[ "$force" != "true" ]]; then
   branch="$(git branch --show-current)"
   sha="$(git rev-parse HEAD)"
 
-  for pr in $(yq -c '.output | map(select(.type == "create_pull_request")) | .[]' "$tmp"); do
+  for pr in $(yq -c '.output | map(select(.type == "create_pull_request")) | .[] // []' "$tmp"); do
     title="$(jq -r '.pr-title' <<< "$pr")"
     git checkout -b "$title" "$branch"
-    for f in $(jq -r '.updated-dependency-files[]' <<< "$pr"); do
+    for f in $(jq -r '.updated-dependency-files[] // []' <<< "$pr"); do
       jq -r '.content' <<< "$f" > "$(jq -r '.name' <<< "$f")"
     done
     git add .
@@ -56,7 +56,7 @@ if [[ "$force" != "true" ]]; then
 
   git reset "$sha"
 
-  for f in $(jq -r '.config.files[]' <<< "$CONTEXT"); do
+  for f in $(jq -r '.config.files[] // []' <<< "$CONTEXT"); do
     if [[ ! -f "$f" ]]; then
       echo "$f does not exist. Skipping."
       continue
