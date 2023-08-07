@@ -14,11 +14,13 @@ for f in $(jq -r '.config.files[]' <<< "$CONTEXT"); do
     continue
   fi
 
-  echo "Rendering template..."
+  echo "Rendering template $f..."
   $root/$SOURCE/scripts/render-template.sh "$root/$SOURCE/templates/$f" "$CONTEXT" "$f"
 
   git add "$f"
-  git commit -m "chore: add or force update $f"
+  if ! git diff-index --quiet HEAD; then
+    git commit -m "chore: add or force update $f"
+  fi
 done
 
 if [[ "$force" != "true" ]]; then
