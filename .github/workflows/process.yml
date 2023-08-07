@@ -107,8 +107,8 @@ jobs:
       working-directory: ${{ matrix.repository }}
       env:
         REPO: ${{ matrix.repository }}
-        DEFAULTS: ${{ fromJSON(inputs.defaults)[fromJSON(steps.github.outputs.json).languages[0]] || inputs.defaults || '{}' }}
-        OVERRIDE: ${{ fromJSON(inputs.override)[fromJSON(steps.github.outputs.json).languages[0]] || inputs.override || '{}' }}
+        DEFAULTS: ${{ toJSON(fromJSON(inputs.defaults)[fromJSON(steps.github.outputs.json).languages[0]] || fromJSON(inputs.defaults) || fromJSON('{}')) }}
+        OVERRIDE: ${{ toJSON(fromJSON(inputs.override)[fromJSON(steps.github.outputs.json).languages[0]] || fromJSON(inputs.override) || fromJSON('{}')) }}
       run: |
         if [[ -f .github/uci.yml ]]; then
           echo "json=$(yq -c --argjson defaults "$DEFAULTS" --argjson override "$OVERRIDE" '$defaults + . + $override' .github/uci.yml)" >> $GITHUB_OUTPUT
