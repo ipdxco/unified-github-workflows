@@ -66,7 +66,7 @@ jobs:
                 repo,
                 pull_number: item.number
               })
-              if (pr.mergeable_state == 'clean') {
+              if (pr.mergeable_state == 'clean' && pr.head.user.login == 'web3-bot') {
                 core.info(`${pr.html_url} can be merged`)
                 prs.push(pr)
               } else {
