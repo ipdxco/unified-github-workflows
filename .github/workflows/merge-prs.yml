@@ -20,7 +20,7 @@ jobs:
           BRANCH: ${{ github.event.inputs.branch }}
         uses: actions/github-script@v6
         with:
-          github-token: ${{ secrets.UCIBOT_GITHUB_TOKEN }}
+          github-token: ${{ secrets.UCI_GITHUB_TOKEN }}
           retries: 0
           script: |
             const request = async function(req, opts) {

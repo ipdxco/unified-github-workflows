@@ -13,7 +13,7 @@ jobs:
     secrets: inherit
     with:
       targets: ${{ github.event.inputs.targets }}
-      branch: ucibot/copy-templates
+      branch: uci/copy-templates
       script: copy-templates.sh
       defaults: |
         {

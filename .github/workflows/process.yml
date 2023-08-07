@@ -26,7 +26,7 @@ on:
         default: '{}'
         type: string
     secrets:
-      UCIBOT_GITHUB_TOKEN:
+      UCI_GITHUB_TOKEN:
         required: true
 
 defaults:
@@ -61,7 +61,7 @@ jobs:
       with:
         path: ${{ matrix.repository }}
         repository: ${{ matrix.repository }}
-        token: ${{ secrets.UCIBOT_GITHUB_TOKEN }}
+        token: ${{ secrets.UCI_GITHUB_TOKEN }}
         persist-credentials: true
         submodules: recursive
     - name: Checkout ${{ github.repository }}
@@ -74,7 +74,7 @@ jobs:
       working-directory: ${{ matrix.repository }}
       env:
         REPO: ${{ matrix.repository }}
-        GITHUB_TOKEN: ${{ secrets.UCIBOT_GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.UCI_GITHUB_TOKEN }}
       run: |
         git fetch origin --tags
         eof="EOF$RANDOM"
@@ -110,8 +110,8 @@ jobs:
         DEFAULTS: ${{ fromJSON(inputs.defaults)[fromJSON(steps.github.outputs.json).languages[0]] || inputs.defaults || '{}' }}
         OVERRIDE: ${{ fromJSON(inputs.override)[fromJSON(steps.github.outputs.json).languages[0]] || inputs.override || '{}' }}
       run: |
-        if [[ -f .github/ucibot.yml ]]; then
-          echo "json=$(yq -c --argjson defaults "$DEFAULTS" --argjson override "$OVERRIDE" '$defaults + . + $override' .github/ucibot.yml)" >> $GITHUB_OUTPUT
+        if [[ -f .github/uci.yml ]]; then
+          echo "json=$(yq -c --argjson defaults "$DEFAULTS" --argjson override "$OVERRIDE" '$defaults + . + $override' .github/uci.yml)" >> $GITHUB_OUTPUT
         else
           echo "json=$(jq -c --argjson defaults "$DEFAULTS" --argjson override "$OVERRIDE" -n '$defaults + $override')" >> $GITHUB_OUTPUT
         fi
@@ -121,16 +121,16 @@ jobs:
         BRANCH: ${{ inputs.branch }}
         DEFAULT_BRANCH: ${{ fromJSON(steps.github.outputs.json).default_branch }}
       # If the branch already exists, check it out; otherwise, create it.
-      # Then, try rebasing the ucibot/* branch onto the default branch.
-      # If that fails, reset the ucibot/* branch to the default branch.
+      # Then, try rebasing the uci/* branch onto the default branch.
+      # If that fails, reset the uci/* branch to the default branch.
       run: |
-        git config user.name ucibot
-        git config user.email ucibot@users.noreply.github.com
+        git config user.name web3-bot
+        git config user.email web3-bot@users.noreply.github.com
         git checkout "$BRANCH" || git checkout -B "$BRANCH"
         git rebase "$DEFAULT_BRANCH" || (git rebase --abort && git reset --hard "$DEFAULT_BRANCH")
     - env:
         SOURCE: ${{ github.repository }}
-        TARGET: ${{ inputs.repository }}
+        TARGET: ${{ matrix.repository }}
         CONTEXT: |
           {
             "config": ${{ toJSON(fromJSON(steps.config.outputs.json)) }},
@@ -145,7 +145,7 @@ jobs:
       env:
         BRANCH: ${{ inputs.branch }}
         DEFAULT_BRANCH: ${{ fromJSON(steps.github.outputs.json).default_branch }}
-      run: git rev-list --count "$BRANCH".."$DEFAULT_BRANCH" | xargs -I{} echo "ahead={}" | tee -a $GITHUB_ENV
+      run: git rev-list --count "$DEFAULT_BRANCH".."$BRANCH" | xargs -I{} echo "ahead={}" | tee -a $GITHUB_OUTPUT
     - name: Push changes
       if: steps.ahead.outputs.ahead != '0'
       working-directory: ${{ matrix.repository }}
