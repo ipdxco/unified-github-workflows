@@ -6,6 +6,9 @@ on:
       targets:
         description: "List of repository names to deploy to"
         required: true
+      force:
+        description: "Force copy even if file exists"
+        required: false
 
 jobs:
   copy-templates:
@@ -25,16 +28,19 @@ jobs:
               ".github/workflows/release-check.yml",
               ".github/workflows/tagpush.yml",
               "version.json"
-            ]
+            ],
+            "force": ${{ github.event.inputs.force || false }}
           },
           "JavaScript": {
             "files": [
               ".github/workflows/js-test-and-release.yml"
-            ]
+            ],
+            "force": ${{ github.event.inputs.force || false }}
           },
           "TypeScript": {
             "files": [
               ".github/workflows/js-test-and-release.yml"
-            ]
-          }
+            ],
+            "force": ${{ github.event.inputs.force || false }}
+          },
         }
