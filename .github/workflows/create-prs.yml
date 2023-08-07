@@ -104,9 +104,10 @@ jobs:
                   repo: repo.name,
                   head: branch.name,
                   base: repo.default_branch,
-                  title: `ci: ${branch.name}`
+                  title: `ci: ${branch.name}`,
+                  body: `This PR was created automatically by the @web3-bot as a part of the [Unified CI](https://github.com/pl-strflt/uci) project.`
                 })
-                core.info(`${pr.html_url} created successfully`)
+                core.info(`${pr.data.html_url} created successfully`)
               } catch(error) {
                 core.error(`Couldn't create a PR for ${repo.html_url}/tree/${branch.name}, got: ${error}`)
                 failed.push({repo, branch})
