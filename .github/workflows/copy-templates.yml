@@ -8,8 +8,9 @@ on:
         required: true
 
 jobs:
-  copy:
+  copy-templates:
     uses: ./.github/workflows/process.yml
+    secrets: inherit
     with:
       targets: ${{ github.event.inputs.targets }}
       branch: ucibot/copy-templates
