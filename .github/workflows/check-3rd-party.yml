@@ -1,7 +1,5 @@
 on:
   pull_request:
-    paths-ignore:
-      - 'configs/*.json'
 
 name: Check 3rd Party
 
@@ -26,7 +24,8 @@ jobs:
     name: ${{ matrix.file }}
     steps:
       - uses: actions/checkout@v3
+      - uses: ./.github/actions/render-templates
       - name: Run check
         env:
           FILE: ${{ matrix.file }}
-        run: .github/workflows/check-3rd-party.sh $FILE
+        run: ./scripts/check-3rd-party.sh $FILE

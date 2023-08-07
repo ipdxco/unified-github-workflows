@@ -4,6 +4,14 @@ on:
     tags:
       - v*
 
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   releaser:
-    uses: protocol/.github/.github/workflows/tagpush.yml@master
+    uses: pl-strflt/uci/shared/.github/workflows/tagpush.yml@${{{ source.tag | split("-") | [(.[0] | split(".") | .[0]), (.[1:])] | flatten | join("-") }}}

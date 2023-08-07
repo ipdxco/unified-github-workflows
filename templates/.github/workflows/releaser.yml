@@ -3,6 +3,13 @@ on:
   push:
     paths: [ 'version.json' ]
 
+permissions:
+  contents: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.sha }}
+  cancel-in-progress: true
+
 jobs:
   releaser:
-    uses: protocol/.github/.github/workflows/releaser.yml@master
+    uses: pl-strflt/uci/shared/.github/workflows/releaser.yml@${{{ source.tag | split("-") | [(.[0] | split(".") | .[0]), (.[1:])] | flatten | join("-") }}}

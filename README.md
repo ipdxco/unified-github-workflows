@@ -25,7 +25,7 @@ Most repositories won't need any customization, and the workflows defined here w
 
 Some aspects of Unified CI workflows are configurable through [configuration variables](https://docs.github.com/en/actions/learn-github-actions/variables#creating-configuration-variables-for-a-repository).
 
-You can customise the runner type for `go-test` through `UCI_GO_TEST_RUNNER_UBUNTU`, `UCI_GO_TEST_RUNNER_WINDOWS` and `UCI_GO_TEST_RUNNER_MACOS` configuration variables. This option will be useful for repositories wanting to use more powerful, [PL self-hosted GitHub Actions runners](https://github.com/pl-strflt/tf-aws-gh-runner).
+You can customise the runner type for `go-test` through `UCI_GO_TEST_RUNNER_UBUNTU`, `UCI_GO_TEST_RUNNER_WINDOWS` and `UCI_GO_TEST_RUNNER_MACOS` configuration variables. This option will be useful for repositories wanting to use more powerful, [PL self-hosted GitHub Actions runners](https://github.com/pl-strflt/tf-aws-gh-runner). Make sure the value of the variable is valid JSON.
 
 `UCI_*_RUNNER_*` variables expect the values to be JSON formatted. For example, if you want the `MacOS` runner used in `Go Test` workflow to be `macos-12` specifically, you'd set `UCI_GO_TEST_RUNNER_MACOS` to `"macos-12"` (notice the `"` around the string); and if you want your `Ubuntu` runner to be a self hosted machine with labels `this`, `is`, `my`, `self-hosted`, `runner`, you'd set `UCI_GO_TEST_RUNNER_UBUNTU` to `["this", "is", "my", "self-hosted", "runner"]`.
 
@@ -84,6 +84,14 @@ If your project cannot be built on one of the supported operating systems, you c
 }
 ```
 
+If you want to disable verbose logging or test shuffling, you can do so by setting `verbose` or `shuffle` to `false` in `.github/workflows/go-test-config.json`:
+```json
+{
+  "verbose": false,
+  "shuffle": false
+}
+```
+
 ## Technical Preview
 
 You can opt-in to receive early updates from the `next` branch in-between official Unified CI releases.
@@ -109,8 +117,6 @@ This repository currently defines two workflows for Go repositories:
 * [go-test](templates/.github/workflows/go-test.yml): Runs all tests, using different compiler versions and operating systems.
 
 Whenever one of these workflows is changed, this repository runs the [copy workflow](.github/workflows/copy-workflow.yml). This workflow creates a pull request in every participating repository to update *go-check* and *go-test*.
-In order to help with the distribution of these workflows, this repository defines two additional workflows that are distributed across participating repositories:
-* [automerge](templates/.github/workflows/automerge.yml): In most cases, an update to the workflows will not cause CI to fail in most participating repositories. To make our life easier, *automerge* automatically merges the pull request if all checks succeed.
 
 ## Usage
 

@@ -5,9 +5,15 @@
 name: Dispatch
 
 on:
-  push:
-    branches: [ master, testing ]
   workflow_dispatch:
+    inputs:
+      workflow:
+        description: "Workflow to dispatch"
+        required: true
+      inputs:
+        description: "Workflow inputs"
+        required: false
+        default: '{}'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -28,32 +34,68 @@ env:
 
 jobs:
   matrix:
-    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/testing'
     name: Batch targets
     runs-on: ubuntu-latest
     outputs:
-      batches: ${{ steps.set-matrix.outputs.batches }}
+      batches: ${{ steps.matrix.outputs.result }}
     steps:
-      - uses: actions/checkout@v3
-      - id: set-matrix
-        run: |
-          targets=()
-          for config in configs/*.json; do
-            if [[ $GITHUB_REF == refs/heads/testing && $config != configs/testing.json ]]; then
-              continue
-            fi
-            if [[ $GITHUB_REF != refs/heads/testing && $config == configs/testing.json ]]; then
-              continue
-            fi
-            echo "::group::$config"
-            defaults=$(jq -c '.defaults' $config)
-            # values defined in the repository object will override the default values
-            # e.g. { "files": ["a", "b"] } + { "files": ["c"] } = { "files": ["c"] }
-            targets+=($(jq -c ".repositories[] | $defaults + ." $config))
-            echo "::endgroup::"
-          done
-          batches=$(jq -sc "[. | _nwise($MAX_REPOS_PER_WORKFLOW)] | to_entries" <<< "${targets[@]}")
-          echo "batches=$batches" >> $GITHUB_OUTPUT
+      - id: matrix
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.UCIBOT_GITHUB_TOKEN }}
+          retries: 0
+          script: |
+            const request = async function(req, opts) {
+              try {
+                return await req(opts)
+              } catch(err) {
+                opts.request.retries = (opts.request.retries || 0) + 1
+                if (err.status === 403) {
+                  if (err.response.headers['x-ratelimit-remaining'] === '0') {
+                    const retryAfter = err.response.headers['x-ratelimit-reset'] - Math.floor(Date.now() / 1000) || 1
+                    core.info(`Rate limit exceeded, retrying in ${retryAfter} seconds`)
+                    await new Promise(resolve => setTimeout(resolve, retryAfter * 1000))
+                    return request(req, opts)
+                  }
+                  if (err.message.toLowerCase().includes('secondary rate limit')) {
+                    const retryAfter = Math.pow(2, opts.request.retries)
+                    core.info(`Secondary rate limit exceeded, retrying in ${retryAfter} seconds`)
+                    await new Promise(resolve => setTimeout(resolve, retryAfter * 1000))
+                    return request(req, opts)
+                  }
+                }
+                throw err
+              }
+            }
+            github.hook.wrap('request', request)
+            core.info(`Looking for repositories the user has direct access to`)
+            const items = await github.paginate(github.rest.repos.listForAuthenticatedUser, {
+              affiliation: 'collaborator'
+            })
+            const maxReposPerWorkflow = parseInt(process.env.MAX_REPOS_PER_WORKFLOW)
+            const batches = []
+            let batch = []
+            for (const item of items) {
+              if (item.archived) {
+                core.info(`Skipping archived repository ${item.full_name}`)
+                continue
+              }
+              batch.push(item.full_name)
+              if (batch.length === maxReposPerWorkflow) {
+                batches.push({
+                  key: batches.length,
+                  value: batch
+                })
+                batch = []
+              }
+            }
+            if (batch.length > 0) {
+              batches.push({
+                key: batches.length,
+                value: batch
+              })
+            }
+            return batches
   dispatch:
     needs: [ matrix ]
     name: Dispatch copy workflow(batch ${{ matrix.cfg.key }})
@@ -66,8 +108,8 @@ jobs:
         # For each "dispatch" job, matrix.cfg.value is an array, like:
         #
         #   [
-        #     {"target": "repo1", "files": [".github/workflows/go-check.yml"]},
-        #     {"target": "repo2", "files": [".github/workflows/go-check.yml", ".github/workflows/go-test.yml"]}
+        #     "repo1",
+        #     "repo2"
         #   ]
         #
         # The triggered copy workflow runs use that final array as their matrix.
@@ -76,26 +118,32 @@ jobs:
         cfg: ${{ fromJSON(needs.matrix.outputs.batches) }}
       max-parallel: 1
     env:
-      GITHUB_TOKEN: ${{ secrets.WEB3_BOT_GITHUB_TOKEN }}
-      WORKFLOW_YML: copy-workflow.yml
-      WORKFLOW_REPO: protocol/.github
+      GITHUB_TOKEN: ${{ secrets.UCIBOT_GITHUB_TOKEN }}
+      WORKFLOW: ${{ github.event.inputs.workflow }}
     steps:
       - id: dispatch
         name: Dispatch copy workflow
         env:
           TARGETS: ${{ toJSON(matrix.cfg.value) }}
+          INPUTS: ${{ github.event.inputs.inputs }}
+          REPO: ${{ github.repository }}
         run: |
           start_date="$(date +%s)"
-          gh workflow run "$WORKFLOW_YML" --ref "$GITHUB_REF" --repo "$WORKFLOW_REPO" --field "targets=$TARGETS"
+          args=()
+          for key in $(jq -r 'keys[]' <<< "$INPUTS"); do
+            args+=("--field" "$key=$(jq -r ".$key" <<< "$INPUTS")")
+          done
+          gh workflow run "$WORKFLOW" --ref "$GITHUB_REF" --repo "$REPO" --field "targets=$TARGETS" ${args[@]}
           echo "start_date=$start_date" >> $GITHUB_OUTPUT
       - id: run
         name: Wait for copy workflow run to start
         env:
           START_DATE: ${{ steps.dispatch.outputs.start_date }}
+          REPO: ${{ github.repository }}
         run: |
           # checks every 3 seconds until the most recent copy workflow run's created_at is later than this job's start_date
           while sleep 3; do
-            run="$(gh api "/repos/$WORKFLOW_REPO/actions/workflows/$WORKFLOW_YML/runs?per_page=1" --jq '.workflow_runs[0]')"
+            run="$(gh api "/repos/$REPO/actions/workflows/$WORKFLOW/runs?per_page=1" --jq '.workflow_runs[0]')"
             # nothing to check if no copy workflow run was returned
             if [[ ! -z "$run" ]]; then
               run_start_date="$(date --date="$(jq -r '.created_at' <<< "$run")" +%s)"
@@ -108,10 +156,11 @@ jobs:
       - name: Wait for copy workflow run to complete
         env:
           RUN_ID: ${{ steps.run.outputs.id }}
+          REPO: ${{ github.repository }}
         run: |
           # delays checking copy workflow's run status to save on GH API requests
           sleep $WORKFLOW_COMPLETION_CHECK_DELAY
 
           # checks every 3 seconds until the copy workflow run's status is completed
           # redirects the stdout to /dev/null because it is very chatty
-          gh run watch "$RUN_ID" --repo "$WORKFLOW_REPO" > /dev/null
+          gh run watch "$RUN_ID" --repo "$REPO" > /dev/null

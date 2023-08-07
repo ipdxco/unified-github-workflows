@@ -1,0 +1,25 @@
+name: Update Go
+
+on:
+  workflow_dispatch:
+    inputs:
+      targets:
+        description: "List of repository names to deploy to"
+        required: true
+      go:
+        description: "Go version to use"
+        required: true
+
+jobs:
+  copy:
+    uses: ./shared/.github/workflows/process.yml
+    with:
+      targets: ${{ github.event.inputs.targets }}
+      branch: ucibot/update-go
+      script: update-go.sh
+      defaults: |
+        {
+          "Go": {
+            "version": "${{ github.event.inputs.go }}"
+          }
+        }
