@@ -43,6 +43,19 @@ jobs:
       max-parallel: 10
     name: ${{ matrix.repository }}
     steps:
+    - name: Show inputs
+      env:
+        TARGETS: ${{ github.event.inputs.targets }}
+        BRANCH: ${{ github.event.inputs.branch }}
+        SCRIPT: ${{ github.event.inputs.script }}
+        DEFAULTS: ${{ github.event.inputs.defaults }}
+        OVERRIDE: ${{ github.event.inputs.override }}
+      run: |
+        echo "TARGETS=$TARGETS"
+        echo "BRANCH=$BRANCH"
+        echo "SCRIPT=$SCRIPT"
+        echo "DEFAULTS=$DEFAULTS"
+        echo "OVERRIDE=$OVERRIDE"
     - name: Checkout ${{ matrix.repository }}
       uses: actions/checkout@v3
       with:
@@ -63,6 +76,7 @@ jobs:
         REPO: ${{ matrix.repository }}
         GITHUB_TOKEN: ${{ secrets.UCIBOT_GITHUB_TOKEN }}
       run: |
+        git fetch origin --tags
         eof="EOF$RANDOM"
         default_branch="$(git remote show origin | awk '/HEAD branch/ {print $NF}')"
         protected_branches="$(gh api -X GET "/repos/$REPO/branches" -f protected=true | jq -c 'map(.name)')"
@@ -80,6 +94,7 @@ jobs:
       name: Get ${{ github.repository }} GitHub info
       working-directory: ${{ github.repository }}
       run: |
+        git fetch origin --tags
         eof="EOF$RANDOM"
         tag="$(git describe --tags --abbrev=0 || true)"
         echo "json<<$eof" >> $GITHUB_OUTPUT
