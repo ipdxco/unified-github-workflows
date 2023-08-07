@@ -16,7 +16,7 @@ jobs:
     secrets: inherit
     with:
       targets: ${{ github.event.inputs.targets }}
-      branch: ucibot/delete-templates
+      branch: uci/delete-templates
       script: delete-templates.sh
       override: |
         {

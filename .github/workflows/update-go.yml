@@ -16,7 +16,7 @@ jobs:
     secrets: inherit
     with:
       targets: ${{ github.event.inputs.targets }}
-      branch: ucibot/update-go
+      branch: uci/update-go
       script: update-go.sh
       defaults: |
         {
