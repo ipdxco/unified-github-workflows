@@ -137,7 +137,7 @@ jobs:
             "github": ${{ toJSON(fromJSON(steps.github.outputs.json)) }},
             "source": ${{ toJSON(fromJSON(steps.source.outputs.json)) }}
           }
-        SCRIPT: ./$SOURCE/scripts/${{ inputs.script }}
+        SCRIPT: ./${{ github.repository }}/scripts/${{ inputs.script }}
       run: $SCRIPT
     - id: ahead
       name: Check if push is needed
