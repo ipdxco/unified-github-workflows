@@ -69,16 +69,16 @@ jobs:
                 }
               })
               for (const branch of branches) {
-                core.info(`Checking if ${branch.html_url} requires a PR to be created`)
+                core.info(`Checking if ${item.html_url}/tree/${branch.name} requires a PR to be created`)
                 const {data: compare} = await github.rest.repos.compareCommitsWithBasehead({
                   owner: item.owner.login,
                   repo: item.name,
                   basehead: `${item.default_branch}...${branch.name}`
                 })
                 if (compare.status == 'ahead') {
-                  core.info(`PR for ${branch.html_url} should exist`)
+                  core.info(`PR for ${item.html_url}/tree/${branch.name} should exist`)
                 } else {
-                  core.info(`PR for ${branch.html_url} is not needed`)
+                  core.info(`PR for ${item.html_url}/tree/${branch.name} is not needed`)
                   continue
                 }
                 const {data: pulls} = await github.rest.repos.listPullRequestsAssociatedWithCommit({
@@ -87,19 +87,19 @@ jobs:
                   commit_sha: branch.commit.sha
                 })
                 if (pulls.length == 0) {
-                  core.info(`PR for ${branch.html_url} should be created`)
+                  core.info(`PR for ${item.html_url}/tree/${branch.name} should be created`)
                   repoBranches.push({repo: item, branch})
                 } else {
-                  core.info(`PR for ${branch.html_url} already exists`)
+                  core.info(`PR for ${item.html_url}/tree/${branch.name} already exists`)
                 }
               }
             }
             core.info(`Attempting to create the PRs`)
             const failed = []
             for (const {repo, branch} of repoBranches) {
-              core.info(`Creating PR for ${branch.html_url}`)
+              core.info(`Creating PR for ${repo.html_url}/tree/${branch.name}`)
               try {
-                const pr = await octokit.rest.pulls.create({
+                const pr = await github.rest.pulls.create({
                   owner: repo.owner.login,
                   repo: repo.name,
                   head: branch.name,
@@ -107,7 +107,7 @@ jobs:
                 })
                 core.info(`${pr.html_url} created successfully`)
               } catch(error) {
-                core.error(`Couldn't create a PR for ${branch.html_url}, got: ${error}`)
+                core.error(`Couldn't create a PR for ${repo.html_url}/tree/${branch.name}, got: ${error}`)
                 failed.push({repo, branch})
               }
             }
