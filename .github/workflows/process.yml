@@ -130,7 +130,7 @@ jobs:
         git rebase "$DEFAULT_BRANCH" || (git rebase --abort && git reset --hard "$DEFAULT_BRANCH")
     - env:
         SOURCE: ${{ github.repository }}
-        TARGET: ${{ inputs.repository }}
+        TARGET: ${{ matrix.repository }}
         CONTEXT: |
           {
             "config": ${{ toJSON(fromJSON(steps.config.outputs.json)) }},

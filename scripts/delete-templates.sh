@@ -4,15 +4,15 @@ set -euo pipefail -o nounset
 
 for f in $(jq -r '.config.files[]' <<< "$CONTEXT"); do
   echo -e "\nProcessing $f."
-  if [[ ! -f "$REPO/$f" ]]; then
+  if [[ ! -f "$TARGET/$f" ]]; then
     echo "$f does not exist. Skipping.\n"
     continue
   fi
 
-  rm -rf "$REPO/$f"
+  rm -rf "$TARGET/$f"
 done
 
-pushd $REPO > /dev/null
+pushd $TARGET > /dev/null
 
 git add .
 

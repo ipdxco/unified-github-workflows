@@ -29,7 +29,7 @@ expected="$(go version | awk '{print $3}')"
 
 go install golang.org/x/tools/cmd/goimports@v0.5.0
 
-pushd "$REPO" > /dev/null
+pushd "$TARGET" > /dev/null
 
 while read file; do
   pushd "$(dirname "$file")" > /dev/null
