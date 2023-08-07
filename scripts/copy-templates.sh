@@ -37,7 +37,7 @@ if [[ "$force" != "true" ]]; then
 
   tmp="$(mktemp)"
 
-  dependabot update github_actions  "$TARGET" --local "$TARGET" --output "$tmp"
+  dependabot update github_actions "$TARGET" --local . --output "$tmp"
 
   branch="$(git branch --show-current)"
   sha="$(git rev-parse HEAD)"
@@ -46,7 +46,7 @@ if [[ "$force" != "true" ]]; then
     title="$(jq -r '.pr-title' <<< "$pr")"
     git checkout -b "$title" "$branch"
     for f in $(jq -r '.updated-dependency-files[]' <<< "$pr"); do
-      jq -r '.content' <<< "$f" > "$TARGET/$(jq -r '.name' <<< "$f")"
+      jq -r '.content' <<< "$f" > "$(jq -r '.name' <<< "$f")"
     done
     git add .
     git commit -m "$(jq -r '.commit-message' <<< "$pr")"
@@ -57,7 +57,7 @@ if [[ "$force" != "true" ]]; then
   git reset "$sha"
 
   for f in $(jq -r '.config.files[]' <<< "$CONTEXT"); do
-    if [[ ! -f "$TARGET/$f" ]]; then
+    if [[ ! -f "$f" ]]; then
       echo "$f does not exist. Skipping."
       continue
     fi
