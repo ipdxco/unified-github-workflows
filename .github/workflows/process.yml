@@ -138,6 +138,7 @@ jobs:
             "source": ${{ toJSON(fromJSON(steps.source.outputs.json)) }}
           }
         SCRIPT: ./${{ github.repository }}/scripts/${{ inputs.script }}
+        GITHUB_TOKEN: ${{ secrets.UCI_GITHUB_TOKEN }}
       run: $SCRIPT
     - id: ahead
       name: Check if push is needed
