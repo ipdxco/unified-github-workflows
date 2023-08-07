@@ -66,7 +66,7 @@ jobs:
                 repo,
                 pull_number: item.number
               })
-              if (pr.mergeable_state == 'clean') {
+              if (pr.mergeable_state == 'clean' && pr.head.user.login == 'web3-bot') {
                 core.info(`${pr.html_url} can be merged`)
                 prs.push(pr)
               } else {
@@ -78,7 +78,7 @@ jobs:
             for (const pr of prs) {
               core.info(`Merging ${pr.html_url}`)
               try {
-                await octokit.rest.pulls.merge({
+                await github.rest.pulls.merge({
                   owner: pr.base.repo.owner.login,
                   repo: pr.base.repo.name,
                   pull_number: pr.number,
