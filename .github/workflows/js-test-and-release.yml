@@ -3,8 +3,7 @@ on:
   workflow_call:
     inputs:
       release:
-        required: false
-        default: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
+        required: true
         type: boolean
     secrets:
       DOCKER_TOKEN:

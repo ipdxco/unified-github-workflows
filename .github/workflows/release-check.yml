@@ -2,10 +2,9 @@ name: Release Checker
 on:
   workflow_call:
     inputs:
-      pull_request_number:
-        required: false
+      number:
+        required: true
         type: number
-        default: ${{ github.event.inputs.number || github.event.number }}
       branches:
         required: false
         type: string
@@ -20,14 +19,14 @@ jobs:
       - id: pr
         name: Retrieve PR information
         env:
-          PULL_REQUEST_NUMBER: ${{ inputs.pull_request_number }}
+          NUMBER: ${{ inputs.number }}
         uses: actions/github-script@v6
         with:
           script: |
             const {data: pr} = await github.rest.pulls.get({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              pull_number: process.env.PULL_REQUEST_NUMBER
+              pull_number: process.env.NUMBER
             });
             core.setOutput('json', JSON.stringify(pr));
       - uses: actions/checkout@v3

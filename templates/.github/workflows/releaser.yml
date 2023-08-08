@@ -1,4 +1,5 @@
 name: Releaser
+
 on:
   push:
     paths: [ 'version.json' ]

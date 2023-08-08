@@ -6,6 +6,11 @@ on:
       - ${{{ github.default_branch }}}
   pull_request:
   workflow_dispatch:
+    inputs:
+      release:
+        description: 'Release?'
+        required: true
+        default: 'false'
 
 permissions:
   contents: write
@@ -23,3 +28,5 @@ jobs:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       UCI_GITHUB_TOKEN: ${{ secrets.UCI_GITHUB_TOKEN }}
+    with:
+      release: ${{ github.event.inputs.release || github.event_name == 'push' }}

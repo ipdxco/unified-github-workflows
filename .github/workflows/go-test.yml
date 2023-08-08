@@ -3,7 +3,6 @@ on:
   workflow_call:
     inputs:
       go-versions:
-        description: 'Go versions to test against'
         required: false
         type: string
         default: '["this", "next"]'
