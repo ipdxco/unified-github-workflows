@@ -200,14 +200,14 @@ jobs:
           RELEASE_BRANCH_NOTICE: |
             ## Cutting a Release (when not on `${{ inputs.branches }}`)
 
-            This PR is targeting `${{ github.base_ref }}`, which is not any of ${{ inputs.branches }}.
+            This PR is targeting `${{ fromJSON(steps.pr.outputs.json).base.ref }}`, which is not any of ${{ inputs.branches }}.
             If you wish to cut a release once this PR is merged, please add the `release` label to this PR.
 
           DIFF_NOTICE: |
             ## Cutting a Release (and modifying non-markdown files)
 
             This PR is modifying both `version.json` and non-markdown files.
-            The Release Checker is not able to analyse files that are not checked in to `${{ github.base_ref }}`. This might cause the above analysis to be inaccurate.
+            The Release Checker is not able to analyse files that are not checked in to `${{ fromJSON(steps.pr.outputs.json).base.ref }}`. This might cause the above analysis to be inaccurate.
             Please consider performing all the code changes in a separate PR before cutting the release.
 
           RELEASE_NOTICE: |
@@ -225,7 +225,7 @@ jobs:
             The draft GitHub Release is going to be published when this PR is merged.
             If you choose not to create a draft GitHub Release, a published GitHub Released is going to be created when this PR is merged.
 
-          BASE_REF: ${{ github.base_ref }}
+          BASE_REF: ${{ fromJSON(steps.pr.outputs.json).base.ref }}
           HEAD_LABEL: ${{ fromJSON(steps.pr.outputs.json).head.label }}
           HEAD_FULL_NAME: ${{ fromJSON(steps.pr.outputs.json).head.repo.full_name }}
           GITHUB_TOKEN: ${{ github.token }}
