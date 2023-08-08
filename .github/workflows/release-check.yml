@@ -2,6 +2,10 @@ name: Release Checker
 on:
   workflow_call:
     inputs:
+      pull_request_number:
+        required: false
+        type: number
+        default: ${{ github.event.number }}
       branches:
         required: false
         type: string
@@ -13,6 +17,19 @@ jobs:
     steps:
       - run: echo "EOF=EOF$RANDOM" >> $GITHUB_ENV
         shell: bash
+      - id: pr
+        name: Retrieve PR information
+        env:
+          PULL_REQUEST_NUMBER: ${{ inputs.pull_request_number }}
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const {data: pr} = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: process.env.PULL_REQUEST_NUMBER
+            });
+            core.setOutput('json', JSON.stringify(pr));
       - uses: actions/checkout@v3
       - id: go-mod
         uses: pl-strflt/uci/.github/actions/read-go-mod@main
@@ -23,8 +40,8 @@ jobs:
         name: Determine version
         env:
           GITHUB_TOKEN: ${{ github.token }}
-          HEAD_FULL_NAME: ${{ github.event.pull_request.head.repo.full_name }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          HEAD_FULL_NAME: ${{ fromJSON(steps.pr.outputs.json).head.repo.full_name }}
+          HEAD_SHA: ${{ fromJSON(steps.pr.outputs.json).head.sha }}
         run: |
           # If `version.json` file doesn't exists, `version` is `""` and `404` is printed on stderr.
           # The step won't be marked as a failure though because the error happens in a subshell.
@@ -36,7 +53,7 @@ jobs:
         if: steps.version.outputs.version != ''
         env:
           BRANCHES: ${{ inputs.branches }}
-          REF: ${{ github.ref }}
+          REF: ${{ fromJSON(steps.pr.outputs.json).base.ref }}
         uses: actions/github-script@v6
         with:
           script: |
@@ -49,26 +66,12 @@ jobs:
             });
             console.log(`This is a release branch: ${release}`);
             core.setOutput('release', release);
-      - id: pr
-        if: steps.version.outputs.version != '' && steps.branch.outputs.release == 'false'
-        name: Check the PR is a release PR
-        env:
-          LABELS: ${{ github.event.pull_request.labels }}
-          QUERY: repository:${{ github.repository }} is:pr is:merged ${{ github.sha }}
-          SHA: ${{ github.sha }}
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const labels = JSON.parse(process.env.LABELS).map(l => l.name);
-            const release = labels.includes('release');
-            console.log(`This is a release PR: ${release}`);
-            core.setOutput('release', release);
       - id: tag
         name: Check if the tag already exists
         if: steps.version.outputs.version != ''
         env:
           VERSION: ${{ steps.version.outputs.version }}
-          ALLOWED: ${{ steps.branch.outputs.release == 'true' || steps.pr.outputs.release == 'true' }}
+          ALLOWED: ${{ steps.branch.outputs.release == 'true' || contains(fromJSON(steps.pr.outputs.json).labels, 'release') }}
         run: |
           git fetch origin --tags
           status=0
@@ -161,20 +164,20 @@ jobs:
           fi
           printf "output<<$EOF\n%s\n$EOF" "$output" >> $GITHUB_OUTPUT
       - id: release
-        if: steps.tag.outputs.needed == 'true' && github.event.pull_request.head.repo.full_name == github.repository
+        if: steps.tag.outputs.needed == 'true' && fromJSON(steps.pr.outputs.json).head.repo.full_name == fromJSON(steps.pr.outputs.json).base.repo.full_name
         uses: galargh/action-gh-release@571276229e7c9e6ea18f99bad24122a4c3ec813f # https://github.com/galargh/action-gh-release/pull/1
         with:
           draft: true
           tag_name: ${{ steps.version.outputs.version }}
           generate_release_notes: true
-          target_commitish: ${{ github.event.pull_request.base.ref }}
+          target_commitish: ${{ fromJSON(steps.pr.outputs.json).base.ref }}
       - id: message
         if: steps.tag.outputs.exists == 'false'
         env:
           HEADER: |
             Suggested version: `${{ steps.version.outputs.version }}`
           BODY: |
-            Comparing to: [${{ steps.prev.outputs.version }}](${{ github.event.pull_request.base.repo.html_url }}/releases/tag/${{ steps.prev.outputs.version }}) ([diff](${{ github.event.pull_request.base.repo.html_url }}/compare/${{ steps.prev.outputs.version }}..${{ github.event.pull_request.head.label }}))
+            Comparing to: [${{ steps.prev.outputs.version }}](${{ fromJSON(steps.pr.outputs.json).base.repo.html_url }}/releases/tag/${{ steps.prev.outputs.version }}) ([diff](${{ fromJSON(steps.pr.outputs.json).base.repo.html_url }}/compare/${{ steps.prev.outputs.version }}..${{ fromJSON(steps.pr.outputs.json).head.label }}))
 
             Changes in `go.mod` file(s):
             ```diff
@@ -223,8 +226,8 @@ jobs:
             If you choose not to create a draft GitHub Release, a published GitHub Released is going to be created when this PR is merged.
 
           BASE_REF: ${{ github.base_ref }}
-          HEAD_LABEL: ${{ github.event.pull_request.head.label }}
-          HEAD_FULL_NAME: ${{ github.event.pull_request.head.repo.full_name }}
+          HEAD_LABEL: ${{ fromJSON(steps.pr.outputs.json).head.label }}
+          HEAD_FULL_NAME: ${{ fromJSON(steps.pr.outputs.json).head.repo.full_name }}
           GITHUB_TOKEN: ${{ github.token }}
           PREV_VERSION: ${{ steps.prev.outputs.version }}
           RELEASE_BRANCH: ${{ steps.branch.outputs.release }}

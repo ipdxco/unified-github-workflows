@@ -1,6 +1,11 @@
 name: test & maybe release
 on:
   workflow_call:
+    inputs:
+      release:
+        required: false
+        default: ${{ github.event_name == 'push' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) }}
+        type: boolean
     secrets:
       DOCKER_TOKEN:
         required: false
@@ -169,7 +174,7 @@ jobs:
   release:
     needs: [test-node, test-chrome, test-chrome-webworker, test-firefox, test-firefox-webworker, test-webkit, test-webkit-webworker, test-electron-main, test-electron-renderer]
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/${{ github.event.repository.default_branch }}'
+    if: inputs.release
     steps:
       - uses: actions/checkout@v3
         with:
