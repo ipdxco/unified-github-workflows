@@ -52,16 +52,15 @@ jobs:
         if: steps.version.outputs.version != ''
         env:
           BRANCHES: ${{ inputs.branches }}
-          REF: ${{ fromJSON(steps.pr.outputs.json).base.ref }}
+          BASE_REF: ${{ fromJSON(steps.pr.outputs.json).base.ref }}
         uses: actions/github-script@v6
         with:
           script: |
             const branches = JSON.parse(process.env.BRANCHES);
-            const ref = process.env.REF.replace(/^refs\/heads\//, '');
             const release = branches.some(b => {
               const regexPattern = b.replace(/\*/g, '.*');
               const regex = new RegExp(`^${regexPattern}$`);
-              return regex.test(ref);
+              return regex.test(process.env.BASE_REF);
             });
             console.log(`This is a release branch: ${release}`);
             core.setOutput('release', release);
