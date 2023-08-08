@@ -5,7 +5,7 @@ on:
       pull_request_number:
         required: false
         type: number
-        default: ${{ github.event.number }}
+        default: ${{ github.event.inputs.number || github.event.number }}
       branches:
         required: false
         type: string
