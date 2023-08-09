@@ -18,6 +18,7 @@ concurrency:
 jobs:
   js-test-and-release:
     uses: pl-strflt/uci/.github/workflows/js-test-and-release.yml@${{{ .config.versions.uci // (.source.tag | sub("\\.[^.\\-\\+]+(?=\\-|\\+|$)"; "")) }}}
+    secrets:
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
