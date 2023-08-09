@@ -16,7 +16,7 @@ configured_patch="${configured_minor#*.}"
 
 expected="$configured_major.$configured_minor"
 if [[ "$configured_patch" != "x" ]]; then
-  expected="$version.$configured_patch"
+  expected="$expected.$configured_patch"
 fi
 
 tmp="$(mktemp -d)"
