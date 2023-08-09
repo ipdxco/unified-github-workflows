@@ -131,7 +131,7 @@ jobs:
       # If that fails, reset the uci/* branch to the default branch.
       run: |
         git config user.name web3-bot
-        git config user.email web3-bot@users.noreply.github.com
+        git config user.email 81333946+web3-bot@users.noreply.github.com
         git checkout "$BRANCH" || git checkout -B "$BRANCH"
         git rebase "$DEFAULT_BRANCH" || (git rebase --abort && git reset --hard "$DEFAULT_BRANCH")
     - env:
