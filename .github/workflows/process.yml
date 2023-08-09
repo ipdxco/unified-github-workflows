@@ -100,9 +100,21 @@ jobs:
       run: |
         eof="EOF$RANDOM"
         tag="$(git tag --points-at $(git describe --tags --abbrev=0 || true) | sort -V | tail -n-1)"
+        major="$(echo "$tag" | cut -d. -f1 | sed 's/v//')"
+        minor="$(echo "$tag" | cut -d. -f2)"
+        patch="$(echo "$tag" | cut -d. -f3)"
+        prerelease="$(echo "$tag" | cut -d- -f2)"
+        build="$(echo "$tag" | cut -d+ -f2)"
         echo "json<<$eof" >> $GITHUB_OUTPUT
         echo '{' >> $GITHUB_OUTPUT
-        echo '"tag":"'"$tag"'"' >> $GITHUB_OUTPUT
+        echo '"tag":"'"$tag"'",' >> $GITHUB_OUTPUT
+        echo '"version":{' >> $GITHUB_OUTPUT
+        echo '"major":"'"$major"'",' >> $GITHUB_OUTPUT
+        echo '"minor":"'"$minor"'",' >> $GITHUB_OUTPUT
+        echo '"patch":"'"$patch"'",' >> $GITHUB_OUTPUT
+        echo '"prerelease":"'"$prerelease"'",' >> $GITHUB_OUTPUT
+        echo '"build":"'"$build"'"' >> $GITHUB_OUTPUT
+        echo '}' >> $GITHUB_OUTPUT
         echo '}' >> $GITHUB_OUTPUT
         echo "$eof" >> $GITHUB_OUTPUT
     - id: config
@@ -110,13 +122,16 @@ jobs:
       working-directory: ${{ matrix.repository }}
       env:
         REPO: ${{ matrix.repository }}
-        DEFAULTS: ${{ toJSON(fromJSON(inputs.defaults)[fromJSON(steps.github.outputs.json).languages[0]] || fromJSON(inputs.defaults) || fromJSON('{}')) }}
-        OVERRIDE: ${{ toJSON(fromJSON(inputs.override)[fromJSON(steps.github.outputs.json).languages[0]] || fromJSON(inputs.override) || fromJSON('{}')) }}
+        DEFAULTS: ${{ inputs.defaults }}
+        OVERRIDE: ${{ inputs.override }}
+        LANGUAGE: ${{ fromJSON(steps.github.outputs.json).languages[0] }}
       run: |
+        defaults="$(yq -n "env.DEFAULTS | del(.. | nulls) | .language[env.LANGUAGE] // {} + .common // {}")"
+        override="$(yq -n "env.OVERRIDE | del(.. | nulls) | .language[env.LANGUAGE] // {} + .common // {}")"
         if [[ -f .github/uci.yml ]]; then
-          echo "json=$(yq -c --argjson defaults "$DEFAULTS" --argjson override "$OVERRIDE" '$defaults + . + $override' .github/uci.yml)" >> $GITHUB_OUTPUT
+          echo "json=$(yq -c 'env.defaults + . + env.override' .github/uci.yml)" >> $GITHUB_OUTPUT
         else
-          echo "json=$(jq -c --argjson defaults "$DEFAULTS" --argjson override "$OVERRIDE" -n '$defaults + $override')" >> $GITHUB_OUTPUT
+          echo "json=$(jq -c -n 'env.defaults + env.override')" >> $GITHUB_OUTPUT
         fi
     - name: Prepare ${{ matrix.repository }} for deployment
       working-directory: ${{ matrix.repository }}

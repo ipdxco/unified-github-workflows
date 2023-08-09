@@ -19,6 +19,5 @@ jobs:
       branch: uci/delete-templates
       script: delete-templates.sh
       override: |
-        {
-          "files": ${{ github.event.inputs.files }}
-        }
+        common:
+          files: ${{ github.event.inputs.files }}

@@ -6,8 +6,8 @@ on:
       targets:
         description: "List of repository names to deploy to"
         required: true
-      go:
-        description: "Go version to use"
+      version:
+        description: "Go version to update to"
         required: true
 
 jobs:
@@ -19,8 +19,7 @@ jobs:
       branch: uci/update-go
       script: update-go.sh
       defaults: |
-        {
-          "Go": {
-            "version": "${{ github.event.inputs.go }}"
-          }
-        }
+        language:
+          Go:
+            versions:
+              go: ${{ github.event.inputs.version }}

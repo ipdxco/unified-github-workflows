@@ -4,10 +4,6 @@ on:
   pull_request_target:
     paths: [ 'version.json' ]
   workflow_dispatch:
-    inputs:
-      number:
-        description: 'Pull Request Number'
-        required: true
 
 permissions:
   contents: write
@@ -19,6 +15,4 @@ concurrency:
 
 jobs:
   release-check:
-    uses: pl-strflt/uci/.github/workflows/release-check.yml@${{{ source.tag | split("-") | [(.[0] | split(".") | .[0]), (.[1:])] | flatten | join("-") }}}
-    with:
-      number: ${{ github.event.inputs.number || github.event.number }}
+    uses: pl-strflt/uci/.github/workflows/release-check.yml@${{{ config.versions.uci // "v\(source.version.major).\(source.version.minor)" }}}

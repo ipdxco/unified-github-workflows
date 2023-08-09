@@ -2,9 +2,6 @@ name: Release Checker
 on:
   workflow_call:
     inputs:
-      number:
-        required: true
-        type: number
       branches:
         required: false
         type: string
@@ -19,15 +16,28 @@ jobs:
       - id: pr
         name: Retrieve PR information
         env:
-          NUMBER: ${{ inputs.number }}
+          PULL_REQUEST: ${{ toJSON(github.event.pull_request) }}
         uses: actions/github-script@v6
         with:
           script: |
-            const {data: pr} = await github.rest.pulls.get({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: process.env.NUMBER
-            });
+            let pr = JSON.parse(process.env.PULL_REQUEST);
+            if (pr == null) {
+              const {data: pulls} = await github.rest.repos.listPullRequestsAssociatedWithCommit({
+                owner: constext.repo.owner,
+                repo: context.repo.repo,
+                commit_sha: context.sha
+              });
+              pulls = pulls.filter(p => p.state == 'open');
+              if (pulls.length == 0) {
+                core.setFailed(`No open PR found for commit ${context.sha}`);
+                return;
+              }
+              if (pulls.length > 1) {
+                core.setFailed(`Multiple open PRs found for commit ${context.sha}`);
+                return;
+              }
+              pr = pulls[0];
+            }
             core.setOutput('json', JSON.stringify(pr));
       - uses: actions/checkout@v3
       - id: go-mod
