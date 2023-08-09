@@ -23,7 +23,7 @@ jobs:
             let pr = JSON.parse(process.env.PULL_REQUEST);
             if (pr == null) {
               const {data: pulls} = await github.rest.repos.listPullRequestsAssociatedWithCommit({
-                owner: constext.repo.owner,
+                owner: context.repo.owner,
                 repo: context.repo.repo,
                 commit_sha: context.sha
               });
