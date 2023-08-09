@@ -1,7 +1,9 @@
 name: Releaser
+
 on:
   push:
     paths: [ 'version.json' ]
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -12,4 +14,4 @@ concurrency:
 
 jobs:
   releaser:
-    uses: pl-strflt/uci/.github/workflows/releaser.yml@${{{ source.tag | split("-") | [(.[0] | split(".") | .[0]), (.[1:])] | flatten | join("-") }}}
+    uses: pl-strflt/uci/.github/workflows/releaser.yml@${{{ .config.versions.uci // (.source.tag | sub("\\.[^.\\-\\+]+(?=\\-|\\+|$)"; "")) }}}

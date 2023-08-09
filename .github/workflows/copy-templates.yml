@@ -9,6 +9,9 @@ on:
       force:
         description: "Force copy even if file exists"
         required: false
+      version:
+        description: "Version to use for templates"
+        required: false
 
 jobs:
   copy-templates:
@@ -19,28 +22,23 @@ jobs:
       branch: uci/copy-templates
       script: copy-templates.sh
       defaults: |
-        {
-          "Go": {
-            "files": [
-              ".github/workflows/go-test.yml",
-              ".github/workflows/go-check.yml",
-              ".github/workflows/releaser.yml",
-              ".github/workflows/release-check.yml",
-              ".github/workflows/tagpush.yml",
-              "version.json"
-            ],
-            "force": ${{ github.event.inputs.force || false }}
-          },
-          "JavaScript": {
-            "files": [
-              ".github/workflows/js-test-and-release.yml"
-            ],
-            "force": ${{ github.event.inputs.force || false }}
-          },
-          "TypeScript": {
-            "files": [
-              ".github/workflows/js-test-and-release.yml"
-            ],
-            "force": ${{ github.event.inputs.force || false }}
-          },
-        }
+        language:
+          Go:
+            files:
+              - .github/workflows/go-test.yml
+              - .github/workflows/go-check.yml
+              - .github/workflows/releaser.yml
+              - .github/workflows/release-check.yml
+              - .github/workflows/tagpush.yml
+              - version.json
+          JavaScript:
+            files:
+              - .github/workflows/js-test-and-release.yml
+          TypeScript:
+            files:
+              - .github/workflows/js-test-and-release.yml
+      override: |
+        common:
+          force: ${{ github.event.inputs.force }}
+          versions:
+            uci: ${{ github.event.inputs.version }}

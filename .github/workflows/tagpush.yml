@@ -1,5 +1,7 @@
 name: Manual Release Nag
-on: [ workflow_call ]
+
+on:
+  workflow_call:
 
 env:
   ISSUE_TITLE: "manual release created (%tagname%)"

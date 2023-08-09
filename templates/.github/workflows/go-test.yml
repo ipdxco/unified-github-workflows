@@ -1,8 +1,10 @@
+name: Go Test
+
 on:
   pull_request:
   push:
     branches: ${{{ .github.protected_branches + [.github.default_branch] | unique }}}
-name: Go Test
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -13,4 +15,4 @@ concurrency:
 
 jobs:
   go-test:
-    uses: pl-strflt/uci/.github/workflows/go-test.yml@${{{ source.tag | split("-") | [(.[0] | split(".") | .[0:2] | join(".")), (.[1:])] | flatten | join("-") }}}
+    uses: pl-strflt/uci/.github/workflows/go-test.yml@${{{ .config.versions.uci // (.source.tag | sub("\\.[^.\\-\\+]+(?=\\-|\\+|$)"; "")) }}}

@@ -110,13 +110,16 @@ jobs:
       working-directory: ${{ matrix.repository }}
       env:
         REPO: ${{ matrix.repository }}
-        DEFAULTS: ${{ toJSON(fromJSON(inputs.defaults)[fromJSON(steps.github.outputs.json).languages[0]] || fromJSON(inputs.defaults) || fromJSON('{}')) }}
-        OVERRIDE: ${{ toJSON(fromJSON(inputs.override)[fromJSON(steps.github.outputs.json).languages[0]] || fromJSON(inputs.override) || fromJSON('{}')) }}
+        DEFAULTS: ${{ inputs.defaults }}
+        OVERRIDE: ${{ inputs.override }}
+        LANGUAGE: ${{ fromJSON(steps.github.outputs.json).languages[0] }}
       run: |
+        defaults="$(yq "del(.. | nulls) | .language[env.LANGUAGE] // {} + .common // {}" <<< "$DEFAULTS")"
+        override="$(yq "del(.. | nulls) | .language[env.LANGUAGE] // {} + .common // {}" <<< "$OVERRIDE")"
         if [[ -f .github/uci.yml ]]; then
-          echo "json=$(yq -c --argjson defaults "$DEFAULTS" --argjson override "$OVERRIDE" '$defaults + . + $override' .github/uci.yml)" >> $GITHUB_OUTPUT
+          echo "json=$(yq -c --argjson defaults "$defaults" --argjson override "$override" '$defaults + . + $override' .github/uci.yml)" >> $GITHUB_OUTPUT
         else
-          echo "json=$(jq -c --argjson defaults "$DEFAULTS" --argjson override "$OVERRIDE" -n '$defaults + $override')" >> $GITHUB_OUTPUT
+          echo "json=$(jq -c --argjson defaults "$defaults" --argjson override "$override" -n '$defaults + $override')" >> $GITHUB_OUTPUT
         fi
     - name: Prepare ${{ matrix.repository }} for deployment
       working-directory: ${{ matrix.repository }}
@@ -128,7 +131,7 @@ jobs:
       # If that fails, reset the uci/* branch to the default branch.
       run: |
         git config user.name web3-bot
-        git config user.email web3-bot@users.noreply.github.com
+        git config user.email 81333946+web3-bot@users.noreply.github.com
         git checkout "$BRANCH" || git checkout -B "$BRANCH"
         git rebase "$DEFAULT_BRANCH" || (git rebase --abort && git reset --hard "$DEFAULT_BRANCH")
     - env:
