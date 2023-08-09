@@ -46,19 +46,21 @@ jobs:
         name: Check if this is a merge commit of a release PR
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPOSITORY: ${{ github.repository }}
           QUERY: repository:${{ github.repository }} is:pr is:merged ${{ github.sha }}
           SHA: ${{ github.sha }}
         uses: actions/github-script@v6
         with:
           script: |
+            const [owner, repo] = process.env.REPOSITORY.split('/');
             const items = await github.paginate(github.rest.search.issuesAndPullRequests, {
               q: process.env.QUERY,
             });
             let pr;
             for (const item of items) {
               const candidate = await github.rest.pulls.get({
-                owner: item.repository.owner.login,
-                repo: item.repository.name,
+                owner,
+                repo,
                 pull_number: item.number,
               });
               if (candidate.data.merge_commit_sha === process.env.SHA) {
