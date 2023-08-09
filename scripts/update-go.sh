@@ -9,23 +9,13 @@ if [[ "$language" != "Go" ]]; then
   exit 0
 fi
 
-configured="$(jq -r '.config.versions.go' <<< "$CONTEXT")"
-configured_major="${configured%.*}"
-configured_minor="${configured#*.}"
-configured_patch="${configured_minor#*.}"
-
-expected="$configured_major.$configured_minor"
-if [[ "$configured_patch" != "x" ]]; then
-  expected="$expected.$configured_patch"
-fi
+expected="$(jq -r '.config.versions.go' <<< "$CONTEXT")"
 
 tmp="$(mktemp -d)"
 pushd "$tmp" > /dev/null
 curl -sSfL "https://golang.org/dl/go$expected.linux-amd64.tar.gz" | tar -xz
 export PATH="$tmp/go/bin:$PATH"
 popd > /dev/null
-
-expected="$(go version | awk '{print $3}')"
 
 go install golang.org/x/tools/cmd/goimports@v0.5.0
 
