@@ -238,12 +238,11 @@ jobs:
           HEAD_FULL_NAME: ${{ fromJSON(steps.pr.outputs.json).head.repo.full_name }}
           GITHUB_TOKEN: ${{ github.token }}
           PREV_VERSION: ${{ steps.prev.outputs.version }}
-          RELEASE_BRANCH: ${{ steps.branch.outputs.release }}
-          RELEASE_PR: ${{ steps.pr.outputs.release }}
+          TAG_NEEDED: ${{ steps.tag.outputs.needed }}
         run: |
           echo "output<<$EOF" >> $GITHUB_OUTPUT
 
-          if [[ "$RELEASE_BRANCH" == "false" && "$RELEASE_PR" == "false" ]]; then
+          if [[ "$TAG_NEEDED" == "false" ]]; then
             echo "$RELEASE_BRANCH_NOTICE" >> $GITHUB_OUTPUT
           else
             echo "$HEADER" >> $GITHUB_OUTPUT
