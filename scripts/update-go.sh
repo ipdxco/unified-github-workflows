@@ -9,7 +9,7 @@ if [[ "$language" != "Go" ]]; then
   exit 0
 fi
 
-configured="$(jq -r '.config.versions.go' <<< "$CONTEXT)"
+configured="$(jq -r '.config.versions.go' <<< "$CONTEXT")"
 configured_major="${configured%.*}"
 configured_minor="${configured#*.}"
 configured_patch="${configured_minor#*.}"
