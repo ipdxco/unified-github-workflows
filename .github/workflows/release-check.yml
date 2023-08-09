@@ -27,16 +27,16 @@ jobs:
                 repo: context.repo.repo,
                 commit_sha: context.sha
               });
-              pulls = pulls.filter(p => p.state == 'open');
-              if (pulls.length == 0) {
+              const open = pulls.filter(p => p.state == 'open');
+              if (open.length == 0) {
                 core.setFailed(`No open PR found for commit ${context.sha}`);
                 return;
               }
-              if (pulls.length > 1) {
+              if (open.length > 1) {
                 core.setFailed(`Multiple open PRs found for commit ${context.sha}`);
                 return;
               }
-              pr = pulls[0];
+              pr = open[0];
             }
             core.setOutput('json', JSON.stringify(pr));
       - uses: actions/checkout@v3
