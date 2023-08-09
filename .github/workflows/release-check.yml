@@ -269,3 +269,4 @@ jobs:
           header: release-check
           recreate: true
           message: ${{ steps.message.outputs.output }}
+          number: ${{ fromJSON(steps.pr.outputs.json).number }}
