@@ -114,12 +114,12 @@ jobs:
         OVERRIDE: ${{ inputs.override }}
         LANGUAGE: ${{ fromJSON(steps.github.outputs.json).languages[0] }}
       run: |
-        defaults="$(yq -n "env.DEFAULTS | del(.. | nulls) | .language[env.LANGUAGE] // {} + .common // {}")"
-        override="$(yq -n "env.OVERRIDE | del(.. | nulls) | .language[env.LANGUAGE] // {} + .common // {}")"
+        defaults="$(yq "del(.. | nulls) | .language[env.LANGUAGE] // {} + .common // {}" <<< "$DEFAULTS")"
+        override="$(yq "del(.. | nulls) | .language[env.LANGUAGE] // {} + .common // {}" <<< "$OVERRIDE")"
         if [[ -f .github/uci.yml ]]; then
-          echo "json=$(yq -c 'env.defaults + . + env.override' .github/uci.yml)" >> $GITHUB_OUTPUT
+          echo "json=$(yq -c --argjson defaults "$defaults" --argjson override "$override" '$defaults + . + $override' .github/uci.yml)" >> $GITHUB_OUTPUT
         else
-          echo "json=$(jq -c -n 'env.defaults + env.override')" >> $GITHUB_OUTPUT
+          echo "json=$(jq -c --argjson defaults "$defaults" --argjson override "$override" -n '$defaults + $override')" >> $GITHUB_OUTPUT
         fi
     - name: Prepare ${{ matrix.repository }} for deployment
       working-directory: ${{ matrix.repository }}
