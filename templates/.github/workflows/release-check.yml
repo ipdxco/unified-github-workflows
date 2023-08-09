@@ -3,6 +3,7 @@ name: Release Checker
 on:
   pull_request_target:
     paths: [ 'version.json' ]
+    types: [ opened, synchronize, reopened, labeled, unlabeled ]
   workflow_dispatch:
 
 permissions:
