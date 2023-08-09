@@ -51,12 +51,12 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            const items = await github.paginate(github.search.issuesAndPullRequests, {
+            const items = await github.paginate(github.rest.search.issuesAndPullRequests, {
               q: process.env.QUERY,
             });
             let pr;
             for (const item of items) {
-              const candidate = await github.pulls.get({
+              const candidate = await github.rest.pulls.get({
                 owner: item.repository.owner.login,
                 repo: item.repository.name,
                 pull_number: item.number,
