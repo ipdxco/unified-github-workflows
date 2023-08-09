@@ -79,7 +79,7 @@ jobs:
         if: steps.version.outputs.version != ''
         env:
           VERSION: ${{ steps.version.outputs.version }}
-          ALLOWED: ${{ steps.branch.outputs.release == 'true' || contains(fromJSON(steps.pr.outputs.json).labels, 'release') }}
+          ALLOWED: ${{ steps.branch.outputs.release == 'true' || contains(fromJSON(steps.pr.outputs.json).labels.*.name, 'release') }}
         run: |
           git fetch origin --tags
           status=0
