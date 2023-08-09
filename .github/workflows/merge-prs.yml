@@ -66,11 +66,20 @@ jobs:
                 repo,
                 pull_number: item.number
               })
-              if (pr.mergeable_state == 'clean' && pr.head.user.login == 'web3-bot') {
-                core.info(`${pr.html_url} can be merged`)
-                prs.push(pr)
+              if (pr.mergeable_state == 'clean') {
+                const commits = await github.paginate(github.rest.pulls.listCommits, {
+                  owner,
+                  repo,
+                  pull_number: item.number
+                })
+                if (commits.filter(c => c.commit.author.name == 'web3-bot').length != commits.length) {
+                  core.info(`${pr.html_url} cannot be merged because it contains commits from other authors`)
+                } else {
+                  core.info(`${pr.html_url} can be merged`)
+                  prs.push(pr)
+                }
               } else {
-                core.info(`${pr.html_url} cannot be merged`)
+                core.info(`${pr.html_url} cannot be merged because it is in ${pr.mergeable_state} state`)
               }
             }
             core.info(`Attempting to merge the PRs`)
