@@ -100,21 +100,9 @@ jobs:
       run: |
         eof="EOF$RANDOM"
         tag="$(git tag --points-at $(git describe --tags --abbrev=0 || true) | sort -V | tail -n-1)"
-        major="$(echo "$tag" | cut -d. -f1 | sed 's/v//')"
-        minor="$(echo "$tag" | cut -d. -f2)"
-        patch="$(echo "$tag" | cut -d. -f3)"
-        prerelease="$(echo "$tag" | cut -d- -f2)"
-        build="$(echo "$tag" | cut -d+ -f2)"
         echo "json<<$eof" >> $GITHUB_OUTPUT
         echo '{' >> $GITHUB_OUTPUT
-        echo '"tag":"'"$tag"'",' >> $GITHUB_OUTPUT
-        echo '"version":{' >> $GITHUB_OUTPUT
-        echo '"major":"'"$major"'",' >> $GITHUB_OUTPUT
-        echo '"minor":"'"$minor"'",' >> $GITHUB_OUTPUT
-        echo '"patch":"'"$patch"'",' >> $GITHUB_OUTPUT
-        echo '"prerelease":"'"$prerelease"'",' >> $GITHUB_OUTPUT
-        echo '"build":"'"$build"'"' >> $GITHUB_OUTPUT
-        echo '}' >> $GITHUB_OUTPUT
+        echo '"tag":"'"$tag"'"' >> $GITHUB_OUTPUT
         echo '}' >> $GITHUB_OUTPUT
         echo "$eof" >> $GITHUB_OUTPUT
     - id: config
