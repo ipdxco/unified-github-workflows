@@ -22,4 +22,4 @@ jobs:
         language:
           Go:
             versions:
-              go: ${{ github.event.inputs.version }}
+              go: "${{ github.event.inputs.version }}"
