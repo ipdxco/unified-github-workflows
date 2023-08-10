@@ -17,7 +17,7 @@ pushd $TARGET > /dev/null
 git add .
 
 if ! git diff-index --quiet HEAD; then
-  git commit -m "chore: delete templates"
+  git commit -m "chore: delete templates [skip ci]"
 fi
 
 popd > /dev/null
