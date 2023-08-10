@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [0.0.2] - 2023-08-10
+### Fixed
+- copy templates procedure
+- Go release workflows
+- Go update procedure
+- JS test and release workflow
+
 ## [0.0.1] - 2023-08-07
 ### Added
 - v0.0.1 of Unified CI 2.0
