@@ -15,7 +15,7 @@ tmp="$(mktemp -d)"
 pushd "$tmp" > /dev/null
 curl -sSfL "https://golang.org/dl/go$expected.linux-amd64.tar.gz" | tar -xz
 export PATH="$tmp/go/bin:$PATH"
-export GOPATH=$TMP/go
+export GOPATH=$tmp/go
 popd > /dev/null
 
 echo "Go version: $(go version)"
