@@ -75,7 +75,7 @@ jobs:
                   repo: item.name,
                   basehead: `${item.default_branch}...${branch.name}`
                 })
-                if (compare.status == 'ahead') {
+                if (compare.ahead_by != '0') {
                   core.info(`PR for ${item.html_url}/tree/${branch.name} should exist`)
                 } else {
                   core.info(`PR for ${item.html_url}/tree/${branch.name} is not needed`)
