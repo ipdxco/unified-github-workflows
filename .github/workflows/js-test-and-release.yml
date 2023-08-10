@@ -2,10 +2,10 @@ name: test & maybe release
 on:
   workflow_call:
     inputs:
-      release:
+      branches:
         required: false
-        type: boolean
-        default: ${{ github.event_name != 'pull_request_target' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) }}
+        type: string
+        default: ${{ format('["{0}"]', github.event.repository.default_branch) }}
     secrets:
       DOCKER_TOKEN:
         required: false
@@ -171,10 +171,35 @@ jobs:
         with:
           flags: electron-renderer
 
-  release:
+  release-check:
     needs: [test-node, test-chrome, test-chrome-webworker, test-firefox, test-firefox-webworker, test-webkit, test-webkit-webworker, test-electron-main, test-electron-renderer]
     runs-on: ubuntu-latest
-    if: inputs.release
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    outputs:
+      release: ${{ steps.branch.outputs.release }}
+    steps:
+      - id: branch
+        name: Check if the branch is a release branch
+        env:
+          BRANCHES: ${{ inputs.branches }}
+          REF: ${{ github.ref }}
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const branches = JSON.parse(process.env.BRANCHES);
+            const ref = process.env.REF.replace(/^refs\/heads\//, '');
+            const release = branches.some(b => {
+              const regexPattern = b.replace(/\*/g, '.*');
+              const regex = new RegExp(`^${regexPattern}$`);
+              return regex.test(ref);
+            });
+            console.log(`This is a release branch: ${release}`);
+            core.setOutput('release', release);
+
+  release:
+    needs: [release-check]
+    runs-on: ubuntu-latest
+    if: needs.release-check.outputs.release == 'true'
     steps:
       - uses: actions/checkout@v3
         with:
