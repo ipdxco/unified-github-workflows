@@ -25,7 +25,7 @@ done
 
 if [[ "$force" != "true" ]]; then
   if [[ -f ".github/dependabot.yml" ]]; then
-    gha="$(yq '.updates | map(select(.package-ecosystem == "github-actions")) | length' .github/dependabot.yml)"
+    gha="$(yq '.updates | map(select(.["package-ecosystem"] == "github-actions")) | length' .github/dependabot.yml)"
     if [[ "$gha" -gt 0 ]]; then
       echo "Dependabot is already configured to update GitHub Actions. Skipping."
       exit 0
@@ -45,7 +45,7 @@ if [[ "$force" != "true" ]]; then
   for pr in $(yq -c '.output | map(select(.type == "create_pull_request")) | map(.expect.data) | .[]' "$tmp"); do
     title="$(jq -r '.["pr-title"]' <<< "$pr")"
     git checkout -b "$title" "$branch"
-    for f in $(jq -r '.updated-dependency-files[] // []' <<< "$pr"); do
+    for f in $(jq -r '.["updated-dependency-files"] | .[] // []' <<< "$pr"); do
       jq -r '.content' <<< "$f" > "$(jq -r '.name' <<< "$f")"
     done
     git add .
