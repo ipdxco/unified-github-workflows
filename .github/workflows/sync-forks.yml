@@ -29,5 +29,5 @@ jobs:
               console.log('Pushing branches');
               execSync(`git push ${fork.full_name} --force --all`);
               console.log('Pushing tags');
-              execSync(`git push ${fork.full_name} --force --tags');
+              execSync(`git push ${fork.full_name} --force --tags`);
             }
