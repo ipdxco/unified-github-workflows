@@ -25,9 +25,9 @@ jobs:
             for (const fork of forks) {
               console.log(`Syncing ${fork.full_name} (${fork.clone_url})`);
               console.log('Adding remote');
-              execSync(`git remote add ${fork.full_name} ${fork.clone_url}`);
+              await exec.exec(`git remote add ${fork.full_name} ${fork.clone_url}`);
               console.log('Pushing branches');
-              execSync(`git push ${fork.full_name} --force --all`);
+              await exec.exec(`git push ${fork.full_name} --force --all`);
               console.log('Pushing tags');
-              execSync(`git push ${fork.full_name} --force --tags`);
+              await exec.exec(`git push ${fork.full_name} --force --tags`);
             }
