@@ -26,8 +26,12 @@ jobs:
               console.log(`Syncing ${fork.full_name} (${fork.clone_url})`);
               console.log('Adding remote');
               await exec.exec(`git remote add ${fork.full_name} ${fork.clone_url}`);
-              console.log('Pushing branches');
-              await exec.exec(`git push ${fork.full_name} --force --all`);
-              console.log('Pushing tags');
-              await exec.exec(`git push ${fork.full_name} --force --tags`);
+              try {
+                console.log('Pushing branches');
+                await exec.exec(`git push ${fork.full_name} --force --all`);
+                console.log('Pushing tags');
+                await exec.exec(`git push ${fork.full_name} --force --tags`);
+              } catch(e) {
+                console.warn(`Failed to sync ${fork.full_name} (${fork.clone_url})`, e);
+              }
             }
