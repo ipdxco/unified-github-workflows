@@ -27,7 +27,7 @@ jobs:
               console.log('Adding remote');
               execSync(`git remote add ${fork.full_name} ${fork.clone_url}`);
               console.log('Pushing branches');
-              execSync(`git push ${fork.full_name} --force --all');
+              execSync(`git push ${fork.full_name} --force --all`);
               console.log('Pushing tags');
               execSync(`git push ${fork.full_name} --force --tags');
             }
