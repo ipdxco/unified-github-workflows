@@ -12,9 +12,14 @@ runs:
     - id: go-mod
       run: |
         eof="EOF$RANDOM"
-        printf "json<<$eof\n%s\n$eof" "$(go mod edit -json || echo '{}')" >> $GITHUB_OUTPUT
-      shell: bash
-    - env:
-        GO_MOD: ${{ steps.go-mod.outputs.json }}
-      run: echo "$GO_MOD"
+        if [[ -f go.mod ]]; then
+          {
+            echo "json<<$eof";
+            go mod edit -json;
+            echo "$eof";
+          } | tee -a $GITHUB_OUTPUT
+        else
+          echo "No go.mod file found in $PWD."
+          echo "json={}" | tee -a $GITHUB_OUTPUT
+        fi
       shell: bash

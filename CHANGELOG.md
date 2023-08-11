@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [0.0.3] - 2023-08-11
+### Fixed
+- Go installtion on self-hosted runners in Go test workflow
+
 ## [0.0.2] - 2023-08-10
 ### Fixed
 - copy templates procedure

@@ -14,9 +14,14 @@ runs:
         eof="EOF$RANDOM"
         path="${GITHUB_WORKFLOW_REF%.yml@*}"
         path="./${path#*/*/}-config.json"
-        printf "json<<$eof\n%s\n$eof" "$(cat "$path" || echo '{}')" >> $GITHUB_OUTPUT
-      shell: bash
-    - env:
-        CONFIG: ${{ steps.config.outputs.json }}
-      run: echo "$CONFIG"
+        if [[ -f "$path" ]]; then
+          {
+            echo "json<<$eof";
+            cat "$path";
+            echo "$eof";
+          } | tee -a "$GITHUB_OUTPUT"
+        else
+          echo "No config file found at $path"
+          echo "json={}" | tee -a "$GITHUB_OUTPUT"
+        fi
       shell: bash
