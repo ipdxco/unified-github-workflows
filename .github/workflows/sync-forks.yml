@@ -13,8 +13,6 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.UCI_GITHUB_TOKEN }}
-      - name: Fetch all branches
-        run: git fetch --no-tags --prune --depth=1 origin +refs/heads/*:refs/remotes/origin/*
       - name: Sync forks
         uses: actions/github-script@v6
         with:
@@ -26,13 +24,9 @@ jobs:
             });
             for (const fork of forks) {
               console.log(`Syncing ${fork.full_name} (${fork.clone_url})`);
-              console.log('Adding remote');
               await exec.exec(`git remote add ${fork.full_name} ${fork.clone_url}`);
               try {
-                console.log('Pushing branches');
-                await exec.exec(`git push ${fork.full_name} --force --all`);
-                console.log('Pushing tags');
-                await exec.exec(`git push ${fork.full_name} --force --tags`);
+                await exec.exec(`git push ${fork.full_name} +refs/tags/*:refs/tags/* +refs/remotes/origin/*:refs/heads/*`);
               } catch(e) {
                 console.warn(`Failed to sync ${fork.full_name} (${fork.clone_url})`);
               }
