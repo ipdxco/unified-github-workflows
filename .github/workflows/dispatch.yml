@@ -148,7 +148,7 @@ jobs:
           start_date="$(date +%s)"
           args=()
           for key in $(jq -r 'keys[]' <<< "$INPUTS"); do
-            args+=("--field" "$key=$(jq -r ".$key" <<< "$INPUTS")")
+            args+=("--field" "$key=$(jq -r '.["'"$key"'"]' <<< "$INPUTS")")
           done
           if [[ "$DRY_RUN" == "true" ]]; then
             echo "DRY RUN: gh workflow run $WORKFLOW --ref $GITHUB_REF --repo $REPO --field targets=$TARGETS ${args[@]}"
