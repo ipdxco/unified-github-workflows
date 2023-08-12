@@ -46,4 +46,4 @@ jobs:
           force: ${{ github.event.inputs.force }}
           versions:
             uci: ${{ github.event.inputs.version }}
-      dry-run: ${{ github.event.inputs.dry-run }}
+      dry-run: ${{ github.event.inputs.dry-run == 'true' }}

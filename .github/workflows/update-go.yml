@@ -27,4 +27,4 @@ jobs:
           Go:
             versions:
               go: "${{ github.event.inputs.version }}"
-      dry-run: ${{ github.event.inputs.dry-run }}
+      dry-run: ${{ github.event.inputs.dry-run == 'true' }}

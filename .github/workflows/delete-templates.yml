@@ -25,4 +25,4 @@ jobs:
       override: |
         common:
           files: ${{ github.event.inputs.files }}
-      dry-run: ${{ github.event.inputs.dry-run }}
+      dry-run: ${{ github.event.inputs.dry-run == 'true' }}

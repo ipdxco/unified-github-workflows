@@ -151,7 +151,7 @@ jobs:
             "github": ${{ toJSON(fromJSON(steps.github.outputs.json)) }},
             "source": ${{ toJSON(fromJSON(steps.source.outputs.json)) }}
           }
-        SCRIPT: ${{ inputs.dry-run && format('./{0}/scripts/{1}', github.repository, inputs.script) || 'env'  }}
+        SCRIPT: ${{ inputs.dry-run && 'env' || format('./{0}/scripts/{1}', github.repository, inputs.script) }}
         GITHUB_TOKEN: ${{ secrets.UCI_GITHUB_TOKEN }}
       run: $SCRIPT
     - id: after

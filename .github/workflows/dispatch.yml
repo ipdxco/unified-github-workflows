@@ -158,7 +158,7 @@ jobs:
           echo "start_date=$start_date" | tee -a $GITHUB_OUTPUT
       - id: run
         name: Wait for workflow run to start
-        if: ${{ !github.event.inputs.dry-run }}
+        if: github.event.inputs.dry-run == 'false'
         env:
           START_DATE: ${{ steps.dispatch.outputs.start_date }}
           REPO: ${{ github.repository }}
@@ -176,7 +176,7 @@ jobs:
             fi
           done
       - name: Wait for workflow run to complete
-        if: ${{ !github.event.inputs.dry-run }}
+        if: github.event.inputs.dry-run == 'false'
         env:
           RUN_ID: ${{ steps.run.outputs.id }}
           REPO: ${{ github.repository }}
