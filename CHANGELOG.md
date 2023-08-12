@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [0.0.6] - 2023-08-12
+### Changed
+- updated versions of actions
+
 ## [0.0.5] - 2023-08-11
 ### Fixed
 - Go installtion on self-hosted runners in Go test workflow
