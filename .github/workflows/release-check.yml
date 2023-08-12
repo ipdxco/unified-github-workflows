@@ -263,7 +263,7 @@ jobs:
           fi
           echo "$EOF" >> $GITHUB_OUTPUT
       - name: Post message on PR
-        uses: marocchino/sticky-pull-request-comment@fcf6fe9e4a0409cd9316a5011435be0f3327f1e1 # v2.3.1
+        uses: marocchino/sticky-pull-request-comment@f61b6cf21ef2fcc468f4345cdfcc9bda741d2343 # v2.6.2
         if: steps.tag.outputs.exists == 'false'
         with:
           header: release-check

@@ -9,6 +9,10 @@ on:
       version:
         description: "Go version to update to"
         required: true
+      dry-run:
+        description: "Whether to run in dry run mode"
+        required: false
+        default: 'false'
 
 jobs:
   update-go:
@@ -23,3 +27,4 @@ jobs:
           Go:
             versions:
               go: "${{ github.event.inputs.version }}"
+      dry-run: ${{ github.event.inputs.dry-run }}

@@ -25,6 +25,11 @@ on:
         required: false
         default: '{}'
         type: string
+      dry-run:
+        description: "Whether to run in dry run mode"
+        required: false
+        default: false
+        type: boolean
     secrets:
       UCI_GITHUB_TOKEN:
         required: true
@@ -121,7 +126,8 @@ jobs:
         else
           echo "json=$(jq -c --argjson defaults "$defaults" --argjson override "$override" -n '$defaults + $override')" >> $GITHUB_OUTPUT
         fi
-    - name: Prepare ${{ matrix.repository }} for deployment
+    - id: before
+      name: Prepare ${{ matrix.repository }} for deployment
       working-directory: ${{ matrix.repository }}
       env:
         BRANCH: ${{ inputs.branch }}
@@ -133,6 +139,8 @@ jobs:
         git config user.name web3-bot
         git config user.email web3-bot@protocol.ai
         git checkout "$BRANCH" || git checkout -B "$BRANCH"
+        # Registering SHA before rebase to push even if only the default branch moved
+        git rev-parse HEAD | xargs -I{} echo "sha={}" | tee -a $GITHUB_OUTPUT
         git rebase "$DEFAULT_BRANCH" || (git rebase --abort && git reset --hard "$DEFAULT_BRANCH")
     - env:
         SOURCE: ${{ github.repository }}
@@ -143,18 +151,18 @@ jobs:
             "github": ${{ toJSON(fromJSON(steps.github.outputs.json)) }},
             "source": ${{ toJSON(fromJSON(steps.source.outputs.json)) }}
           }
-        SCRIPT: ./${{ github.repository }}/scripts/${{ inputs.script }}
+        SCRIPT: ${{ inputs.dry-run && format('./{0}/scripts/{1}', github.repository, inputs.script) || 'env'  }}
         GITHUB_TOKEN: ${{ secrets.UCI_GITHUB_TOKEN }}
       run: $SCRIPT
-    - id: ahead
+    - id: after
       name: Check if push is needed
       working-directory: ${{ matrix.repository }}
       env:
         BRANCH: ${{ inputs.branch }}
         DEFAULT_BRANCH: ${{ fromJSON(steps.github.outputs.json).default_branch }}
-      run: git rev-list --count "$DEFAULT_BRANCH".."$BRANCH" | xargs -I{} echo "ahead={}" | tee -a $GITHUB_OUTPUT
+      run: git rev-parse HEAD | xargs -I{} echo "sha={}" | tee -a $GITHUB_OUTPUT
     - name: Push changes
-      if: steps.ahead.outputs.ahead != '0'
+      if: steps.after.outputs.sha != steps.before.outputs.sha && !inputs.dry-run
       working-directory: ${{ matrix.repository }}
       env:
         BRANCH: ${{ inputs.branch }}
