@@ -1,4 +1,4 @@
-# Trigger the execution of copy workflow in batches.
+# Trigger the execution of workflow in batches.
 # This workflow is needed since GitHub Actions limits the matrix size to 256 jobs.
 # We use one job per repository per batch.
 
@@ -21,13 +21,13 @@ concurrency:
 
 env:
   # Number of repositories in a batch.
-  # Matrix jobs within a copy workflow run are run in parallel.
+  # Matrix jobs within a workflow run are run in parallel.
   # 256 is the upper limit on the number of matrix jobs.
   # Batching too many repositories together can result in
   #  could not create workflow dispatch event: HTTP 422: inputs are too large.
-  # This value should be higher than max-parallel in copy workflow.
+  # This value should be higher than max-parallel in workflow.
   MAX_REPOS_PER_WORKFLOW: 100
-  # Number of seconds to wait before starting to watch copy workflow run.
+  # Number of seconds to wait before starting to watch workflow run.
   # Unfortunately, the interval on the watch is not configurable.
   # The delay helps us save on GH API requests.
   WORKFLOW_COMPLETION_CHECK_DELAY: 60
@@ -98,7 +98,7 @@ jobs:
             return batches
   dispatch:
     needs: [ matrix ]
-    name: Dispatch copy workflow(batch ${{ matrix.cfg.key }})
+    name: Dispatch workflow(batch ${{ matrix.cfg.key }})
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -112,8 +112,8 @@ jobs:
         #     "repo2"
         #   ]
         #
-        # The triggered copy workflow runs use that final array as their matrix.
-        # Since max-parallel here is 1, we'll end up with at most max-parallel from copy workflow + 1 parallel jobs.
+        # The triggered workflow runs use that final array as their matrix.
+        # Since max-parallel here is 1, we'll end up with at most max-parallel from workflow + 1 parallel jobs.
         # 20 is the upper limit on parallel jobs on a free plan.
         cfg: ${{ fromJSON(needs.matrix.outputs.batches) }}
       max-parallel: 1
@@ -122,7 +122,7 @@ jobs:
       WORKFLOW: ${{ github.event.inputs.workflow }}
     steps:
       - id: dispatch
-        name: Dispatch copy workflow
+        name: Dispatch workflow
         env:
           TARGETS: ${{ toJSON(matrix.cfg.value) }}
           INPUTS: ${{ github.event.inputs.inputs }}
@@ -136,15 +136,15 @@ jobs:
           gh workflow run "$WORKFLOW" --ref "$GITHUB_REF" --repo "$REPO" --field "targets=$TARGETS" ${args[@]}
           echo "start_date=$start_date" >> $GITHUB_OUTPUT
       - id: run
-        name: Wait for copy workflow run to start
+        name: Wait for workflow run to start
         env:
           START_DATE: ${{ steps.dispatch.outputs.start_date }}
           REPO: ${{ github.repository }}
         run: |
-          # checks every 3 seconds until the most recent copy workflow run's created_at is later than this job's start_date
+          # checks every 3 seconds until the most recent workflow run's created_at is later than this job's start_date
           while sleep 3; do
             run="$(gh api "/repos/$REPO/actions/workflows/$WORKFLOW/runs?per_page=1" --jq '.workflow_runs[0]')"
-            # nothing to check if no copy workflow run was returned
+            # nothing to check if no workflow run was returned
             if [[ ! -z "$run" ]]; then
               run_start_date="$(date --date="$(jq -r '.created_at' <<< "$run")" +%s)"
               if [[ "$run_start_date" > "$START_DATE" ]]; then
@@ -153,14 +153,14 @@ jobs:
               fi
             fi
           done
-      - name: Wait for copy workflow run to complete
+      - name: Wait for workflow run to complete
         env:
           RUN_ID: ${{ steps.run.outputs.id }}
           REPO: ${{ github.repository }}
         run: |
-          # delays checking copy workflow's run status to save on GH API requests
+          # delays checking workflow's run status to save on GH API requests
           sleep $WORKFLOW_COMPLETION_CHECK_DELAY
 
-          # checks every 3 seconds until the copy workflow run's status is completed
+          # checks every 3 seconds until the workflow run's status is completed
           # redirects the stdout to /dev/null because it is very chatty
           gh run watch "$RUN_ID" --repo "$REPO" > /dev/null
