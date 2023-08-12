@@ -91,7 +91,7 @@ jobs:
                 continue
               }
               try {
-                await exec.exec('jq', ['-e', '-n', `JSON.stringify(item) | ${process.env.FILTER}`])
+                await exec.exec('jq', ['-e', '-n', `${JSON.stringify(item)} | ${process.env.FILTER}`])
               } catch(e) {
                 core.info(`Skipping repository ${item.full_name} due to filter`)
                 continue
