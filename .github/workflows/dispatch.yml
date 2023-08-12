@@ -134,7 +134,7 @@ jobs:
         cfg: ${{ fromJSON(needs.matrix.outputs.batches) }}
       max-parallel: 1
     env:
-      GITHUB_TOKEN: ${{ secrets.UCI_GITHUB_TOKEN }}
+      GITHUB_TOKEN: ${{ github.token }}
       WORKFLOW: ${{ github.event.inputs.workflow }}
     steps:
       - id: dispatch
