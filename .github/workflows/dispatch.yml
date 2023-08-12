@@ -18,6 +18,10 @@ on:
         description: "Filter to apply to the list of repositories"
         required: false
         default: 'true'
+      dry-run:
+        description: "Whether to run in dry run mode"
+        required: false
+        default: 'false'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -139,16 +143,22 @@ jobs:
           TARGETS: ${{ toJSON(matrix.cfg.value) }}
           INPUTS: ${{ github.event.inputs.inputs }}
           REPO: ${{ github.repository }}
+          DRY_RUN: ${{ github.event.inputs.dry-run }}
         run: |
           start_date="$(date +%s)"
           args=()
           for key in $(jq -r 'keys[]' <<< "$INPUTS"); do
             args+=("--field" "$key=$(jq -r ".$key" <<< "$INPUTS")")
           done
-          gh workflow run "$WORKFLOW" --ref "$GITHUB_REF" --repo "$REPO" --field "targets=$TARGETS" ${args[@]}
-          echo "start_date=$start_date" >> $GITHUB_OUTPUT
+          if [[ "$DRY_RUN" == "true" ]]; then
+            echo "DRY RUN: gh workflow run $WORKFLOW --ref $GITHUB_REF --repo $REPO --field targets=$TARGETS ${args[@]}"
+          else
+            gh workflow run "$WORKFLOW" --ref "$GITHUB_REF" --repo "$REPO" --field "targets=$TARGETS" ${args[@]}
+          fi
+          echo "start_date=$start_date" | tee -a $GITHUB_OUTPUT
       - id: run
         name: Wait for workflow run to start
+        if: !github.event.inputs.dry-run
         env:
           START_DATE: ${{ steps.dispatch.outputs.start_date }}
           REPO: ${{ github.repository }}
@@ -160,12 +170,13 @@ jobs:
             if [[ ! -z "$run" ]]; then
               run_start_date="$(date --date="$(jq -r '.created_at' <<< "$run")" +%s)"
               if [[ "$run_start_date" > "$START_DATE" ]]; then
-                echo "id=$(jq -r '.id' <<< "$run")" >> $GITHUB_OUTPUT
+                echo "id=$(jq -r '.id' <<< "$run")" | tee -a $GITHUB_OUTPUT
                 break
               fi
             fi
           done
       - name: Wait for workflow run to complete
+        if: !github.event.inputs.dry-run
         env:
           RUN_ID: ${{ steps.run.outputs.id }}
           REPO: ${{ github.repository }}
