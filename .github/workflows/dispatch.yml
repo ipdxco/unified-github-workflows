@@ -14,6 +14,10 @@ on:
         description: "Workflow inputs"
         required: false
         default: '{}'
+      filter:
+        description: "Filter to apply to the list of repositories"
+        required: false
+        default: 'true'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -41,6 +45,8 @@ jobs:
     steps:
       - id: matrix
         uses: actions/github-script@v6
+        env:
+          FILTER: ${{ github.event.inputs.filter }}
         with:
           github-token: ${{ secrets.UCI_GITHUB_TOKEN }}
           retries: 0
@@ -78,6 +84,12 @@ jobs:
             for (const item of items) {
               if (item.archived) {
                 core.info(`Skipping archived repository ${item.full_name}`)
+                continue
+              }
+              try {
+                await exec.exec('jq', ['-e', '-n', `JSON.stringify(item) | ${process.env.FILTER}`])
+              } catch(e) {
+                core.info(`Skipping repository ${item.full_name} due to filter`)
                 continue
               }
               batch.push(item.full_name)
