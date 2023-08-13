@@ -17,6 +17,7 @@ jobs:
       - uses: actions/setup-go@v4
         with:
           go-version: ${{ fromJSON(steps.go-mod.outputs.json).Go }}.x
+          cache: false
       - name: Run repo-specific setup
         uses: ./.github/actions/go-check-setup
         if: hashFiles('./.github/actions/go-check-setup') != ''
