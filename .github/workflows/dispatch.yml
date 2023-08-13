@@ -136,19 +136,19 @@ jobs:
     env:
       GITHUB_TOKEN: ${{ github.token }}
       WORKFLOW: ${{ github.event.inputs.workflow }}
+      REPO: ${{ github.repository }}
     steps:
       - id: dispatch
         name: Dispatch workflow
         env:
           TARGETS: ${{ toJSON(matrix.cfg.value) }}
           INPUTS: ${{ github.event.inputs.inputs }}
-          REPO: ${{ github.repository }}
           DRY_RUN: ${{ github.event.inputs.dry-run }}
         run: |
           start_date="$(date +%s)"
           args=()
           for key in $(jq -r 'keys[]' <<< "$INPUTS"); do
-            args+=("--field" "$key=$(jq -r '.["'"$key"'"]' <<< "$INPUTS")")
+            args+=("--field" "$key=$(jq -rc '.["'"$key"'"]' <<< "$INPUTS")")
           done
           if [[ "$DRY_RUN" == "true" ]]; then
             echo "DRY RUN: gh workflow run $WORKFLOW --ref $GITHUB_REF --repo $REPO --field targets=$TARGETS ${args[@]}"
@@ -161,7 +161,6 @@ jobs:
         if: github.event.inputs.dry-run == 'false'
         env:
           START_DATE: ${{ steps.dispatch.outputs.start_date }}
-          REPO: ${{ github.repository }}
         run: |
           # checks every 3 seconds until the most recent workflow run's created_at is later than this job's start_date
           while sleep 3; do
@@ -179,7 +178,6 @@ jobs:
         if: github.event.inputs.dry-run == 'false'
         env:
           RUN_ID: ${{ steps.run.outputs.id }}
-          REPO: ${{ github.repository }}
         run: |
           # delays checking workflow's run status to save on GH API requests
           sleep $WORKFLOW_COMPLETION_CHECK_DELAY
