@@ -59,7 +59,7 @@ jobs:
               try {
                 return await req(opts)
               } catch(err) {
-                opts.request.retries = (opts.request.retries || 0) + 1
+                opts._attempt = (opts._attempt || 0) + 1
                 if (err.status === 403) {
                   if (err.response.headers['x-ratelimit-remaining'] === '0') {
                     const retryAfter = err.response.headers['x-ratelimit-reset'] - Math.floor(Date.now() / 1000) || 1
@@ -68,7 +68,7 @@ jobs:
                     return request(req, opts)
                   }
                   if (err.message.toLowerCase().includes('secondary rate limit')) {
-                    const retryAfter = Math.pow(2, opts.request.retries)
+                    const retryAfter = Math.pow(2, opts._attempt)
                     core.info(`Secondary rate limit exceeded, retrying in ${retryAfter} seconds`)
                     await new Promise(resolve => setTimeout(resolve, retryAfter * 1000))
                     return request(req, opts)
