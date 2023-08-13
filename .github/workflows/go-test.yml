@@ -32,10 +32,12 @@ jobs:
       - uses: actions/checkout@v3
         with:
           submodules: recursive
-      - uses: actions/setup-go@v4
+      # Update to v4 is blocked by https://github.com/actions/setup-go/pull/411
+      # - uses: actions/setup-go@v4
+      - uses: actions/setup-go@v3
         with:
           go-version: stable
-          cache: false
+          # cache: false
       - id: config
         uses: pl-strflt/uci/.github/actions/read-config@main
       - id: go-mod
@@ -69,7 +71,9 @@ jobs:
           echo "GOTESTFLAGS=-v $GOTESTFLAGS" >> $GITHUB_ENV
           echo "GO386FLAGS=-v $GO386FLAGS" >> $GITHUB_ENV
           echo "GORACEFLAGS=-v $GORACEFLAGS" >> $GITHUB_ENV
-      - uses: actions/setup-go@v4
+      # Update to v4 is blocked by https://github.com/actions/setup-go/pull/411
+      # - uses: actions/setup-go@v4
+      - uses: actions/setup-go@v3
         with:
           go-version: ${{ steps.go.outputs.version }}
       - name: Go information
