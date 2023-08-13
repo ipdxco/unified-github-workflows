@@ -87,23 +87,26 @@ jobs:
             for (const pr of prs) {
               core.info(`Merging ${pr.html_url}`)
               try {
-                try {
-                  await github.rest.pulls.merge({
-                    owner: pr.base.repo.owner.login,
-                    repo: pr.base.repo.name,
-                    pull_number: pr.number,
-                    merge_method: 'squash'
-                  })
-                } catch(error) {
-                  if (error.message.toLowerCase().includes('squash merges')) {
-                    await github.rest.pulls.merge({
+                let mergeMethods = ['squash', 'merge', 'rebase']
+                let merge = undefined
+                while (merge == undefined && mergeMethods.length != 0) {
+                  const mergeMethod = mergeMethods.shift()
+                  try {
+                    merge = await github.rest.pulls.merge({
                       owner: pr.base.repo.owner.login,
                       repo: pr.base.repo.name,
-                      pull_number: pr.number
+                      pull_number: pr.number,
+                      merge_method: mergeMethod
                     })
-                  } else {
-                    throw error
+                  } catch(error) {
+                    const message = error.message.toLowerCase()
+                    if (!(message.includes(mergeMethod) && message.includes('not allowed on this repository'))) {
+                      throw error
+                    }
                   }
+                }
+                if (!merge) {
+                  throw new Error('No merge methods are allowed on this repository.')
                 }
                 core.info(`${pr.html_url} merged successfully`)
               } catch(error) {
