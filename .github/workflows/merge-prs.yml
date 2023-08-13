@@ -87,12 +87,24 @@ jobs:
             for (const pr of prs) {
               core.info(`Merging ${pr.html_url}`)
               try {
-                await github.rest.pulls.merge({
-                  owner: pr.base.repo.owner.login,
-                  repo: pr.base.repo.name,
-                  pull_number: pr.number,
-                  merge_method: 'squash'
-                })
+                try {
+                  await github.rest.pulls.merge({
+                    owner: pr.base.repo.owner.login,
+                    repo: pr.base.repo.name,
+                    pull_number: pr.number,
+                    merge_method: 'squash'
+                  })
+                } catch(error) {
+                  if (error.message.toLowerCase().includes('squash merges')) {
+                    await github.rest.pulls.merge({
+                      owner: pr.base.repo.owner.login,
+                      repo: pr.base.repo.name,
+                      pull_number: pr.number
+                    })
+                  } else {
+                    throw error
+                  }
+                }
                 core.info(`${pr.html_url} merged successfully`)
               } catch(error) {
                 core.error(`Couldn't merge ${pr.html_url}, got: ${error}`)
