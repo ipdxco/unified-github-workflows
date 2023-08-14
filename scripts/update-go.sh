@@ -2,6 +2,11 @@
 
 set -euo pipefail -o nounset
 
+# If ACTIONS_RUNNER_DEBUG or ACTIONS_STEP_DEBUG is set to true, print all commands
+if [[ "${ACTIONS_RUNNER_DEBUG:-}" == "true" || "${ACTIONS_STEP_DEBUG:-}" == "true" ]]; then
+  set -x
+fi
+
 language="$(jq -r '.github.languages[0]' <<< "$CONTEXT")"
 
 if [[ "$language" != "Go" ]]; then
