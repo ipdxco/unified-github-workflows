@@ -28,7 +28,7 @@ pushd "$TARGET" > /dev/null
 while read file; do
   pushd "$(dirname "$file")" > /dev/null
 
-  current="$(go list -m -f {{.GoVersion}} | tail -n-1)"
+  current="$(go list -m -json | jq 'select(.Dir == "'"$(pwd)"'")' | jq -r .GoVersion)"
 
   if [[ "$current" == "$expected" ]]; then
     echo "Go version $expected already in use."
