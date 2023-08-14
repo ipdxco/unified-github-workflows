@@ -9,6 +9,10 @@ on:
       version:
         description: "Go version to update to"
         required: true
+      branch:
+        description: "Branch to push to"
+        required: false
+        default: 'uci/update-go'
       dry-run:
         description: "Whether to run in dry run mode"
         required: false
@@ -20,7 +24,7 @@ jobs:
     secrets: inherit
     with:
       targets: ${{ github.event.inputs.targets }}
-      branch: uci/update-go
+      branch: ${{ github.event.inputs.branch }}
       script: update-go.sh
       defaults: |
         language:
