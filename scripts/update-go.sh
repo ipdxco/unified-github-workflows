@@ -7,7 +7,7 @@ if [[ "${ACTIONS_RUNNER_DEBUG:-}" == "true" || "${ACTIONS_STEP_DEBUG:-}" == "tru
   set -x
 fi
 
-language="$(jq -r '.github.languages[0]' <<< "$CONTEXT")"
+language="$(jq -r '.github.languages | map(select(. == "Go")) | .[0]' <<< "$CONTEXT")"
 
 if [[ "$language" != "Go" ]]; then
   echo "Not a Go project. Skipping."
