@@ -1,0 +1,38 @@
+name: Run
+
+on:
+  workflow_dispatch:
+    inputs:
+      targets:
+        description: "List of repository names to deploy to"
+        required: true
+      branch:
+        description: "Branch to deploy to"
+        required: true
+      script:
+        description: "Script to run"
+        required: true
+      defaults:
+        description: "Defaults to use for each repository"
+        required: false
+        default: '{}'
+      override:
+        description: "Override to use for each repository"
+        required: false
+        default: '{}'
+      dry-run:
+        description: "Whether to run in dry run mode"
+        required: false
+        default: 'false'
+
+jobs:
+  update-go:
+    uses: ./.github/workflows/process.yml
+    secrets: inherit
+    with:
+      targets: ${{ github.event.inputs.targets }}
+      branch: ${{ github.event.inputs.branch }}
+      script: ${{ github.event.inputs.script }}
+      defaults: ${{ github.event.inputs.defaults }}
+      override: ${{ github.event.inputs.override }}
+      dry-run: ${{ github.event.inputs.dry-run == 'true' }}

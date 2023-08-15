@@ -4,29 +4,23 @@ on:
   workflow_call:
     inputs:
       targets:
-        description: "List of repository names to deploy to"
         required: true
         type: string
       branch:
-        description: "Branch to deploy to"
         required: true
         type: string
       script:
-        description: "Script to run"
         required: true
         type: string
       defaults:
-        description: "Defaults to use for each repository"
         required: false
         default: '{}'
         type: string
       override:
-        description: "Override to use for each repository"
         required: false
         default: '{}'
         type: string
       dry-run:
-        description: "Whether to run in dry run mode"
         required: false
         default: false
         type: boolean
@@ -155,9 +149,9 @@ jobs:
             "github": ${{ toJSON(fromJSON(steps.github.outputs.json)) }},
             "source": ${{ toJSON(fromJSON(steps.source.outputs.json)) }}
           }
-        SCRIPT: ${{ inputs.dry-run && 'env' || format('./{0}/scripts/{1}', github.repository, inputs.script) }}
+        SCRIPT: ${{ inputs.script }}
         GITHUB_TOKEN: ${{ secrets.UCI_GITHUB_TOKEN }}
-      run: $SCRIPT
+      run: if [[ -f "$SOURCE/scripts/$SCRIPT" ]]; then $SOURCE/scripts/$SCRIPT; else $SCRIPT; fi
     - id: after
       name: Check if push is needed
       working-directory: ${{ matrix.repository }}
