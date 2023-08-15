@@ -88,6 +88,6 @@ while read file; do
   fi
 
   popd > /dev/null
-done <<< "$(find . -type f -name 'go.mod')"
+done <<< "$(git ls-tree --full-tree --name-only -r HEAD | grep 'go\.mod$')"
 
 popd > /dev/null
