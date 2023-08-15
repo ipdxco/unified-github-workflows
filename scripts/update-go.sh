@@ -37,6 +37,7 @@ while read file; do
 
   if [[ "$current" == "$expected" ]]; then
     echo "Go version $expected already in use."
+    popd > /dev/null
     continue
   fi
 
