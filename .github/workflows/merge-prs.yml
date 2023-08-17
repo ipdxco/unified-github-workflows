@@ -6,11 +6,16 @@ on:
       branch:
         description: "Branch from which to merge PRs"
         required: false
+      dry-run:
+        description: "Whether to actually merge the PRs or not"
+        required: false
+        default: 'false'
+
   # schedule:
   #   - cron: "0 0 * * *" # https://crontab.guru/every-day
 
 jobs:
-  dispatch:
+  merge-prs:
     name: Merge PRs
     runs-on: ubuntu-latest
     steps:
@@ -18,6 +23,7 @@ jobs:
         env:
           QUERY: is:pr author:web3-bot state:open archived:false
           BRANCH: ${{ github.event.inputs.branch }}
+          DRY_RUN: ${{ github.event.inputs.dry-run }}
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.UCI_GITHUB_TOKEN }}
@@ -86,6 +92,10 @@ jobs:
             const failed = []
             for (const pr of prs) {
               core.info(`Merging ${pr.html_url}`)
+              if (process.env.DRY_RUN) {
+                core.info(`Skipping PR merge because this is a dry run`)
+                continue
+              }
               try {
                 let mergeMethods = ['squash', 'merge', 'rebase']
                 let merge = undefined

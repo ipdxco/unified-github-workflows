@@ -1,13 +1,13 @@
-name: Create PRs
+name: Delete branches
 
 on:
   workflow_dispatch:
     inputs:
       branch:
-        description: "Branch from which to merge PRs"
+        description: "Branch to delete"
         required: false
       dry-run:
-        description: "Whether to actually create PRs or not"
+        description: "Whether to actually delete branches or not"
         required: false
         default: 'false'
 
@@ -15,11 +15,11 @@ on:
   #   - cron: "0 0 * * *" # https://crontab.guru/every-day
 
 jobs:
-  create-prs:
-    name: Create PRs
+  delete-branches:
+    name: Delete branches
     runs-on: ubuntu-latest
     steps:
-      - name: Create PRs
+      - name: Delete branches
         env:
           BRANCH: ${{ github.event.inputs.branch }}
           DRY_RUN: ${{ github.event.inputs.dry-run }}
@@ -56,7 +56,7 @@ jobs:
             const items = await github.paginate(github.rest.repos.listForAuthenticatedUser, {
               affiliation: 'collaborator'
             })
-            core.info(`Filtering out the repositories without unmerged branches`)
+            core.info(`Filtering out the repositories without branches to delete`)
             const repoBranches = []
             for (const item of items) {
               if (item.archived) {
@@ -75,54 +75,40 @@ jobs:
                 }
               })
               for (const branch of branches) {
-                core.info(`Checking if ${item.html_url}/tree/${branch.name} requires a PR to be created`)
-                const {data: compare} = await github.rest.repos.compareCommitsWithBasehead({
-                  owner: item.owner.login,
-                  repo: item.name,
-                  basehead: `${item.default_branch}...${branch.name}`
-                })
-                if (compare.ahead_by != '0') {
-                  core.info(`PR for ${item.html_url}/tree/${branch.name} should exist`)
-                } else {
-                  core.info(`PR for ${item.html_url}/tree/${branch.name} is not needed`)
-                  continue
-                }
+                core.info(`Checking if ${item.html_url}/tree/${branch.name} can be deleted`)
                 const {data: pulls} = await github.rest.repos.listPullRequestsAssociatedWithCommit({
                   owner: item.owner.login,
                   repo: item.name,
                   commit_sha: branch.commit.sha
                 })
                 if (pulls.length == 0) {
-                  core.info(`PR for ${item.html_url}/tree/${branch.name} should be created`)
+                  core.info(`${item.html_url}/tree/${branch.name} should be deleted`)
                   repoBranches.push({repo: item, branch})
                 } else {
-                  core.info(`PR for ${item.html_url}/tree/${branch.name} already exists`)
+                  core.info(`${item.html_url}/tree/${branch.name} has ${pulls.length} PRs, skipping`)
                 }
               }
             }
-            core.info(`Attempting to create the PRs`)
+            core.info(`Attempting to delete branches`)
             const failed = []
             for (const {repo, branch} of repoBranches) {
-              core.info(`Creating PR for ${repo.html_url}/tree/${branch.name}`)
+              core.info(`Deleting ${repo.html_url}/tree/${branch.name}`)
               if (process.env.DRY_RUN) {
-                core.info(`Skipping PR creation because this is a dry run`)
+                core.info(`Skipping branch deletion because this is a dry run`)
                 continue
               }
               try {
-                const pr = await github.rest.pulls.create({
+                await github.rest.git.deleteRef({
                   owner: repo.owner.login,
                   repo: repo.name,
-                  head: branch.name,
-                  base: repo.default_branch,
-                  title: `ci: ${branch.name}`,
-                  body: `This PR was created automatically by the @web3-bot as a part of the [Unified CI](https://github.com/pl-strflt/uci) project.`
+                  ref: `heads/${branch.name}`
                 })
-                core.info(`${pr.data.html_url} created successfully`)
+                core.info(`${repo.html_url}/tree/${branch.name} deleted successfully`)
               } catch(error) {
-                core.error(`Couldn't create a PR for ${repo.html_url}/tree/${branch.name}, got: ${error}`)
+                core.error(`Couldn't delete ${repo.html_url}/tree/${branch.name}, got: ${error}`)
                 failed.push({repo, branch})
               }
             }
             if (failed.length != 0) {
-              throw new Error(`Failed to create ${failed.length} PRs`)
+              throw new Error(`Failed to delete ${failed.length} branches`)
             }
