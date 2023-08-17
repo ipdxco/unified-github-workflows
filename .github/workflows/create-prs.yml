@@ -76,17 +76,6 @@ jobs:
               })
               for (const branch of branches) {
                 core.info(`Checking if ${item.html_url}/tree/${branch.name} requires a PR to be created`)
-                const {data: compare} = await github.rest.repos.compareCommitsWithBasehead({
-                  owner: item.owner.login,
-                  repo: item.name,
-                  basehead: `${item.default_branch}...${branch.name}`
-                })
-                if (compare.ahead_by != '0') {
-                  core.info(`PR for ${item.html_url}/tree/${branch.name} should exist`)
-                } else {
-                  core.info(`PR for ${item.html_url}/tree/${branch.name} is not needed`)
-                  continue
-                }
                 const {data: pulls} = await github.rest.repos.listPullRequestsAssociatedWithCommit({
                   owner: item.owner.login,
                   repo: item.name,

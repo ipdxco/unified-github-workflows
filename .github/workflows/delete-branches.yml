@@ -81,11 +81,12 @@ jobs:
                   repo: item.name,
                   commit_sha: branch.commit.sha
                 })
-                if (pulls.length == 0) {
-                  core.info(`${item.html_url}/tree/${branch.name} should be deleted`)
+                const openPulls = pulls.filter(pull => pull.state == 'open')
+                if (openPulls.length == 0) {
+                  core.info(`${item.html_url}/tree/${branch.name} has no open PRs, adding to list`)
                   repoBranches.push({repo: item, branch})
                 } else {
-                  core.info(`${item.html_url}/tree/${branch.name} has ${pulls.length} PRs, skipping`)
+                  core.info(`${item.html_url}/tree/${branch.name} has ${openPulls.length} open PRs, skipping`)
                 }
               }
             }
