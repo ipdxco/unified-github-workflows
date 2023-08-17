@@ -51,6 +51,24 @@ If you need to access the GitHub Token in a setup action, you can do so through 
 
 ### Configuration Files
 
+#### Global Configuration Files
+
+You can configure Unified CI for your repository by creating a `.github/uci.yml` configuration file.
+
+Here is an example configuration file:
+```yml
+files: # Configure what Unified CI templates should be used for your repository; defaults to primary language default fileset
+  - .github/workflows/go-check.yml
+  - .github/workflows/go-test.yml
+  - .github/workflows/release.yml
+force: true # Configure whether Unified CI should overwrite existing workflows; defaults to false
+versions:
+  uci: v1 # Configure what version of Unified CI reusables should be used; defaults to latest
+  go: 1.21 # Configure what version of Go should be used; defaults to oldstable
+```
+
+#### Job Specific Configuration Files
+
 `go-check` contains an optional step that checks that running `go generate` doesn't change any files.
 This is useful to make sure that the generated code stays in sync.
 
@@ -92,45 +110,80 @@ If you want to disable verbose logging or test shuffling, you can do so by setti
 }
 ```
 
-## Technical Preview
+### Workflow Modification
 
-You can opt-in to receive early updates from the `next` branch in-between official Unified CI releases.
+You can modify the workflows distributed by Unified CI as you wish. Unified CI will only ever try to update the versions of reusables after the initial distribution. Similarly to how dependabot operates.
 
-To do so you have to set `source_ref` property to `next` on your repository target object in the configuration file.
-```json
-{
-  "repositories": [
-    {
-      "target": "pl-strflt/example",
-      "source_ref": "next"
-    }
-  ]
-}
-```
-
-_Warning_: `next` branch updates are much more frequent than those from `master`.
-
-## Technical Details
-
-This repository currently defines two workflows for Go repositories:
-* [go-check](templates/.github/workflows/go-check.yml): Performs static analysis, style, and formatting checks to help improve the code quality.
-* [go-test](templates/.github/workflows/go-test.yml): Runs all tests, using different compiler versions and operating systems.
-
-Whenever one of these workflows is changed, this repository runs the [copy workflow](.github/workflows/copy-workflow.yml). This workflow creates a pull request in every participating repository to update *go-check* and *go-test*.
+In particular, you might want to update the organization part of the reusable's path to your organization in case your organization doesn't allow using reusables from outside organization or you intend to run reusables on self-hosted runners. If you fork the Unified CI repository and give write access to your fork to @web3-bot, your fork is going to be kept up to date automatically. This ensures the validity of all future, automatic Unified CI updates.
 
 ## Usage
 
-Workflows are distributed to all repositories listed in [configs/go.json](configs/go.json).
+Unified CI is distributed to all repositories @web3-bot has write access to.
 
-If you want your project to participle, please send a PR which adds your repository to the config! Remember to ensure [@web3-bot](https://github.com/web3-bot) has write access to your repository.
+If you want your project to participle, give [@web3-bot](https://github.com/web3-bot) write access to your repository. If the invitation needs acceptance, please create an issue or reach out to us at [#ipdx](https://filecoinproject.slack.com/archives/C03KLC57LKB).
 
-## Development
+## Structure
 
-### Branches
+Unified CI consists of [templates](./templates/) which are [rendered](./scripts/render-template.sh) using the combination of [default configuration](./.github/workflows/copy-templates.yml) and [repository specific configuration](#global-configuration-files) and distributed to [participating repositories](#usage) on [schedule](./.github/workflows/copy-templates.yml) by [Copy](./.github/workflows/copy-templates.yml) workflow. Distributed changes are proposed as Pull Requests by [Create](./.github/workflows/create-prs.yml) workflow and automatically merged by [Merge](./.github/workflows/merge-prs.yml) workflow when allowed.
 
-The `master` branch contains currently deployed workflows.
-When we make minor changes to these workflows, we don't always want these changes to get deployed to all hundreds of repositories, as this creates a lot of unnecessary noise. Minor changes to the workflows are therefore merged into the [`next`](https://github.com/protocol/.github/tree/next) branch. When the time has come, we create a PR from the `next` branch to `master` to trigger a deployment to all repositores.
+All workflow [templates](./templates/) distributed by Unified CI reference [reusables](./.github/workflows/) which live in Unified CI repository. By default, [Copy](./.github/workflows/copy-templates.yml) workflow proposes updates **ONLY** to the versions of [reusables](./.github/workflows/) - the same way [dependabot](https://github.com/dependabot/dependabot) operates. This ensures users are free to modify the workflows after distribution as they wish.
 
-### IDE
+Unified CI repository can be forked to accomodate repositories that don't allow usage of reusables from outside the organization or intend to run reusables on self-hosted runners. The forks to which @web3-bot has write access are kept up to date automatically by [Sync](./.github/workflows/sync-forks.yml) workflow. This ensures the validity of all future, automatic Unified CI updates.
 
-If you're using [Visual Studio Code](https://code.visualstudio.com/) for development, you might want to install the [YAML](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml) extension. It is configured to perform GitHub workflow/action linting out-of-the-box. If you're using a different IDE, you can check if a [client](https://github.com/redhat-developer/yaml-language-server#clients) for it exists.
+## Templates
+
+<details><summary>release.yml, release-check.yml, tagpush.yml, version.json</summary>
+
+### Versioning
+
+Go versioning uses [Semantic Versioning 2.0.0](https://semver.org/).
+
+On a high level, this means that given a version number MAJOR.MINOR.PATCH, one is supposed to increment the:
+
+* MAJOR version when you make incompatible API changes,
+* MINOR version when you add functionality in a backwards compatible manner, and
+* PATCH version when you make backwards compatible bug fixes.
+
+For `v0` versions, incompatible API changes only require a MINOR version bump.
+
+The Go tooling uses version numbers to infer which upgrades are safe (in the sense that they don't result in breaking the build). For example `go get -u=patch` updates dependencies to the most recent patch release. Our downstream users also expect that their compilation won't break when they update to a patch release.
+
+Special care has to be taken when cutting a new release after updating dependencies. Even though a dependency update might not change the API of a package and might therefore _look_ as if it was backwards-compatible change, this is not true if the update of that package is more than a patch release update (i.e., it is a minor or a major release): Go's Minimum Version Selection will force all downstream users to use the new version _of the dependency_, which in turn might lead to breakages in downstream code. Updating a dependency (other than patch releases) therefore MUST result in a bump of the minor version number.
+
+It has turned out that manually assigning version numbers is easy to mess up. To make matters worse, GitHub doesn't give us the option to apply our code review process to releases: A new Go release is created everytime a tag starting with `v` is pushed. Once pushed, the release is picked up by the Google module proxy in a very short time frame, which means that in practice, it's not possible to delete an errorneous pushed tag.
+
+Instead of manually tagging versions, we use GitHub Actions workflows to aid us picking the right version number.
+
+#### Using the Versioning Workflows
+
+Every Go repository contains a `version.json` file in the root directory:
+```json
+{
+  "version": "v0.4.2"
+}
+```
+
+This version file defines the currently released version.
+
+When cutting a new release, open a Pull Request that bumps the version number and have it review by your team mates.
+The [release check workflow](.github/workflows/release-check.yml) will create a draft GitHub Release (_if the workflow was not initiated by a PR from a fork_) and post a link to it along with other useful information (the output of `gorelease`, `gocompat` and a diff of the `go.mod` files(s)).
+
+As soon as the PR is merged into the default branch, the [releaser workflow](.github/workflows/releaser.yml) is run. This workflow either publishes the draft GitHub Release created by the release check workflow or creates a published GitHub Release if it doesn't exist yet. This, in turn, will create a new Git tag and push it to the repository.
+
+##### Modifying GitHub Release
+
+All modification you make to the draft GitHub Release created by the release check workflow will be preserved. You can change its' name and body to describe the release in more detail.
+
+##### Using a Release Branch
+
+Sometimes it's necessary to cut releases on a release branch. If you open a Pull Request targeting a branch other than the default branch, a new release will only be created if the PR has the `release` label.
+
+##### Dealing with Manual Pushes
+
+Unfortunately, GitHub doesn't allow us to disable / restrict pushing of Git tags (see this long-standing [Feature Request](https://github.community/t/feature-request-protected-tags/1742), and consider upvoting it ;)). We can however run a [workflow](.github/workflows/tagpush.yml) when a version tag is pushed.
+
+This workflow will open a new issue in the repository, asking the pusher to
+1. double-check that the pushed tag complies with the Semantic Versioning rules described above
+2. manually update `version.json` for consistency
+
+</details>
