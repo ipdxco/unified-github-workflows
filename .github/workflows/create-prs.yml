@@ -7,7 +7,7 @@ on:
         description: "Branch from which to merge PRs"
         required: false
       dry-run:
-        description: "Whether to actually create PRs or not"
+        description: "Whether to run in dry run mode"
         required: false
         default: 'false'
 
@@ -93,7 +93,7 @@ jobs:
             const failed = []
             for (const {repo, branch} of repoBranches) {
               core.info(`Creating PR for ${repo.html_url}/tree/${branch.name}`)
-              if (process.env.DRY_RUN) {
+              if (process.env.DRY_RUN == 'true') {
                 core.info(`Skipping PR creation because this is a dry run`)
                 continue
               }

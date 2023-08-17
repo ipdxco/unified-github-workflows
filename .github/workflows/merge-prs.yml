@@ -7,7 +7,7 @@ on:
         description: "Branch from which to merge PRs"
         required: false
       dry-run:
-        description: "Whether to actually merge the PRs or not"
+        description: "Whether to run in dry run mode"
         required: false
         default: 'false'
 
@@ -92,7 +92,7 @@ jobs:
             const failed = []
             for (const pr of prs) {
               core.info(`Merging ${pr.html_url}`)
-              if (process.env.DRY_RUN) {
+              if (process.env.DRY_RUN == 'true') {
                 core.info(`Skipping PR merge because this is a dry run`)
                 continue
               }

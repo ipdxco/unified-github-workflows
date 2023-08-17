@@ -7,7 +7,7 @@ on:
         description: "Branch to delete"
         required: false
       dry-run:
-        description: "Whether to actually delete branches or not"
+        description: "Whether to run in dry run mode"
         required: false
         default: 'false'
 
@@ -94,7 +94,7 @@ jobs:
             const failed = []
             for (const {repo, branch} of repoBranches) {
               core.info(`Deleting ${repo.html_url}/tree/${branch.name}`)
-              if (process.env.DRY_RUN) {
+              if (process.env.DRY_RUN == 'true') {
                 core.info(`Skipping branch deletion because this is a dry run`)
                 continue
               }
