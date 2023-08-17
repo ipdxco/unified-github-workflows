@@ -2,7 +2,12 @@
 
 set -euo pipefail -o nounset
 
-language="$(jq -r '.github.languages[0]' <<< "$CONTEXT")"
+# If ACTIONS_RUNNER_DEBUG or ACTIONS_STEP_DEBUG is set to true, print all commands
+if [[ "${ACTIONS_RUNNER_DEBUG:-}" == "true" || "${ACTIONS_STEP_DEBUG:-}" == "true" ]]; then
+  set -x
+fi
+
+language="$(jq -r '.github.languages | map(select(. == "Go")) | .[0]' <<< "$CONTEXT")"
 
 if [[ "$language" != "Go" ]]; then
   echo "Not a Go project. Skipping."
@@ -28,10 +33,11 @@ pushd "$TARGET" > /dev/null
 while read file; do
   pushd "$(dirname "$file")" > /dev/null
 
-  current="$(go list -m -f {{.GoVersion}})"
+  current="$(go list -m -json | jq 'select(.Dir == "'"$(pwd)"'")' | jq -r .GoVersion)"
 
   if [[ "$current" == "$expected" ]]; then
     echo "Go version $expected already in use."
+    popd > /dev/null
     continue
   fi
 
@@ -83,6 +89,6 @@ while read file; do
   fi
 
   popd > /dev/null
-done <<< "$(find . -type f -name 'go.mod')"
+done <<< "$(git ls-tree --full-tree --name-only -r HEAD | grep 'go\.mod$')"
 
 popd > /dev/null

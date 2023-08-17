@@ -27,7 +27,7 @@ jobs:
               try {
                 return await req(opts)
               } catch(err) {
-                opts.request.retries = (opts.request.retries || 0) + 1
+                opts._attempt = (opts._attempt || 0) + 1
                 if (err.status === 403) {
                   if (err.response.headers['x-ratelimit-remaining'] === '0') {
                     const retryAfter = err.response.headers['x-ratelimit-reset'] - Math.floor(Date.now() / 1000) || 1
@@ -36,7 +36,7 @@ jobs:
                     return request(req, opts)
                   }
                   if (err.message.toLowerCase().includes('secondary rate limit')) {
-                    const retryAfter = Math.pow(2, opts.request.retries)
+                    const retryAfter = Math.pow(2, opts._attempt)
                     core.info(`Secondary rate limit exceeded, retrying in ${retryAfter} seconds`)
                     await new Promise(resolve => setTimeout(resolve, retryAfter * 1000))
                     return request(req, opts)
@@ -87,12 +87,27 @@ jobs:
             for (const pr of prs) {
               core.info(`Merging ${pr.html_url}`)
               try {
-                await github.rest.pulls.merge({
-                  owner: pr.base.repo.owner.login,
-                  repo: pr.base.repo.name,
-                  pull_number: pr.number,
-                  merge_method: 'squash'
-                })
+                let mergeMethods = ['squash', 'merge', 'rebase']
+                let merge = undefined
+                while (merge == undefined && mergeMethods.length != 0) {
+                  const mergeMethod = mergeMethods.shift()
+                  try {
+                    merge = await github.rest.pulls.merge({
+                      owner: pr.base.repo.owner.login,
+                      repo: pr.base.repo.name,
+                      pull_number: pr.number,
+                      merge_method: mergeMethod
+                    })
+                  } catch(error) {
+                    const message = error.message.toLowerCase()
+                    if (!(message.includes(mergeMethod) && message.includes('not allowed on this repository'))) {
+                      throw error
+                    }
+                  }
+                }
+                if (!merge) {
+                  throw new Error('No merge methods are allowed on this repository.')
+                }
                 core.info(`${pr.html_url} merged successfully`)
               } catch(error) {
                 core.error(`Couldn't merge ${pr.html_url}, got: ${error}`)

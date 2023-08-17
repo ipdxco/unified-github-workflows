@@ -1,0 +1,33 @@
+name: Sync forks
+
+on:
+  workflow_dispatch:
+
+jobs:
+  sync:
+    name: Sync forks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.UCI_GITHUB_TOKEN }}
+      - name: Sync forks
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.UCI_GITHUB_TOKEN }}
+          script: |
+            const forks = await github.paginate(github.rest.repos.listForks, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            });
+            for (const fork of forks) {
+              console.log(`Syncing ${fork.full_name} (${fork.clone_url})`);
+              await exec.exec(`git remote add ${fork.full_name} ${fork.clone_url}`);
+              try {
+                await exec.exec(`git push ${fork.full_name} +refs/tags/*:refs/tags/* +refs/remotes/origin/*:refs/heads/*`);
+              } catch(e) {
+                console.warn(`Failed to sync ${fork.full_name} (${fork.clone_url})`);
+              }
+            }

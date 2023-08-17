@@ -1,6 +1,10 @@
 name: Go Checks
 on:
   workflow_call:
+    inputs:
+      go-version:
+        required: false
+        type: string
 
 jobs:
   unit:
@@ -14,9 +18,10 @@ jobs:
         uses: pl-strflt/uci/.github/actions/read-config@main
       - id: go-mod
         uses: pl-strflt/uci/.github/actions/read-go-mod@main
-      - uses: actions/setup-go@v3
+      - uses: actions/setup-go@v4
         with:
-          go-version: ${{ fromJSON(steps.go-mod.outputs.json).Go }}.x
+          go-version: ${{ inputs.go-version || (fromJSON(steps.go-mod.outputs.json).Go && format('{0}.x', fromJSON(steps.go-mod.outputs.json).Go)) }}
+          cache: false
       - name: Run repo-specific setup
         uses: ./.github/actions/go-check-setup
         if: hashFiles('./.github/actions/go-check-setup') != ''

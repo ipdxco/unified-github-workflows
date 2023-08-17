@@ -6,6 +6,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [0.0.8] - 2023-08-15
+### Added
+- `go-version` input for Go check workflow
+
+## [0.0.7] - 2023-08-13
+### Fixed
+- partially reverted setup-go action update
+
+## [0.0.6] - 2023-08-12
+### Changed
+- updated versions of actions
+
+## [0.0.5] - 2023-08-11
+### Fixed
+- Go installtion on self-hosted runners in Go test workflow
+
+## [0.0.4] - 2023-08-11
+### Fixed
+- Go installtion on self-hosted runners in Go test workflow
+
+## [0.0.3] - 2023-08-11
+### Fixed
+- Go installtion on self-hosted runners in Go test workflow
+
 ## [0.0.2] - 2023-08-10
 ### Fixed
 - copy templates procedure

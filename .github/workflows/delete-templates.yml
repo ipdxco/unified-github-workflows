@@ -9,6 +9,10 @@ on:
       files:
         description: "List of files to delete"
         required: true
+      dry-run:
+        description: "Whether to run in dry run mode"
+        required: false
+        default: 'false'
 
 jobs:
   delete-templates:
@@ -21,3 +25,4 @@ jobs:
       override: |
         common:
           files: ${{ github.event.inputs.files }}
+      dry-run: ${{ github.event.inputs.dry-run == 'true' }}

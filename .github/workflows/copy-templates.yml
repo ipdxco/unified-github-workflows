@@ -12,6 +12,10 @@ on:
       version:
         description: "Version to use for templates"
         required: false
+      dry-run:
+        description: "Whether to run in dry run mode"
+        required: false
+        default: 'false'
 
 jobs:
   copy-templates:
@@ -42,3 +46,4 @@ jobs:
           force: ${{ github.event.inputs.force }}
           versions:
             uci: ${{ github.event.inputs.version }}
+      dry-run: ${{ github.event.inputs.dry-run == 'true' }}

@@ -1,4 +1,4 @@
-name: Update Go
+name: Run
 
 on:
   workflow_dispatch:
@@ -6,13 +6,20 @@ on:
       targets:
         description: "List of repository names to deploy to"
         required: true
-      version:
-        description: "Go version to update to"
-        required: true
       branch:
-        description: "Branch to push to"
+        description: "Branch to deploy to"
+        required: true
+      script:
+        description: "Script to run"
+        required: true
+      defaults:
+        description: "Defaults to use for each repository"
         required: false
-        default: 'uci/update-go'
+        default: '{}'
+      override:
+        description: "Override to use for each repository"
+        required: false
+        default: '{}'
       dry-run:
         description: "Whether to run in dry run mode"
         required: false
@@ -25,9 +32,7 @@ jobs:
     with:
       targets: ${{ github.event.inputs.targets }}
       branch: ${{ github.event.inputs.branch }}
-      script: update-go.sh
-      defaults: |
-        common:
-          versions:
-            go: "${{ github.event.inputs.version }}"
+      script: ${{ github.event.inputs.script }}
+      defaults: ${{ github.event.inputs.defaults }}
+      override: ${{ github.event.inputs.override }}
       dry-run: ${{ github.event.inputs.dry-run == 'true' }}

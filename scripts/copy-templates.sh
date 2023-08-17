@@ -14,6 +14,11 @@ for f in $(jq -r '.config.files[] // []' <<< "$CONTEXT"); do
     continue
   fi
 
+  dir="$(dirname "$f")"
+  if [[ ! -d "$dir" ]]; then
+    mkdir -p "$dir"
+  fi
+
   echo "Rendering template $f..."
   $root/$SOURCE/scripts/render-template.sh "$root/$SOURCE/templates/$f" "$CONTEXT" "$f"
 

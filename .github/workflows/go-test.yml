@@ -32,6 +32,12 @@ jobs:
       - uses: actions/checkout@v3
         with:
           submodules: recursive
+      # Update to v4 is blocked by https://github.com/actions/setup-go/pull/411
+      # - uses: actions/setup-go@v4
+      - uses: actions/setup-go@v3
+        with:
+          go-version: stable
+          # cache: false
       - id: config
         uses: pl-strflt/uci/.github/actions/read-config@main
       - id: go-mod
@@ -65,6 +71,8 @@ jobs:
           echo "GOTESTFLAGS=-v $GOTESTFLAGS" >> $GITHUB_ENV
           echo "GO386FLAGS=-v $GO386FLAGS" >> $GITHUB_ENV
           echo "GORACEFLAGS=-v $GORACEFLAGS" >> $GITHUB_ENV
+      # Update to v4 is blocked by https://github.com/actions/setup-go/pull/411
+      # - uses: actions/setup-go@v4
       - uses: actions/setup-go@v3
         with:
           go-version: ${{ steps.go.outputs.version }}
@@ -109,7 +117,7 @@ jobs:
         shell: bash
         run: echo "files=$(find . -type f -name 'module-coverage.txt' | tr -s '\n' ',' | sed 's/,$//')" >> $GITHUB_OUTPUT
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@d9f34f8cd5cb3b3eb79b3e4b5dae3a16df499a70 # v3.1.1
+        uses: codecov/codecov-action@eaaf4bedf32dbdc6b720b63067d99c4d77d6047d # v3.1.4
         with:
           files: ${{ steps.coverages.outputs.files }}
           env_vars: OS=${{ matrix.os }}, GO=${{ steps.go.outputs.version }}
