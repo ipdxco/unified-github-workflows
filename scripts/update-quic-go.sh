@@ -33,8 +33,10 @@ while read file; do
 
   if go list -m -json all | jq -se 'map(select(.Path == "github.com/libp2p/go-libp2p")) | length != 0' > /dev/null; then
     go get -u github.com/libp2p/go-libp2p
+    go mod tidy
   elif go list -m -json all | jq -se 'map(select(.Path == "github.com/quic-go/quic-go")) | length != 0' > /dev/null; then
     go get -u github.com/quic-go/quic-go
+    go mod tidy
   fi
 
   git add .
