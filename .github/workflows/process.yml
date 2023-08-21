@@ -28,9 +28,9 @@ on:
         required: false
         default: true
         type: boolean
-      force-reset:
+      rebase:
         required: false
-        default: false
+        default: true
         type: boolean
     secrets:
       UCI_GITHUB_TOKEN:
@@ -135,7 +135,7 @@ jobs:
         BRANCH: ${{ inputs.branch }}
         DEFAULT_BRANCH: ${{ fromJSON(steps.github.outputs.json).default_branch }}
         RESET: ${{ inputs.reset }}
-        FORCE_RESET: ${{ inputs.force-reset }}
+        REBASE: ${{ inputs.rebase }}
       # If the branch already exists, check it out; otherwise, create it.
       # Then, try rebasing the uci/* branch onto the default branch.
       # If that fails, reset the uci/* branch to the default branch.
@@ -145,12 +145,12 @@ jobs:
         git checkout "$BRANCH" || git checkout -B "$BRANCH"
         # Registering SHA before rebase to push even if only the default branch moved
         git rev-parse HEAD | xargs -I{} echo "sha={}" | tee -a $GITHUB_OUTPUT
-        if [[ "$FORCE_RESET" == 'true' ]]; then
-          git reset --hard "$DEFAULT_BRANCH"
-        elif [[ "$RESET" == 'true' ]]; then
+        if [[ "$REBASE" == 'true' && "$RESET" == 'true' ]]; then
           git rebase "$DEFAULT_BRANCH" || (git rebase --abort && git reset --hard "$DEFAULT_BRANCH")
-        else
-          git rebase "$DEFAULT_BRANCH"
+        elif [[ "$REBASE" == 'true' ]]; then
+          git rebase "$DEFAULT_BRANCH" || git rebase --abort
+        elif [[ "$RESET" == 'true' ]]; then
+          git reset --hard "$DEFAULT_BRANCH"
         fi
     - name: Configure global git user
       run: |

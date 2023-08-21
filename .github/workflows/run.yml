@@ -28,10 +28,10 @@ on:
         description: "Whether to allow resetting the branch"
         required: false
         default: 'true'
-      force-reset:
-        description: "Whether to force reset the branch"
+      rebase:
+        description: "Whether to allow rebasing the branch"
         required: false
-        default: 'false'
+        default: 'true'
 
 
 jobs:
@@ -46,4 +46,4 @@ jobs:
       override: ${{ github.event.inputs.override }}
       dry-run: ${{ github.event.inputs.dry-run == 'true' }}
       reset: ${{ github.event.inputs.reset == 'true' }}
-      force-reset: ${{ github.event.inputs.force-reset == 'true' }}
+      rebase: ${{ github.event.inputs.rebase == 'true' }}
