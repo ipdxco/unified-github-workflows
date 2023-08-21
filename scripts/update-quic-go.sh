@@ -47,10 +47,3 @@ while read file; do
 done <<< "$(git ls-tree --full-tree --name-only -r HEAD | grep 'go\.mod$')"
 
 popd > /dev/null
-
-
-if go list -m -json all | jq -e 'select(.Path == "github.com/libp2p/go-libp2p")' > /dev/null; then
-    echo "1"
-elif go list -m -json all | jq -e 'select(.Path == "github.com/quic-go/quic-go")' > /dev/null; then
-    echo "2"
-fi
