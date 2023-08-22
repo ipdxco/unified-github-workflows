@@ -18,7 +18,8 @@ jobs:
         uses: pl-strflt/uci/.github/actions/read-config@main
       - id: go-mod
         uses: pl-strflt/uci/.github/actions/read-go-mod@main
-      - uses: actions/setup-go@v4
+      - id: go
+        uses: actions/setup-go@v4
         with:
           go-version: ${{ inputs.go-version || (fromJSON(steps.go-mod.outputs.json).Go && format('{0}.x', fromJSON(steps.go-mod.outputs.json).Go)) }}
           cache: false
@@ -26,7 +27,24 @@ jobs:
         uses: ./.github/actions/go-check-setup
         if: hashFiles('./.github/actions/go-check-setup') != ''
       - name: Install staticcheck
-        run: go install honnef.co/go/tools/cmd/staticcheck@4970552d932f48b71485287748246cf3237cebdf # 2023.1 (v0.4.0)
+        env:
+          STATICCHECK_VERSIONS: |
+            {
+              "1.21": "9e12e6014d3b0a854950490051ad1338fc6badd1",
+              "1.20": "9e12e6014d3b0a854950490051ad1338fc6badd1",
+              "1.19": "376210a89477dedbe6fdc4484b233998650d7b3c",
+              "1.18": "376210a89477dedbe6fdc4484b233998650d7b3c",
+              "1.17": "c8caa92bad8c27ae734c6725b8a04932d54a147b",
+              "1.16": "5a1275af4f46a845a0ec1e8b2b6539bdb991f63a",
+              "1.15": "5b7de96f09104e2be384aa93a7c821eb5e77378b",
+              "1.14": "e6faca53be3c685bf97e827e24e58ec9297f619e",
+              "1.13": "afd67930eec2a9ed3e9b19f684d17a062285f16a"
+            }
+          GO_VERSION: ${{ steps.go.outputs.go-version }}
+        run: |
+          version="$(jq -nr 'env.STATICCHECK_VERSIONS | fromjson | .[env.GO_VERSION | sub("\\.[^.]+$"; "")] // "latest"')"
+          echo "Installing staticcheck@$version"
+          go install honnef.co/go/tools/cmd/staticcheck@$version
       - name: Check that go.mod is tidy
         uses: protocol/multiple-go-modules@v1.2
         with:
