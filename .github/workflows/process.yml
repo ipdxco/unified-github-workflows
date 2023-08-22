@@ -24,6 +24,14 @@ on:
         required: false
         default: false
         type: boolean
+      reset:
+        required: false
+        default: true
+        type: boolean
+      rebase:
+        required: false
+        default: true
+        type: boolean
     secrets:
       UCI_GITHUB_TOKEN:
         required: true
@@ -126,6 +134,8 @@ jobs:
       env:
         BRANCH: ${{ inputs.branch }}
         DEFAULT_BRANCH: ${{ fromJSON(steps.github.outputs.json).default_branch }}
+        RESET: ${{ inputs.reset }}
+        REBASE: ${{ inputs.rebase }}
       # If the branch already exists, check it out; otherwise, create it.
       # Then, try rebasing the uci/* branch onto the default branch.
       # If that fails, reset the uci/* branch to the default branch.
@@ -135,7 +145,13 @@ jobs:
         git checkout "$BRANCH" || git checkout -B "$BRANCH"
         # Registering SHA before rebase to push even if only the default branch moved
         git rev-parse HEAD | xargs -I{} echo "sha={}" | tee -a $GITHUB_OUTPUT
-        git rebase "$DEFAULT_BRANCH" || (git rebase --abort && git reset --hard "$DEFAULT_BRANCH")
+        if [[ "$REBASE" == 'true' && "$RESET" == 'true' ]]; then
+          git rebase "$DEFAULT_BRANCH" || (git rebase --abort && git reset --hard "$DEFAULT_BRANCH")
+        elif [[ "$REBASE" == 'true' ]]; then
+          git rebase "$DEFAULT_BRANCH" || git rebase --abort
+        elif [[ "$RESET" == 'true' ]]; then
+          git reset --hard "$DEFAULT_BRANCH"
+        fi
     - name: Configure global git user
       run: |
         git config --global user.name web3-bot

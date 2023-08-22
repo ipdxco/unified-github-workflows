@@ -24,6 +24,15 @@ on:
         description: "Whether to run in dry run mode"
         required: false
         default: 'false'
+      reset:
+        description: "Whether to allow resetting the branch"
+        required: false
+        default: 'true'
+      rebase:
+        description: "Whether to allow rebasing the branch"
+        required: false
+        default: 'true'
+
 
 jobs:
   update-go:
@@ -36,3 +45,5 @@ jobs:
       defaults: ${{ github.event.inputs.defaults }}
       override: ${{ github.event.inputs.override }}
       dry-run: ${{ github.event.inputs.dry-run == 'true' }}
+      reset: ${{ github.event.inputs.reset == 'true' }}
+      rebase: ${{ github.event.inputs.rebase == 'true' }}
