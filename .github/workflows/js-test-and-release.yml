@@ -16,6 +16,10 @@ on:
       UCI_GITHUB_TOKEN:
         required: false
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
 
   check:

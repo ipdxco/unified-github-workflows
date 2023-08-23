@@ -7,6 +7,10 @@ on:
         type: string
         default: '["this", "next"]'
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   unit:
     strategy:
@@ -23,7 +27,6 @@ jobs:
     steps:
       - name: Use msys2 on windows
         if: matrix.os == 'windows'
-        shell: bash
         # The executable for msys2 is also called bash.cmd
         #   https://github.com/actions/virtual-environments/blob/main/images/win/Windows2019-Readme.md#shells
         # If we prepend its location to the PATH
@@ -60,7 +63,6 @@ jobs:
           else
             echo "version=$MATRIX_GO" >> $GITHUB_OUTPUT
           fi
-        shell: bash
       - if: toJSON(fromJSON(steps.config.outputs.json).shuffle) != 'false'
         run: |
           echo "GOTESTFLAGS=-shuffle=on $GOTESTFLAGS" >> $GITHUB_ENV
@@ -114,7 +116,6 @@ jobs:
           run: go test -race ./...
       - name: Collect coverage files
         id: coverages
-        shell: bash
         run: echo "files=$(find . -type f -name 'module-coverage.txt' | tr -s '\n' ',' | sed 's/,$//')" >> $GITHUB_OUTPUT
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@eaaf4bedf32dbdc6b720b63067d99c4d77d6047d # v3.1.4

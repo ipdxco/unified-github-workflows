@@ -12,7 +12,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: echo "EOF=EOF$RANDOM" >> $GITHUB_ENV
-        shell: bash
       - id: pr
         name: Retrieve PR information
         env:
