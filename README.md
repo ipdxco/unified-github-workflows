@@ -90,10 +90,11 @@ Typically, such tests can be disabled using [build constraints](https://pkg.go.d
 However, the constraints must be set per go file, which can be cumbersome for a project with many files.
 Using this option, 32-bit tests can be skipped entirely without having to specify build constraints per file.
 
-To completely disable running 32-bit tests set `skip32bit` to `true` in `.github/workflows/go-test-config.json`:
+To completely disable running 32-bit and/or race detection tests set `skip32bit`/`skipRace` to `true` in `.github/workflows/go-test-config.json`:
 ```json
 {
-  "skip32bit": true
+  "skip32bit": true,
+  "skipRace": true
 }
 ```
 
