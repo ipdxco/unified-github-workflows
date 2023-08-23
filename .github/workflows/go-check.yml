@@ -35,16 +35,17 @@ jobs:
               "1.19": "376210a89477dedbe6fdc4484b233998650d7b3c",
               "1.18": "376210a89477dedbe6fdc4484b233998650d7b3c",
               "1.17": "c8caa92bad8c27ae734c6725b8a04932d54a147b",
-              "1.16": "5a1275af4f46a845a0ec1e8b2b6539bdb991f63a",
+              "1.16": "4dc1992c9bb4310ba1e98b30c8d7d46444891d3b",
               "1.15": "5b7de96f09104e2be384aa93a7c821eb5e77378b",
-              "1.14": "e6faca53be3c685bf97e827e24e58ec9297f619e",
+              "1.14": "5b7de96f09104e2be384aa93a7c821eb5e77378b",
               "1.13": "afd67930eec2a9ed3e9b19f684d17a062285f16a"
             }
           GO_VERSION: ${{ steps.go.outputs.go-version }}
+          GO111MODULE: on
         run: |
           version="$(jq -nr 'env.STATICCHECK_VERSIONS | fromjson | .[env.GO_VERSION | sub("\\.[^.]+$"; "")] // "latest"')"
           echo "Installing staticcheck@$version"
-          go install honnef.co/go/tools/cmd/staticcheck@$version
+          go install honnef.co/go/tools/cmd/staticcheck@$version || go get honnef.co/go/tools/cmd/staticcheck@$version
       - name: Check that go.mod is tidy
         uses: protocol/multiple-go-modules@v1.2
         with:
