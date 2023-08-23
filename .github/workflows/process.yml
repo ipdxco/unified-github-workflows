@@ -36,10 +36,6 @@ on:
       UCI_GITHUB_TOKEN:
         required: true
 
-defaults:
-  run:
-    shell: bash
-
 jobs:
   copy:
     runs-on: ubuntu-latest

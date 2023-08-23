@@ -12,4 +12,3 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.UCI_GITHUB_TOKEN }}
         run: gh api user/repos -X GET -f affiliation=collaborator --jq '.[] | select(.archived == false) | .full_name' --paginate
-        shell: bash
