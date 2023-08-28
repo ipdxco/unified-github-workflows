@@ -16,6 +16,8 @@ on:
         description: "Whether to run in dry run mode"
         required: false
         default: 'false'
+  schedule:
+    - cron: '10 0 * * *' # https://crontab.guru/#10_0_*_*_*
 
 jobs:
   copy-templates:

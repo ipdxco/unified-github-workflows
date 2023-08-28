@@ -10,9 +10,8 @@ on:
         description: "Whether to run in dry run mode"
         required: false
         default: 'false'
-
-  # schedule:
-  #   - cron: "0 0 * * *" # https://crontab.guru/every-day
+  schedule:
+    - cron: '10 1 * * *' # https://crontab.guru/#10_1_*_*_*
 
 jobs:
   create-prs:
