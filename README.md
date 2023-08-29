@@ -1,6 +1,6 @@
 # Unified CI: Streamlining GitHub Workflows Across Repositories
 
-![web3-bot](./web3-bot.png)
+<img src="web3-bot.png" alt="web3-bot" width="200"/>
 
 Welcome to Unified CI, your key to deploying and managing GitHub Actions workflows across an extensive network of repositories. Unified CI takes the helm in orchestrating both the initial deployment and ongoing updates of workflows, providing a seamless solution to streamline your projects' lifecycle.
 
