@@ -2,6 +2,11 @@
 
 set -euo pipefail -o nounset
 
+# If the script is run with RUNNER_DEBUG=1, print all statements executed
+if [[ "${RUNNER_DEBUG:-}" == "1" ]]; then
+  set -x
+fi
+
 force="$(jq -r '.config.force' <<< "$CONTEXT")"
 
 root="$(pwd)"

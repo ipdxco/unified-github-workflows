@@ -2,8 +2,8 @@
 
 set -euo pipefail -o nounset
 
-# If ACTIONS_RUNNER_DEBUG or ACTIONS_STEP_DEBUG is set to true, print all commands
-if [[ "${ACTIONS_RUNNER_DEBUG:-}" == "true" || "${ACTIONS_STEP_DEBUG:-}" == "true" ]]; then
+# If the script is run with RUNNER_DEBUG=1, print all statements executed
+if [[ "${RUNNER_DEBUG:-}" == "1" ]]; then
   set -x
 fi
 
