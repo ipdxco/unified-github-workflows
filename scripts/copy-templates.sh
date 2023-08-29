@@ -53,8 +53,14 @@ if [[ "$force" != "true" ]]; then
   sha="$(git rev-parse HEAD)"
 
   while read -r pr; do
+    if [[ -z "$pr" ]]; then
+      continue
+    fi
     git checkout -B "uci$tmp" "$branch"
     while read -r f; do
+      if [[ -z "$f" ]]; then
+        continue
+      fi
       jq -j '.content' <<< "$f" > "$(jq -r '.name' <<< "$f")"
     done <<< "$(jq -c '.["updated-dependency-files"] | .[] // []' <<< "$pr")"
     git add .
