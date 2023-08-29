@@ -1,47 +1,26 @@
-# Trigger the execution of workflow in batches.
-# This workflow is needed since GitHub Actions limits the matrix size to 256 jobs.
-# We use one job per repository per batch.
-
 name: Dispatch
 
 on:
-  workflow_dispatch:
+  workflow_call:
     inputs:
       workflow:
-        description: "Workflow to dispatch"
         required: true
+        type: string
       inputs:
-        description: "Workflow inputs"
         required: false
         default: '{}'
+        type: string
       filter:
-        description: "Filter to apply to the list of repositories"
         required: false
         default: 'true'
+        type: string
       dry-run:
-        description: "Whether to run in dry run mode"
         required: false
-        default: 'false'
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
-env:
-  # Number of repositories in a batch.
-  # Matrix jobs within a workflow run are run in parallel.
-  # 256 is the upper limit on the number of matrix jobs.
-  # Batching too many repositories together can result in
-  #  could not create workflow dispatch event: HTTP 422: inputs are too large.
-  # This value should be higher than max-parallel in workflow.
-  MAX_REPOS_PER_WORKFLOW: 100
-  # Number of seconds to wait before starting to watch workflow run.
-  # Unfortunately, the interval on the watch is not configurable.
-  # The delay helps us save on GH API requests.
-  WORKFLOW_COMPLETION_CHECK_DELAY: 60
+        default: false
+        type: boolean
 
 jobs:
-  matrix:
+  batch:
     name: Batch targets
     runs-on: ubuntu-latest
     outputs:
@@ -50,7 +29,7 @@ jobs:
       - id: matrix
         uses: actions/github-script@v6
         env:
-          FILTER: ${{ github.event.inputs.filter }}
+          FILTER: ${{ inputs.filter }}
         with:
           github-token: ${{ secrets.UCI_GITHUB_TOKEN }}
           retries: 0
@@ -82,7 +61,7 @@ jobs:
             const items = await github.paginate(github.rest.repos.listForAuthenticatedUser, {
               affiliation: 'collaborator'
             })
-            const maxReposPerWorkflow = parseInt(process.env.MAX_REPOS_PER_WORKFLOW)
+            const maxReposPerWorkflow = 100
             const batches = []
             let batch = []
             for (const item of items) {
@@ -113,37 +92,25 @@ jobs:
             }
             return batches
   dispatch:
-    needs: [ matrix ]
+    needs: [ batch ]
     name: Dispatch workflow(batch ${{ matrix.cfg.key }})
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        # We end up with multiple "dispatch" jobs,
-        # one per BATCHES "key" chunk above with a "value" array.
-        # For each "dispatch" job, matrix.cfg.value is an array, like:
-        #
-        #   [
-        #     "repo1",
-        #     "repo2"
-        #   ]
-        #
-        # The triggered workflow runs use that final array as their matrix.
-        # Since max-parallel here is 1, we'll end up with at most max-parallel from workflow + 1 parallel jobs.
-        # 20 is the upper limit on parallel jobs on a free plan.
-        cfg: ${{ fromJSON(needs.matrix.outputs.batches) }}
+        cfg: ${{ fromJSON(needs.batch.outputs.batches) }}
       max-parallel: 1
     env:
       GITHUB_TOKEN: ${{ github.token }}
-      WORKFLOW: ${{ github.event.inputs.workflow }}
+      WORKFLOW: ${{ inputs.workflow }}
       REPO: ${{ github.repository }}
     steps:
       - id: dispatch
         name: Dispatch workflow
         env:
           TARGETS: ${{ toJSON(matrix.cfg.value) }}
-          INPUTS: ${{ github.event.inputs.inputs }}
-          DRY_RUN: ${{ github.event.inputs.dry-run }}
+          INPUTS: ${{ inputs.inputs }}
+          DRY_RUN: ${{ inputs.dry-run }}
         run: |
           start_date="$(date +%s)"
           args=()
@@ -151,14 +118,14 @@ jobs:
             args+=("--field" "$key=$(jq -rc '.["'"$key"'"]' <<< "$INPUTS")")
           done
           if [[ "$DRY_RUN" == "true" ]]; then
-            echo "DRY RUN: gh workflow run $WORKFLOW --ref $GITHUB_REF --repo $REPO --field targets=$TARGETS ${args[@]}"
+            echo "DRY RUN: gh workflow run $WORKFLOW --ref $GITHUB_REF --repo $REPO ${args[@]} --field targets=$TARGETS"
           else
-            gh workflow run "$WORKFLOW" --ref "$GITHUB_REF" --repo "$REPO" --field "targets=$TARGETS" ${args[@]}
+            gh workflow run "$WORKFLOW" --ref "$GITHUB_REF" --repo "$REPO" ${args[@]} --field "targets=$TARGETS"
           fi
           echo "start_date=$start_date" | tee -a $GITHUB_OUTPUT
       - id: run
         name: Wait for workflow run to start
-        if: github.event.inputs.dry-run == 'false'
+        if: inputs.dry-run == false
         env:
           START_DATE: ${{ steps.dispatch.outputs.start_date }}
         run: |
@@ -175,12 +142,12 @@ jobs:
             fi
           done
       - name: Wait for workflow run to complete
-        if: github.event.inputs.dry-run == 'false'
+        if: inputs.dry-run == false
         env:
           RUN_ID: ${{ steps.run.outputs.id }}
         run: |
           # delays checking workflow's run status to save on GH API requests
-          sleep $WORKFLOW_COMPLETION_CHECK_DELAY
+          sleep 60
 
           # checks every 3 seconds until the workflow run's status is completed
           # redirects the stdout to /dev/null because it is very chatty

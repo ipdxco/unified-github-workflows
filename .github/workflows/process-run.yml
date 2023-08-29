@@ -1,4 +1,4 @@
-name: Run
+name: Process Run
 
 on:
   workflow_dispatch:
@@ -35,7 +35,7 @@ on:
 
 
 jobs:
-  update-go:
+  process:
     uses: ./.github/workflows/process.yml
     secrets: inherit
     with:
