@@ -1,0 +1,25 @@
+name: Copy Templates Dispatch
+
+on:
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "Force copy even if file exists"
+        required: false
+      version:
+        description: "Version to use for templates"
+        required: false
+      dry-run:
+        description: "Whether to run in dry run mode"
+        required: false
+        default: 'false'
+  schedule:
+    - cron: '10 0 * * *' # https://crontab.guru/#10_0_*_*_*
+
+jobs:
+  copy-templates:
+    uses: ./.github/workflows/dispatch.yml
+    secrets: inherit
+    with:
+      workflow: 'copy-templates.yml'
+      inputs: ${{ toJSON(github.event.inputs) || '{}' }}

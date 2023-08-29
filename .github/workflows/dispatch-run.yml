@@ -1,0 +1,34 @@
+name: Dispatch Run
+
+on:
+  workflow_dispatch:
+    inputs:
+      workflow:
+        description: "Workflow to dispatch"
+        required: true
+      inputs:
+        description: "Workflow inputs"
+        required: false
+        default: '{}'
+      filter:
+        description: "Filter to apply to the list of repositories"
+        required: false
+        default: 'true'
+      dry-run:
+        description: "Whether to run in dry run mode"
+        required: false
+        default: 'false'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  dispatch:
+    uses: ./.github/workflows/dispatch.yml
+    secrets: inherit
+    with:
+      workflow: ${{ github.event.inputs.workflow }}
+      inputs: ${{ github.event.inputs.inputs }}
+      filter: ${{ github.event.inputs.filter }}
+      dry-run: ${{ github.event.inputs.dry-run == 'true' }}
