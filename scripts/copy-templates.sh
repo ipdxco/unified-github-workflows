@@ -52,7 +52,7 @@ if [[ "$force" != "true" ]]; then
   branch="$(git branch --show-current)"
   sha="$(git rev-parse HEAD)"
 
-  for pr in $(yq -c '.output | map(select(.type == "create_pull_request")) | map(.expect.data) | .[]' "$tmp"); do
+  while read -r pr; do
     title="$(jq -r '.["pr-title"]' <<< "$pr")"
     git checkout -b "$title" "$branch"
     for f in $(jq -r '.["updated-dependency-files"] | .[] // []' <<< "$pr"); do
@@ -64,7 +64,7 @@ if [[ "$force" != "true" ]]; then
     fi
     git checkout "$branch"
     git merge "$title" --strategy-option theirs
-  done
+  done <<< "$(yq -c '.output | map(select(.type == "create_pull_request")) | map(.expect.data) | .[]' "$tmp")"
 
   git reset "$sha"
 
