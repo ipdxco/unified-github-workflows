@@ -53,8 +53,7 @@ if [[ "$force" != "true" ]]; then
   sha="$(git rev-parse HEAD)"
 
   while read -r pr; do
-    title="$(jq -r '.["pr-title"]' <<< "$pr")"
-    git checkout -b "$title" "$branch"
+    git checkout -B "uci$tmp" "$branch"
     for f in $(jq -r '.["updated-dependency-files"] | .[] // []' <<< "$pr"); do
       jq -r '.content' <<< "$f" > "$(jq -r '.name' <<< "$f")"
     done
@@ -63,7 +62,7 @@ if [[ "$force" != "true" ]]; then
       git commit -m "$(jq -r '.["commit-message"]' <<< "$pr")"
     fi
     git checkout "$branch"
-    git merge "$title" --strategy-option theirs
+    git merge "uci$tmp" --strategy-option theirs
   done <<< "$(yq -c '.output | map(select(.type == "create_pull_request")) | map(.expect.data) | .[]' "$tmp")"
 
   git reset "$sha"
