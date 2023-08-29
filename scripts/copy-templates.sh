@@ -54,9 +54,9 @@ if [[ "$force" != "true" ]]; then
 
   while read -r pr; do
     git checkout -B "uci$tmp" "$branch"
-    for f in $(jq -r '.["updated-dependency-files"] | .[] // []' <<< "$pr"); do
-      jq -r '.content' <<< "$f" > "$(jq -r '.name' <<< "$f")"
-    done
+    while read -r f; do
+      jq -j '.content' <<< "$f" > "$(jq -r '.name' <<< "$f")"
+    done <<< "$(jq -c '.["updated-dependency-files"] | .[] // []' <<< "$pr")"
     git add .
     if ! git diff-index --quiet HEAD; then
       git commit -m "$(jq -r '.["commit-message"]' <<< "$pr")"
@@ -74,7 +74,7 @@ if [[ "$force" != "true" ]]; then
     fi
 
     git add "$f"
-    if ! git diff-index --quiet HEAD; then
+    if ! git diff-index --quiet HEAD -- "$f"; then
       git commit -m "chore: update $f"
     fi
   done
