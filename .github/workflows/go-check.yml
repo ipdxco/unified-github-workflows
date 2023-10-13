@@ -90,6 +90,8 @@ jobs:
             if [[ -n "$IGNORE_PROTOC_VERSION_COMMENTS" ]]; then
               find . -name '*.pb.go' -print0 | xargs -0 -r sed -i '/^\/\/.*protoc.*v/d'
               git add .
+              git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+              git config --global user.name "github-actions[bot]"
               git commit -m "chore: remove protoc version comments"
             fi
             go generate -x ./...
