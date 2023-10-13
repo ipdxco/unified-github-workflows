@@ -87,7 +87,7 @@ jobs:
         with:
           run: |
             git clean -fd # make sure there aren't untracked files / directories
-            if [[ -n "$IGNORE_PROTOC_VERSION_COMMENTS" ]]; then
+            if [[ "$IGNORE_PROTOC_VERSION_COMMENTS" == "true" ]]; then
               find . -name '*.pb.go' -print0 | xargs -0 -r sed -i '/^\/\/.*protoc.*v/d'
               git add .
               git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -95,7 +95,7 @@ jobs:
               git diff --cached --quiet || git commit -m "chore: remove protoc version comments"
             fi
             go generate -x ./...
-            if [[ -n "$IGNORE_PROTOC_VERSION_COMMENTS" ]]; then
+            if [[ "$IGNORE_PROTOC_VERSION_COMMENTS" == "true" ]]; then
               find . -name '*.pb.go' -print0 | xargs -0 -r sed -i '/^\/\/.*protoc.*v/d'
             fi
             git add .
