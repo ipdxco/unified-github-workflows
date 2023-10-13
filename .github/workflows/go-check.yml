@@ -88,13 +88,13 @@ jobs:
           run: |
             git clean -fd # make sure there aren't untracked files / directories
             if [[ -n "$IGNORE_PROTOC_VERSION_COMMENTS" ]]; then
-              find . -name '*.pb.go' -print0 | xargs -0 sed -i '/^\/\/.*protoc.*v/d'
+              find . -name '*.pb.go' -print0 | xargs -0 -r sed -i '/^\/\/.*protoc.*v/d'
               git add .
               git commit -m "chore: remove protoc version comments"
             fi
             go generate -x ./...
             if [[ -n "$IGNORE_PROTOC_VERSION_COMMENTS" ]]; then
-              find . -name '*.pb.go' -print0 | xargs -0 sed -i '/^\/\/.*protoc.*v/d'
+              find . -name '*.pb.go' -print0 | xargs -0 -r sed -i '/^\/\/.*protoc.*v/d'
             fi
             git add .
             # check if go generate modified or added any files
