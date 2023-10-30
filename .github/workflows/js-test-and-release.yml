@@ -52,6 +52,7 @@ jobs:
       - uses: codecov/codecov-action@eaaf4bedf32dbdc6b720b63067d99c4d77d6047d # v3.1.4
         with:
           flags: node
+          files: .coverage/*,packages/*/.coverage/*
 
   test-chrome:
     needs: check
@@ -66,6 +67,7 @@ jobs:
       - uses: codecov/codecov-action@eaaf4bedf32dbdc6b720b63067d99c4d77d6047d # v3.1.4
         with:
           flags: chrome
+          files: .coverage/*,packages/*/.coverage/*
 
   test-chrome-webworker:
     needs: check
@@ -80,6 +82,7 @@ jobs:
       - uses: codecov/codecov-action@eaaf4bedf32dbdc6b720b63067d99c4d77d6047d # v3.1.4
         with:
           flags: chrome-webworker
+          files: .coverage/*,packages/*/.coverage/*
 
   test-firefox:
     needs: check
@@ -94,6 +97,7 @@ jobs:
       - uses: codecov/codecov-action@eaaf4bedf32dbdc6b720b63067d99c4d77d6047d # v3.1.4
         with:
           flags: firefox
+          files: .coverage/*,packages/*/.coverage/*
 
   test-firefox-webworker:
     needs: check
@@ -108,6 +112,7 @@ jobs:
       - uses: codecov/codecov-action@eaaf4bedf32dbdc6b720b63067d99c4d77d6047d # v3.1.4
         with:
           flags: firefox-webworker
+          files: .coverage/*,packages/*/.coverage/*
 
   test-webkit:
     needs: check
@@ -127,6 +132,7 @@ jobs:
       - uses: codecov/codecov-action@eaaf4bedf32dbdc6b720b63067d99c4d77d6047d # v3.1.4
         with:
           flags: webkit
+          files: .coverage/*,packages/*/.coverage/*
 
   test-webkit-webworker:
     needs: check
@@ -146,6 +152,7 @@ jobs:
       - uses: codecov/codecov-action@eaaf4bedf32dbdc6b720b63067d99c4d77d6047d # v3.1.4
         with:
           flags: webkit-webworker
+          files: .coverage/*,packages/*/.coverage/*
 
   test-electron-main:
     needs: check
@@ -160,6 +167,7 @@ jobs:
       - uses: codecov/codecov-action@eaaf4bedf32dbdc6b720b63067d99c4d77d6047d # v3.1.4
         with:
           flags: electron-main
+          files: .coverage/*,packages/*/.coverage/*
 
   test-electron-renderer:
     needs: check
@@ -174,6 +182,7 @@ jobs:
       - uses: codecov/codecov-action@eaaf4bedf32dbdc6b720b63067d99c4d77d6047d # v3.1.4
         with:
           flags: electron-renderer
+          files: .coverage/*,packages/*/.coverage/*
 
   release-check:
     needs: [test-node, test-chrome, test-chrome-webworker, test-firefox, test-firefox-webworker, test-webkit, test-webkit-webworker, test-electron-main, test-electron-renderer]
