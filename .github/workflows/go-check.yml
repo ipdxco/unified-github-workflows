@@ -5,6 +5,9 @@ on:
       go-version:
         required: false
         type: string
+      go-generate-ignore-protoc-version-comments:
+        required: false
+        type: boolean
 
 jobs:
   unit:
@@ -79,12 +82,25 @@ jobs:
       - name: go generate
         uses: protocol/multiple-go-modules@v1.2
         if: (success() || failure()) && fromJSON(steps.config.outputs.json).gogenerate == true
+        env:
+          IGNORE_PROTOC_VERSION_COMMENTS: ${{ inputs.go-generate-ignore-protoc-version-comments }}
         with:
           run: |
             git clean -fd # make sure there aren't untracked files / directories
+            if [[ "$IGNORE_PROTOC_VERSION_COMMENTS" == "true" ]]; then
+              find . -name '*.pb.go' -print0 | xargs -0 -r sed -i '/^\/\/.*protoc.*v/d'
+              git add .
+              git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+              git config --global user.name "github-actions[bot]"
+              git diff --cached --quiet || git commit -m "chore: remove protoc version comments"
+            fi
             go generate -x ./...
+            if [[ "$IGNORE_PROTOC_VERSION_COMMENTS" == "true" ]]; then
+              find . -name '*.pb.go' -print0 | xargs -0 -r sed -i '/^\/\/.*protoc.*v/d'
+            fi
+            git add .
             # check if go generate modified or added any files
-            if ! $(git add . && git diff-index HEAD --exit-code --quiet); then
+            if ! $(git diff-index HEAD --exit-code --quiet); then
               echo "go generated caused changes to the repository:"
               git status --short
               exit 1
