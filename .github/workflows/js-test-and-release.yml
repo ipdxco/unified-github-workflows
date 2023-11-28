@@ -215,6 +215,7 @@ jobs:
     if: needs.release-check.outputs.release == 'true'
     permissions:
       id-token: write
+      contents: write
     steps:
       - uses: actions/checkout@v3
         with:
