@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [0.0.15] - 2023-11-30
+### Fixed
+- revert adding permissions in JS release job (we cannot do that in a reusable workflow)
+
 ## [0.0.14] - 2023-11-30
 ### Changed
 - permissions in JS release job
