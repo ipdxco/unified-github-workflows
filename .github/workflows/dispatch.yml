@@ -95,6 +95,8 @@ jobs:
     needs: [ batch ]
     name: Dispatch workflow(batch ${{ matrix.cfg.key }})
     runs-on: ubuntu-latest
+    permissions:
+      actions: write
     strategy:
       fail-fast: false
       matrix:
