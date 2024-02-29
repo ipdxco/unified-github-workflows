@@ -20,6 +20,8 @@ jobs:
   copy-templates:
     uses: ./.github/workflows/dispatch.yml
     secrets: inherit
+    permissions:
+      actions: write
     with:
       workflow: 'copy-templates.yml'
       inputs: ${{ toJSON(github.event.inputs) || '{}' }}
