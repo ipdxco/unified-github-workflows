@@ -15,10 +15,11 @@ if [[ "$language" != "Go" ]]; then
 fi
 
 expected="$(jq -r '.config.versions.go' <<< "$CONTEXT")"
+version="$(curl -sSfL https://go.dev/dl/\?mode\=json | jq -r --arg expected "$expected" 'map(.version) | map(select(startswith("go\($expected)"))) | .[0]')"
 
 tmp="$(mktemp -d)"
 pushd "$tmp" > /dev/null
-curl -sSfL "https://golang.org/dl/go$expected.linux-amd64.tar.gz" | tar -xz
+curl -sSfL "https://golang.org/dl/$version.linux-amd64.tar.gz" | tar -xz
 export PATH="$tmp/go/bin:$PATH"
 export GOPATH=$tmp/go
 popd > /dev/null
