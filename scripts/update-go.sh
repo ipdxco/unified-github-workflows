@@ -27,7 +27,7 @@ popd > /dev/null
 echo "Go version: $(go version)"
 echo "Go path: $(go env GOPATH)"
 
-go install golang.org/x/tools/cmd/goimports@v0.5.0
+go install golang.org/x/tools/cmd/goimports@v0.19.0
 
 pushd "$TARGET" > /dev/null
 
@@ -45,6 +45,9 @@ while read file; do
   go mod tidy -go="$current"
   go mod tidy -go="$expected"
   go mod tidy
+
+  # Remove the line starting with toolchain from the go.mod file
+  sed -i '/^toolchain/d' go.mod
 
   go fix ./...
 
