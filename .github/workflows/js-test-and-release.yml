@@ -53,6 +53,8 @@ jobs:
         with:
           flags: node
           files: .coverage/*,packages/*/.coverage/*
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false
 
   test-chrome:
     needs: check
@@ -68,6 +70,8 @@ jobs:
         with:
           flags: chrome
           files: .coverage/*,packages/*/.coverage/*
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false
 
   test-chrome-webworker:
     needs: check
@@ -83,6 +87,8 @@ jobs:
         with:
           flags: chrome-webworker
           files: .coverage/*,packages/*/.coverage/*
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false
 
   test-firefox:
     needs: check
@@ -98,6 +104,8 @@ jobs:
         with:
           flags: firefox
           files: .coverage/*,packages/*/.coverage/*
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false
 
   test-firefox-webworker:
     needs: check
@@ -113,6 +121,8 @@ jobs:
         with:
           flags: firefox-webworker
           files: .coverage/*,packages/*/.coverage/*
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false
 
   test-webkit:
     needs: check
@@ -134,6 +144,8 @@ jobs:
         with:
           flags: webkit
           files: .coverage/*,packages/*/.coverage/*
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false
 
   test-webkit-webworker:
     needs: check
@@ -155,6 +167,8 @@ jobs:
         with:
           flags: webkit-webworker
           files: .coverage/*,packages/*/.coverage/*
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false
 
   test-electron-main:
     needs: check
@@ -170,6 +184,8 @@ jobs:
         with:
           flags: electron-main
           files: .coverage/*,packages/*/.coverage/*
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false
 
   test-electron-renderer:
     needs: check
@@ -185,6 +201,8 @@ jobs:
         with:
           flags: electron-renderer
           files: .coverage/*,packages/*/.coverage/*
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false
 
   release-check:
     needs: [test-node, test-chrome, test-chrome-webworker, test-firefox, test-firefox-webworker, test-webkit, test-webkit-webworker, test-electron-main, test-electron-renderer]

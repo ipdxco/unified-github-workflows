@@ -119,3 +119,5 @@ jobs:
         with:
           files: ${{ steps.coverages.outputs.files }}
           env_vars: OS=${{ matrix.os }}, GO=${{ steps.go.outputs.version }}
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false
