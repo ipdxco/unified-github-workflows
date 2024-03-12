@@ -11,7 +11,7 @@ jobs:
   releaser:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - id: version
         name: Determine version
         run: jq -r .version version.json | xargs -I{} echo "version={}" | tee -a $GITHUB_OUTPUT
@@ -29,7 +29,7 @@ jobs:
         env:
           BRANCHES: ${{ inputs.branches }}
           REF: ${{ github.ref }}
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           script: |
             const branches = JSON.parse(process.env.BRANCHES);
@@ -49,7 +49,7 @@ jobs:
           REPOSITORY: ${{ github.repository }}
           QUERY: repository:${{ github.repository }} is:pr is:merged ${{ github.sha }}
           SHA: ${{ github.sha }}
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           script: |
             const [owner, repo] = process.env.REPOSITORY.split('/');
@@ -118,7 +118,7 @@ jobs:
         run: jq . <<< "$RELEASE" > release.json
       - name: Upload release.json
         if: steps.release.outputs.id != ''
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: release
           path: release.json
