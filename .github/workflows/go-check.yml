@@ -17,6 +17,9 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
       - id: config
         uses: pl-strflt/uci/.github/actions/read-config@main
       - id: go-mod
@@ -33,7 +36,8 @@ jobs:
         env:
           STATICCHECK_VERSIONS: |
             {
-              "1.21": "9e12e6014d3b0a854950490051ad1338fc6badd1",
+              "1.22": "a093f7c2d3d45d5104fb3414ae939a98be37be02",
+              "1.21": "f57fec247eddf41c04774af84b91e41dd78a3173",
               "1.20": "9e12e6014d3b0a854950490051ad1338fc6badd1",
               "1.19": "376210a89477dedbe6fdc4484b233998650d7b3c",
               "1.18": "376210a89477dedbe6fdc4484b233998650d7b3c",
