@@ -42,12 +42,13 @@ while read file; do
     continue
   fi
 
-  go mod tidy -go="$current"
+  go mod tidy -go="$current" || true
   go mod tidy -go="$expected"
-  go mod tidy
 
   # Remove the line starting with toolchain from the go.mod file
   sed -i '/^toolchain/d' go.mod
+
+  go mod tidy
 
   go fix ./...
 
@@ -55,6 +56,16 @@ while read file; do
 
   if ! git diff-index --quiet HEAD; then
     git commit -m "chore: bump go.mod to Go $expected and run go fix"
+  fi
+
+  if [[ -f go.work ]]; then
+    go work use
+    sed -i '/^toolchain/d' go.work
+    go work use
+    git add .
+    if ! git diff-index --quiet HEAD; then
+      git commit -m "chore: bump go.work to Go $expected"
+    fi
   fi
 
   # As of Go 1.19 io/ioutil is deprecated
