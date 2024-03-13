@@ -50,7 +50,7 @@ if [[ "$force" != "true" ]]; then
   file2="$(mktemp)"
   file3="$(mktemp)"
 
-  dependabot update github_actions org/repo --local . --output "$plan"
+  dependabot update github_actions "$TARGET" --local . --output "$plan"
 
   git config --local diff.algorithm histogram
 
