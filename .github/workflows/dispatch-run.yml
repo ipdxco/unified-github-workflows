@@ -23,6 +23,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  actions: write
+
 jobs:
   dispatch:
     uses: ./.github/workflows/dispatch.yml
