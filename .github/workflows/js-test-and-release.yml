@@ -25,8 +25,8 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    - uses: actions/setup-node@v3
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
       with:
         node-version: lts/*
     - uses: ipfs/aegir/actions/cache-node-modules@master
@@ -43,8 +43,8 @@ jobs:
         node: [lts/*]
       fail-fast: true
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
       - uses: ipfs/aegir/actions/cache-node-modules@master
@@ -58,8 +58,8 @@ jobs:
     needs: check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: lts/*
       - uses: ipfs/aegir/actions/cache-node-modules@master
@@ -73,8 +73,8 @@ jobs:
     needs: check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: lts/*
       - uses: ipfs/aegir/actions/cache-node-modules@master
@@ -88,8 +88,8 @@ jobs:
     needs: check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: lts/*
       - uses: ipfs/aegir/actions/cache-node-modules@master
@@ -103,8 +103,8 @@ jobs:
     needs: check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: lts/*
       - uses: ipfs/aegir/actions/cache-node-modules@master
@@ -123,8 +123,8 @@ jobs:
         node: [lts/*]
       fail-fast: true
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: lts/*
       - uses: ipfs/aegir/actions/cache-node-modules@master
@@ -144,8 +144,8 @@ jobs:
         node: [lts/*]
       fail-fast: true
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: lts/*
       - uses: ipfs/aegir/actions/cache-node-modules@master
@@ -160,8 +160,8 @@ jobs:
     needs: check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: lts/*
       - uses: ipfs/aegir/actions/cache-node-modules@master
@@ -175,8 +175,8 @@ jobs:
     needs: check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: lts/*
       - uses: ipfs/aegir/actions/cache-node-modules@master
@@ -198,7 +198,7 @@ jobs:
         env:
           BRANCHES: ${{ inputs.branches }}
           REF: ${{ github.ref }}
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           script: |
             const branches = JSON.parse(process.env.BRANCHES);
@@ -216,10 +216,10 @@ jobs:
     runs-on: ubuntu-latest
     if: needs.release-check.outputs.release == 'true'
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: lts/*
       - uses: ipfs/aegir/actions/cache-node-modules@master

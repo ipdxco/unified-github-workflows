@@ -14,15 +14,18 @@ jobs:
     runs-on: ubuntu-latest
     name: All
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
       - id: config
         uses: pl-strflt/uci/.github/actions/read-config@main
       - id: go-mod
         uses: pl-strflt/uci/.github/actions/read-go-mod@main
       - id: go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v5
         with:
           go-version: ${{ inputs.go-version || (fromJSON(steps.go-mod.outputs.json).Go && format('{0}.x', fromJSON(steps.go-mod.outputs.json).Go)) }}
           cache: false
@@ -33,7 +36,8 @@ jobs:
         env:
           STATICCHECK_VERSIONS: |
             {
-              "1.21": "9e12e6014d3b0a854950490051ad1338fc6badd1",
+              "1.22": "a093f7c2d3d45d5104fb3414ae939a98be37be02",
+              "1.21": "f57fec247eddf41c04774af84b91e41dd78a3173",
               "1.20": "9e12e6014d3b0a854950490051ad1338fc6badd1",
               "1.19": "376210a89477dedbe6fdc4484b233998650d7b3c",
               "1.18": "376210a89477dedbe6fdc4484b233998650d7b3c",
@@ -50,7 +54,7 @@ jobs:
           echo "Installing staticcheck@$version"
           go install honnef.co/go/tools/cmd/staticcheck@$version || go get honnef.co/go/tools/cmd/staticcheck@$version
       - name: Check that go.mod is tidy
-        uses: protocol/multiple-go-modules@v1.2
+        uses: protocol/multiple-go-modules@v1.4
         with:
           run: |
             go mod tidy
@@ -69,18 +73,18 @@ jobs:
           fi
       - name: go vet
         if: success() || failure() # run this step even if the previous one failed
-        uses: protocol/multiple-go-modules@v1.2
+        uses: protocol/multiple-go-modules@v1.4
         with:
           run: go vet ./...
       - name: staticcheck
         if: success() || failure() # run this step even if the previous one failed
-        uses: protocol/multiple-go-modules@v1.2
+        uses: protocol/multiple-go-modules@v1.4
         with:
           run: |
             set -o pipefail
             staticcheck ./... | sed -e 's@\(.*\)\.go@./\1.go@g'
       - name: go generate
-        uses: protocol/multiple-go-modules@v1.2
+        uses: protocol/multiple-go-modules@v1.4
         if: (success() || failure()) && fromJSON(steps.config.outputs.json).gogenerate == true
         env:
           IGNORE_PROTOC_VERSION_COMMENTS: ${{ inputs.go-generate-ignore-protoc-version-comments }}

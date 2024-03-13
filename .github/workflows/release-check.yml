@@ -16,7 +16,7 @@ jobs:
         name: Retrieve PR information
         env:
           PULL_REQUEST: ${{ toJSON(github.event.pull_request) }}
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           script: |
             let pr = JSON.parse(process.env.PULL_REQUEST);
@@ -38,10 +38,10 @@ jobs:
               pr = open[0];
             }
             core.setOutput('json', JSON.stringify(pr));
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - id: go-mod
         uses: pl-strflt/uci/.github/actions/read-go-mod@main
-      - uses: actions/setup-go@v3
+      - uses: actions/setup-go@v5
         with:
           go-version: ${{ fromJSON(steps.go-mod.outputs.json).Go }}.x
       - id: version
@@ -62,7 +62,7 @@ jobs:
         env:
           BRANCHES: ${{ inputs.branches }}
           BASE_REF: ${{ fromJSON(steps.pr.outputs.json).base.ref }}
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           script: |
             const branches = JSON.parse(process.env.BRANCHES);
@@ -262,7 +262,7 @@ jobs:
           fi
           echo "$EOF" >> $GITHUB_OUTPUT
       - name: Post message on PR
-        uses: marocchino/sticky-pull-request-comment@f61b6cf21ef2fcc468f4345cdfcc9bda741d2343 # v2.6.2
+        uses: marocchino/sticky-pull-request-comment@331f8f5b4215f0445d3c07b4967662a32a2d3e31 # v2.9.0
         if: steps.tag.outputs.exists == 'false'
         with:
           header: release-check

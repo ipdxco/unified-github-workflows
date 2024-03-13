@@ -45,33 +45,39 @@ if [[ "$force" != "true" ]]; then
   # https://gist.github.com/mattt/e09e1ecd76d5573e0517a7622009f06f
   gh gist view --raw e09e1ecd76d5573e0517a7622009f06f | bash
 
-  tmp="$(mktemp)"
+  plan="$(mktemp)"
+  file1="$(mktemp)"
+  file2="$(mktemp)"
+  file3="$(mktemp)"
 
-  dependabot update github_actions "$TARGET" --local . --output "$tmp"
-
-  branch="$(git branch --show-current)"
-  sha="$(git rev-parse HEAD)"
+  dependabot update github_actions "$TARGET" --local . --output "$plan"
 
   while read -r pr; do
     if [[ -z "$pr" ]]; then
       continue
     fi
-    git checkout -B "uci$tmp" "$branch"
     while read -r f; do
       if [[ -z "$f" ]]; then
         continue
       fi
-      jq -j '.content' <<< "$f" > "$(jq -r '.name' <<< "$f")"
+      name="$(jq -r '.name' <<< "$f")"
+      cp -f "$name" "$file1"
+      jq -j '.content' <<< "$f" > "$file2"
+      git show HEAD:"$name" > "$file3"
+      for i in $(seq 1 "$(wc -l < "$file3")"); do
+        line1="$(sed -n "${i}p" "$file1")"
+        line2="$(sed -n "${i}p" "$file2")"
+        line3="$(sed -n "${i}p" "$file3")"
+        if [[ "$line1" == "$line3" ]]; then
+          echo "$line2"
+        elif [[ "$line2" == "$line3" ]]; then
+          echo "$line1"
+        else
+          echo "$line3"
+        fi
+      done > "$name"
     done <<< "$(jq -c '.["updated-dependency-files"] | .[] // []' <<< "$pr")"
-    git add .
-    if ! git diff-index --quiet HEAD; then
-      git commit -m "$(jq -r '.["commit-message"]' <<< "$pr")"
-    fi
-    git checkout "$branch"
-    git merge "uci$tmp" --strategy-option theirs
-  done <<< "$(yq -c '.output | map(select(.type == "create_pull_request")) | map(.expect.data) | .[]' "$tmp")"
-
-  git reset "$sha"
+  done <<< "$(yq -c '.output | map(select(.type == "create_pull_request")) | map(.expect.data) | .[]' "$plan")"
 
   for f in $(jq -r '.config.files[] // []' <<< "$CONTEXT"); do
     if [[ ! -f "$f" ]]; then

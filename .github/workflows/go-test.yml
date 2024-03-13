@@ -32,12 +32,10 @@ jobs:
         # If we prepend its location to the PATH
         #   subsequent 'shell: bash' steps will use msys2 instead of gitbash
         run: echo "C:/msys64/usr/bin" >> $GITHUB_PATH
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
-      # Update to v4 is blocked by https://github.com/actions/setup-go/pull/411
-      # - uses: actions/setup-go@v4
-      - uses: actions/setup-go@v3
+      - uses: actions/setup-go@v5
         with:
           go-version: stable
           # cache: false
@@ -73,9 +71,7 @@ jobs:
           echo "GOTESTFLAGS=-v $GOTESTFLAGS" >> $GITHUB_ENV
           echo "GO386FLAGS=-v $GO386FLAGS" >> $GITHUB_ENV
           echo "GORACEFLAGS=-v $GORACEFLAGS" >> $GITHUB_ENV
-      # Update to v4 is blocked by https://github.com/actions/setup-go/pull/411
-      # - uses: actions/setup-go@v4
-      - uses: actions/setup-go@v3
+      - uses: actions/setup-go@v5
         with:
           go-version: ${{ steps.go.outputs.version }}
       - name: Go information
@@ -87,7 +83,7 @@ jobs:
         if: hashFiles('./.github/actions/go-test-setup') != ''
       - name: Run tests
         if: contains(fromJSON(steps.config.outputs.json).skipOSes, matrix.os) == false
-        uses: protocol/multiple-go-modules@v1.2
+        uses: protocol/multiple-go-modules@v1.4
         env:
           GOFLAGS: ${{ format('{0} {1}', env.GOTESTFLAGS, env.GOFLAGS) }}
         with:
@@ -97,7 +93,7 @@ jobs:
         if: matrix.os != 'macos' &&
           fromJSON(steps.config.outputs.json).skip32bit != true &&
           contains(fromJSON(steps.config.outputs.json).skipOSes, matrix.os) == false
-        uses: protocol/multiple-go-modules@v1.2
+        uses: protocol/multiple-go-modules@v1.4
         env:
           GOARCH: 386
           GOFLAGS: ${{ format('{0} {1}', env.GO386FLAGS, env.GOFLAGS) }}
@@ -110,7 +106,7 @@ jobs:
         if: matrix.os == 'ubuntu' &&
           fromJSON(steps.config.outputs.json).skipRace != true &&
           contains(fromJSON(steps.config.outputs.json).skipOSes, matrix.os) == false
-        uses: protocol/multiple-go-modules@v1.2
+        uses: protocol/multiple-go-modules@v1.4
         env:
           GOFLAGS: ${{ format('{0} {1}', env.GORACEFLAGS, env.GOFLAGS) }}
         with:
