@@ -52,8 +52,6 @@ if [[ "$force" != "true" ]]; then
 
   dependabot update github_actions "$TARGET" --local . --output "$plan"
 
-  git config --local diff.algorithm histogram
-
   while read -r pr; do
     if [[ -z "$pr" ]]; then
       continue
