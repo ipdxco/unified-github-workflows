@@ -6,6 +6,9 @@ on:
         required: false
         type: string
         default: '["this", "next"]'
+    secrets:
+      CODECOV_TOKEN:
+        required: false
 
 defaults:
   run:

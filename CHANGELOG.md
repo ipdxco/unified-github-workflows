@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - updated codecov-action
 - passed CODECOV_TOKEN secret to codecov-action explicitly (requires secrets to be set in the repository or organization settings)
+- made template workflows inherit secrets from parent workflows
 
 ## [0.0.17] - 2024-01-13
 ### Changed
