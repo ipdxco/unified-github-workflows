@@ -14,4 +14,4 @@ concurrency:
 
 jobs:
   releaser:
-    uses: pl-strflt/uci/.github/workflows/releaser.yml@${{{ .config.versions.uci // (.source.tag | sub("\\.[^.\\-\\+]+(?=\\-|\\+|$)"; "")) }}}
+    uses: ipdxco/unified-github-workflows/.github/workflows/releaser.yml@${{{ .config.versions.uci // (.source.tag | sub("\\.[^.\\-\\+]+(?=\\-|\\+|$)"; "")) }}}

@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [1.0.1] - 2024-03-21
+### Changed
+- rename pl-strflt/* to ipdxco/*
+
 ## [1.0.0] - 2024-03-21
 ### Changed
 - updated codecov-action

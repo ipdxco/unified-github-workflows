@@ -16,7 +16,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - id: release
-        uses: pl-strflt/changelog-driven-release@v1
+        uses: ipdxco/changelog-driven-release@v1
         with:
           path: CHANGELOG.md
           draft: ${{ github.event_name == 'pull_request' }}

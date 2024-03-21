@@ -14,7 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/render-templates
-      - uses: pl-strflt/validate-yaml-schema@v1
+      - uses: ipdxco/validate-yaml-schema@v1
         with:
           yamlSchemasJson: |
             {

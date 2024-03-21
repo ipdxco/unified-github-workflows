@@ -30,7 +30,7 @@ runs:
   using: composite
   steps:
     - id: workflow-run
-      uses: pl-strflt/rich-workflow-run@v1
+      uses: ipdxco/workflow-run-context@v1
       with:
         artifacts-url: ${{ inputs.artifacts-url }}
         artifact-names: release
