@@ -27,7 +27,7 @@ Most repositories won't need any customization, and the workflows defined here w
 
 Some aspects of Unified CI workflows are configurable through [configuration variables](https://docs.github.com/en/actions/learn-github-actions/variables#creating-configuration-variables-for-a-repository).
 
-You can customise the runner type for `go-test` through `UCI_GO_TEST_RUNNER_UBUNTU`, `UCI_GO_TEST_RUNNER_WINDOWS` and `UCI_GO_TEST_RUNNER_MACOS` configuration variables. This option will be useful for repositories wanting to use more powerful, [PL self-hosted GitHub Actions runners](https://github.com/pl-strflt/tf-aws-gh-runner). Make sure the value of the variable is valid JSON.
+You can customise the runner type for `go-test` through `UCI_GO_TEST_RUNNER_UBUNTU`, `UCI_GO_TEST_RUNNER_WINDOWS` and `UCI_GO_TEST_RUNNER_MACOS` configuration variables. This option will be useful for repositories wanting to use more powerful, [PL self-hosted GitHub Actions runners](https://github.com/pl-ipdxco/custom-github-runners). Make sure the value of the variable is valid JSON.
 
 `UCI_*_RUNNER_*` variables expect the values to be JSON formatted. For example, if you want the `MacOS` runner used in `Go Test` workflow to be `macos-12` specifically, you'd set `UCI_GO_TEST_RUNNER_MACOS` to `"macos-12"` (notice the `"` around the string); and if you want your `Ubuntu` runner to be a self hosted machine with labels `this`, `is`, `my`, `self-hosted`, `runner`, you'd set `UCI_GO_TEST_RUNNER_UBUNTU` to `["this", "is", "my", "self-hosted", "runner"]`.
 

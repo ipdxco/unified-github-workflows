@@ -103,7 +103,7 @@ jobs:
                   head: branch.name,
                   base: repo.default_branch,
                   title: `ci: ${branch.name}`,
-                  body: `This PR was created automatically by the @web3-bot as a part of the [Unified CI](https://github.com/pl-strflt/uci) project.`
+                  body: `This PR was created automatically by the @web3-bot as a part of the [Unified CI](https://github.com/ipdxco/unified-github-workflows) project.`
                 })
                 core.info(`${pr.data.html_url} created successfully`)
               } catch(error) {

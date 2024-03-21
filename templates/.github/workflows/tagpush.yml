@@ -15,4 +15,4 @@ concurrency:
 
 jobs:
   releaser:
-    uses: pl-strflt/uci/.github/workflows/tagpush.yml@${{{ .config.versions.uci // (.source.tag | sub("\\.[^.\\-\\+]+(?=\\-|\\+|$)"; "")) }}}
+    uses: ipdxco/unified-github-workflows/.github/workflows/tagpush.yml@${{{ .config.versions.uci // (.source.tag | sub("\\.[^.\\-\\+]+(?=\\-|\\+|$)"; "")) }}}

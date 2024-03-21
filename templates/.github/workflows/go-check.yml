@@ -15,4 +15,4 @@ concurrency:
 
 jobs:
   go-check:
-    uses: pl-strflt/uci/.github/workflows/go-check.yml@${{{ .config.versions.uci // (.source.tag | sub("\\.[^.\\-\\+]+(?=\\-|\\+|$)"; "")) }}}
+    uses: ipdxco/unified-github-workflows/.github/workflows/go-check.yml@${{{ .config.versions.uci // (.source.tag | sub("\\.[^.\\-\\+]+(?=\\-|\\+|$)"; "")) }}}
