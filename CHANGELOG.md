@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [1.0.2] - 2024-05-21
+### Changed
+- allow using custom GitHub token in the releaser workflow
+
 ## [1.0.1] - 2024-03-21
 ### Changed
 - rename pl-strflt/* to ipdxco/*

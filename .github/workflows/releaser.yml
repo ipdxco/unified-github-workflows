@@ -6,6 +6,9 @@ on:
         required: false
         type: string
         default: ${{ format('["{0}"]', github.event.repository.default_branch) }}
+    secrets:
+      UCI_GITHUB_TOKEN:
+        required: false
 
 jobs:
   releaser:
@@ -45,7 +48,7 @@ jobs:
         if: steps.version.outputs.version != '' && steps.branch.outputs.release == 'false'
         name: Check if this is a merge commit of a release PR
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
           REPOSITORY: ${{ github.repository }}
           QUERY: repository:${{ github.repository }} is:pr is:merged ${{ github.sha }}
           SHA: ${{ github.sha }}
@@ -102,6 +105,7 @@ jobs:
           generate_release_notes: true
           target_commitish: ${{ github.sha }}
           make_latest: ${{ steps.version.outputs.version == steps.latest.outputs.latest }}
+          token: ${{ secrets.UCI_GITHUB_TOKEN || github.token }}
       - name: Create release.json
         if: steps.release.outputs.id != ''
         env:
