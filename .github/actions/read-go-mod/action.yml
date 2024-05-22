@@ -1,6 +1,11 @@
 name: read go.mod
 description: Reads go.mod
 
+inputs:
+  working-directory:
+    description: Specifies the working directory where the command is run.
+    required: false
+
 outputs:
   json:
     description: JSON representation of go.mod
@@ -22,4 +27,5 @@ runs:
           echo "No go.mod file found in $PWD."
           echo "json={}" | tee -a $GITHUB_OUTPUT
         fi
+      working-directory: ${{ inputs.working-directory || github.workspace }}
       shell: bash
