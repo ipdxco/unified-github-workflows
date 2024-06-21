@@ -14,17 +14,23 @@ jobs:
     runs-on: ubuntu-latest
     name: All
     steps:
-      - uses: actions/checkout@v4
+      - name: Check out the repository
+        uses: actions/checkout@v4
         with:
           submodules: recursive
-      - uses: actions/setup-go@v5
+      - name: Check out the latest stable version of Go
+        uses: actions/setup-go@v5
         with:
           go-version: stable
-      - id: config
+          # cache: false
+      - name: Read the Unified GitHub Workflows configuration
+        id: config
         uses: ipdxco/unified-github-workflows/.github/actions/read-config@main
-      - id: go-mod
+      - name: Read the go.mod file
+        id: go-mod
         uses: ipdxco/unified-github-workflows/.github/actions/read-go-mod@main
-      - id: go
+      - name: Set up the Go version read from the go.mod file
+        id: go
         uses: actions/setup-go@v5
         with:
           go-version: ${{ inputs.go-version || (fromJSON(steps.go-mod.outputs.json).Go && format('{0}.x', fromJSON(steps.go-mod.outputs.json).Go)) }}

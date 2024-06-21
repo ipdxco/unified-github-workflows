@@ -35,18 +35,23 @@ jobs:
         # If we prepend its location to the PATH
         #   subsequent 'shell: bash' steps will use msys2 instead of gitbash
         run: echo "C:/msys64/usr/bin" >> $GITHUB_PATH
-      - uses: actions/checkout@v4
+      - name: Check out the repository
+        uses: actions/checkout@v4
         with:
           submodules: recursive
-      - uses: actions/setup-go@v5
+      - name: Check out the latest stable version of Go
+        uses: actions/setup-go@v5
         with:
           go-version: stable
           # cache: false
-      - id: config
+      - name: Read the Unified GitHub Workflows configuration
+        id: config
         uses: ipdxco/unified-github-workflows/.github/actions/read-config@main
-      - id: go-mod
+      - name: Read the go.mod file
+        id: go-mod
         uses: ipdxco/unified-github-workflows/.github/actions/read-go-mod@main
-      - id: go
+      - name: Determine the Go version to use based on the go.mod file
+        id: go
         env:
           MATRIX_GO: ${{ matrix.go }}
           GO_MOD_VERSION: ${{ fromJSON(steps.go-mod.outputs.json).Go }}
@@ -64,20 +69,23 @@ jobs:
           else
             echo "version=$MATRIX_GO" >> $GITHUB_OUTPUT
           fi
-      - if: toJSON(fromJSON(steps.config.outputs.json).shuffle) != 'false'
+      - name: Enable shuffle flag for go test command
+        if: toJSON(fromJSON(steps.config.outputs.json).shuffle) != 'false'
         run: |
           echo "GOTESTFLAGS=-shuffle=on $GOTESTFLAGS" >> $GITHUB_ENV
           echo "GO386FLAGS=-shuffle=on $GO386FLAGS" >> $GITHUB_ENV
           echo "GORACEFLAGS=-shuffle=on $GORACEFLAGS" >> $GITHUB_ENV
-      - if: toJSON(fromJSON(steps.config.outputs.json).verbose) != 'false'
+      - name: Enable verbose flag for go test command
+        if: toJSON(fromJSON(steps.config.outputs.json).verbose) != 'false'
         run: |
           echo "GOTESTFLAGS=-v $GOTESTFLAGS" >> $GITHUB_ENV
           echo "GO386FLAGS=-v $GO386FLAGS" >> $GITHUB_ENV
           echo "GORACEFLAGS=-v $GORACEFLAGS" >> $GITHUB_ENV
-      - uses: actions/setup-go@v5
+      - name: Set up the Go version read from the go.mod file
+        uses: actions/setup-go@v5
         with:
           go-version: ${{ steps.go.outputs.version }}
-      - name: Go information
+      - name: Display the Go version and environment
         run: |
           go version
           go env
