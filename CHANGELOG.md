@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [1.0.3] - 2024-06-21
+### Added
+- names to the steps in the Go test and check workflows
+
 ## [1.0.2] - 2024-05-21
 ### Changed
 - allow using custom GitHub token in the releaser workflow
