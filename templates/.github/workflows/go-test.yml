@@ -5,6 +5,7 @@ on:
   push:
     branches: ${{{ .github.protected_branches + [.github.default_branch] | unique }}}
   workflow_dispatch:
+  merge_group:
 
 permissions:
   contents: read
