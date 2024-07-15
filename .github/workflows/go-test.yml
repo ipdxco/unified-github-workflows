@@ -6,6 +6,10 @@ on:
         required: false
         type: string
         default: '["this", "next"]'
+      go-cache:
+        required: false
+        type: boolean
+        default: false
     secrets:
       CODECOV_TOKEN:
         required: false
@@ -43,7 +47,7 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: stable
-          # cache: false
+          cache: false
       - name: Read the Unified GitHub Workflows configuration
         id: config
         uses: ipdxco/unified-github-workflows/.github/actions/read-config@main
@@ -85,6 +89,7 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: ${{ steps.go.outputs.version }}
+          cache: ${{ inputs.go-cache }}
       - name: Display the Go version and environment
         run: |
           go version

@@ -8,6 +8,10 @@ on:
       go-generate-ignore-protoc-version-comments:
         required: false
         type: boolean
+      go-cache:
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   unit:
@@ -22,7 +26,7 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: stable
-          # cache: false
+          cache: false
       - name: Read the Unified GitHub Workflows configuration
         id: config
         uses: ipdxco/unified-github-workflows/.github/actions/read-config@main
@@ -34,7 +38,7 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: ${{ inputs.go-version || (fromJSON(steps.go-mod.outputs.json).Go && format('{0}.x', fromJSON(steps.go-mod.outputs.json).Go)) }}
-          cache: false
+          cache: ${{ inputs.go-cache }}
       - name: Run repo-specific setup
         uses: ./.github/actions/go-check-setup
         if: hashFiles('./.github/actions/go-check-setup') != ''
