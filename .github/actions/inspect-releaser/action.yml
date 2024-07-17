@@ -6,6 +6,10 @@ inputs:
     description: "URL to the artifacts of the releaser workflow"
     required: true
     default: ${{ github.event.workflow_run.artifacts_url }}
+  artifact-names:
+    description: "Names of the artifacts to inspect"
+    required: true
+    default: version.json
 outputs:
   draft:
     description: "Whether the release is a draft"
@@ -33,4 +37,4 @@ runs:
       uses: ipdxco/workflow-run-context@v1
       with:
         artifacts-url: ${{ inputs.artifacts-url }}
-        artifact-names: release
+        artifact-names: ${{ inputs.artifact-names }}
