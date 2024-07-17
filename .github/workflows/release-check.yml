@@ -148,7 +148,7 @@ jobs:
           ts=$(git tag | grep "^${PREFIX}" | paste -sd , -)
           vs=$(echo "$ts" | sed "s/^${PREFIX}/v/g")
           if [[ ! -z "$vs" ]]; then
-            v=$(semver-highest -target "$VERSION" -versions "$vs" -prerelease="$prerelease")
+            v=$(semver-highest -target "$VERSION" -versions "$vs" -prerelease="$PRERELEASE")
             status=$?
             if [[ $status != 0 ]]; then
               echo "v=$v"
