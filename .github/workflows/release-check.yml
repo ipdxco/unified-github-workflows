@@ -176,7 +176,7 @@ jobs:
         working-directory: ${{ steps.version.outputs.root }}
       - id: language
         name: Run language specific checks
-        if: steps.tag.outputs.needed == 'true' && steps.prev.outputs.version != ''
+        if: steps.tag.outputs.needed == 'true' && steps.prev.outputs.tag != ''
         env:
           LANGUAGE: github.event.pull_request.base.repo.language
           PREV_TAG: ${{ steps.prev.outputs.tag }}
@@ -216,7 +216,7 @@ jobs:
           HEADER: |
             Suggested version: `${{ steps.version.outputs.version }}`
           BODY: |
-            Comparing to: [${{ steps.prev.outputs.version }}](${{ fromJSON(steps.pr.outputs.json).base.repo.html_url }}/releases/tag/${{ steps.prev.outputs.tag }}) ([diff](${{ fromJSON(steps.pr.outputs.json).base.repo.html_url }}/compare/${{ steps.prev.outputs.tag }}..${{ fromJSON(steps.pr.outputs.json).head.label }}))
+            Comparing to: [${{ steps.prev.outputs.tag }}](${{ fromJSON(steps.pr.outputs.json).base.repo.html_url }}/releases/tag/${{ steps.prev.outputs.tag }}) ([diff](${{ fromJSON(steps.pr.outputs.json).base.repo.html_url }}/compare/${{ steps.prev.outputs.tag }}..${{ fromJSON(steps.pr.outputs.json).head.label }}))
 
             Changes in configuration file(s):
             ```diff
@@ -259,7 +259,7 @@ jobs:
           HEAD_LABEL: ${{ fromJSON(steps.pr.outputs.json).head.label }}
           HEAD_FULL_NAME: ${{ fromJSON(steps.pr.outputs.json).head.repo.full_name }}
           GITHUB_TOKEN: ${{ github.token }}
-          PREV_VERSION: ${{ steps.prev.outputs.version }}
+          PREV_TAG: ${{ steps.prev.outputs.tag }}
           TAG_NEEDED: ${{ steps.tag.outputs.needed }}
         run: |
           echo "output<<$EOF" >> $GITHUB_OUTPUT
@@ -268,7 +268,7 @@ jobs:
             echo "$RELEASE_BRANCH_NOTICE" >> $GITHUB_OUTPUT
           else
             echo "$HEADER" >> $GITHUB_OUTPUT
-            if [[ "$PREV_VERSION" != "" ]]; then
+            if [[ "$PREV_TAG" != "" ]]; then
               echo "$BODY" >> $GITHUB_OUTPUT
             else
               echo "$BODY_ALT" >> $GITHUB_OUTPUT
