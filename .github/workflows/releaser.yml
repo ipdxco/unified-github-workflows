@@ -6,6 +6,10 @@ on:
         required: false
         type: string
         default: ${{ format('["{0}"]', github.event.repository.default_branch) }}
+      sources:
+        required: false
+        type: string
+        default: '["version.json"]'
     secrets:
       UCI_GITHUB_TOKEN:
         required: false
@@ -13,19 +17,37 @@ on:
 jobs:
   releaser:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        source: ${{ fromJSON(inputs.sources) }}
     steps:
       - uses: actions/checkout@v4
       - id: version
         name: Determine version
-        run: jq -r .version version.json | xargs -I{} echo "version={}" | tee -a $GITHUB_OUTPUT
+        env:
+          SOURCE: ${{ matrix.source }}
+        run: |
+          prefix="$(dirname "$SOURCE")"
+          if [[ "$prefix" == "." ]]; then
+            prefix="v"
+          else
+            prefix="$prefix/v"
+          fi
+          echo "prefix=$prefix" | tee -a $GITHUB_OUTPUT
+          version="$(yq -r '.workspace.package.version // .package.version // .version // ""' "$SOURCE")"
+          version="${version#"$prefix"}"
+          echo "version=$version" | tee -a $GITHUB_OUTPUT
+          echo "tag=${prefix}${version}" | tee -a $GITHUB_OUTPUT
       - id: latest
         if: steps.version.outputs.version != ''
         name: Determine latest version
         env:
-          VERSION: ${{ steps.version.outputs.version }}
+          PREFIX: ${{ steps.version.outputs.prefix }}
+          TAG: ${{ steps.version.outputs.tag }}
         run: |
           git fetch origin --tags
-          echo -e "$VERSION\n$(git tag)" | sort -V | tail -n1 | xargs -I{} echo "latest={}" | tee -a $GITHUB_OUTPUT
+          echo -e "${TAG}\n$(git tag)" | grep "^${PREFIX}" | sort -V | tail -n1 | xargs -I{} echo "latest={}" | tee -a $GITHUB_OUTPUT
       - id: branch
         name: Check if the branch is a release branch
         if: steps.version.outputs.version != ''
@@ -85,11 +107,11 @@ jobs:
         name: Check if tag already exists
         if: steps.branch.outputs.release == 'true' || steps.pr.outputs.release == 'true'
         env:
-          VERSION: ${{ steps.version.outputs.version }}
+          TAG: ${{ steps.version.outputs.tag }}
         run: |
           git fetch origin --tags
           status=0
-          git rev-list "$VERSION" &> /dev/null || status=$?
+          git rev-list "$TAG" &> /dev/null || status=$?
           if [[ $status == 0 ]]; then
             echo "exists=true" >> $GITHUB_OUTPUT
           else
@@ -101,10 +123,10 @@ jobs:
         uses: galargh/action-gh-release@571276229e7c9e6ea18f99bad24122a4c3ec813f # https://github.com/galargh/action-gh-release/pull/1
         with:
           draft: false
-          tag_name: ${{ steps.version.outputs.version }}
+          tag_name: ${{ steps.version.outputs.tag }}
           generate_release_notes: true
           target_commitish: ${{ github.sha }}
-          make_latest: ${{ steps.version.outputs.version == steps.latest.outputs.latest }}
+          make_latest: ${{ steps.version.outputs.prefix == 'v' && steps.version.outputs.tag == steps.latest.outputs.latest }}
           token: ${{ secrets.UCI_GITHUB_TOKEN || github.token }}
       - name: Create release.json
         if: steps.release.outputs.id != ''
@@ -112,12 +134,12 @@ jobs:
           RELEASE: |
             {
               "draft": false,
-              "version": "${{ steps.version.outputs.version }}",
+              "version": "${{ steps.version.outputs.tag }}",
               "url": "${{ steps.release.outputs.url }}",
               "id": "${{ steps.release.outputs.id }}",
               "upload_url": "${{ steps.release.outputs.upload_url }}",
               "assets": ${{ steps.release.outputs.assets }},
-              "make_latest": ${{ steps.version.outputs.version == steps.latest.outputs.latest }}
+              "make_latest": ${{ steps.version.outputs.prefix == 'v' && steps.version.outputs.tag == steps.latest.outputs.latest }}
             }
         run: jq . <<< "$RELEASE" > release.json
       - name: Upload release.json

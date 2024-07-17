@@ -41,6 +41,11 @@ jobs:
           TypeScript:
             files:
               - .github/workflows/js-test-and-release.yml
+          Rust:
+            files:
+              - .github/workflows/releaser.yml
+              - .github/workflows/release-check.yml
+              - .github/workflows/tagpush.yml
       override: |
         common:
           force: ${{ github.event.inputs.force }}
