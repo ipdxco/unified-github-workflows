@@ -154,7 +154,9 @@ jobs:
               echo "v=$v"
               exit $status
             fi
-            echo "tag=$PREFIX${v%v}" | tee -a $GITHUB_OUTPUT
+            if [[ -n "$v" ]]; then
+              echo "tag=$PREFIX${v#v}" | tee -a $GITHUB_OUTPUT
+            fi
           fi
       - id: git-diff
         name: Run git diff on configuration file(s)
