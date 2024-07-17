@@ -117,5 +117,6 @@ jobs:
             if ! $(git diff-index HEAD --exit-code --quiet); then
               echo "go generated caused changes to the repository:"
               git status --short
+              git diff HEAD
               exit 1
             fi
