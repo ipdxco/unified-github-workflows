@@ -71,8 +71,9 @@ jobs:
           echo "prefix=$prefix" | tee -a $GITHUB_OUTPUT
           # If `version.json` file doesn't exists, `version` is `""` and `404` is printed on stderr.
           # The step won't be marked as a failure though because the error happens in a subshell.
-          content="$(gh api -X GET "repos/$HEAD_FULL_NAME/contents/$SOURCE" -f ref="$HEAD_SHA" --jq '.content' | base64 -d)"
-          version="$(yq -r '.workspace.package.version // .package.version // .version // ""' <<< "$content")"
+          gh api -X GET "repos/$HEAD_FULL_NAME/contents/$SOURCE" -f ref="$HEAD_SHA" --jq '.content' | base64 -d > $SOURCE
+          version="$(yq -r '.workspace.package.version // .package.version // .version // ""' "$SOURCE")"
+          git checkout HEAD -- "$SOURCE"
           version="${version#"$prefix"}"
           echo "version=$version" | tee -a $GITHUB_OUTPUT
           echo "tag=${prefix}${version}" | tee -a $GITHUB_OUTPUT
