@@ -145,8 +145,7 @@ jobs:
         run: |
           git fetch origin --tags
           go install github.com/marten-seemann/semver-highest@fcdc98f8820ff0e6613c1bee071c096febd98dbf
-          ts=$(git tag | grep "^${PREFIX}" | paste -sd , -)
-          vs=$(echo "$ts" | sed "s#^${PREFIX}#v#g")
+          vs=$(git tag | grep "^${PREFIX}" | sed "s#^${PREFIX}#v#" | paste -sd , -)
           if [[ ! -z "$vs" ]]; then
             v=$(semver-highest -target "$VERSION" -versions "$vs" -prerelease="$PRERELEASE")
             status=$?
