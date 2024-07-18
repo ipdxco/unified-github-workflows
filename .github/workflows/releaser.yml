@@ -130,7 +130,9 @@ jobs:
           token: ${{ secrets.UCI_GITHUB_TOKEN || github.token }}
       - name: Create release.json
         if: steps.release.outputs.id != ''
+        id: json
         env:
+          SOURCE: ${{ matrix.source }}
           RELEASE: |
             {
               "draft": false,
@@ -141,10 +143,12 @@ jobs:
               "assets": ${{ steps.release.outputs.assets }},
               "make_latest": ${{ steps.version.outputs.prefix == 'v' && steps.version.outputs.tag == steps.latest.outputs.latest }}
             }
-        run: jq . <<< "$RELEASE" > release.json
+        run: |
+          jq . <<< "$RELEASE" > release.json
+          sed 's/[":<>|*?\r\n\\\/]/_/g' <<< "$SOURCE" | xargs -I {} -0 echo "name={}" | tee -a $GITHUB_OUTPUT
       - name: Upload release.json
         if: steps.release.outputs.id != ''
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.source }}
+          name: ${{ steps.json.outputs.name }}
           path: release.json
