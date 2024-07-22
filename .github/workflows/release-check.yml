@@ -177,7 +177,7 @@ jobs:
         name: Run language specific checks
         if: steps.tag.outputs.needed == 'true' && steps.prev.outputs.tag != ''
         env:
-          LANGUAGE: github.event.pull_request.base.repo.language
+          LANGUAGE: ${{ github.event.pull_request.base.repo.language }}
           PREV_TAG: ${{ steps.prev.outputs.tag }}
         # see https://github.com/golang/exp/commits/master/cmd/gorelease
         run: |
