@@ -181,6 +181,7 @@ jobs:
           PREV_TAG: ${{ steps.prev.outputs.tag }}
         # see https://github.com/golang/exp/commits/master/cmd/gorelease
         run: |
+          git config advice.detachedHead false
           echo "output<<$EOF" >> $GITHUB_OUTPUT
           if [[ "$LANGUAGE" == "Go" ]]; then
             go mod download
