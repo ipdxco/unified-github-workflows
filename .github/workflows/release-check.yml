@@ -189,13 +189,13 @@ jobs:
             echo "`gorelease` says:" >> $GITHUB_OUTPUT
             echo "```" >> $GITHUB_OUTPUT
             echo "Run gorelease"
-            (gorelease -base "$PREV_TAG") 2>&1 || true | tee -a $GITHUB_OUTPUT
+            2>&1 gorelease -base "$PREV_TAG" || true | tee -a $GITHUB_OUTPUT
             echo "```" >> $GITHUB_OUTPUT
             echo "" >> $GITHUB_OUTPUT
             echo "`gocompat` says:" >> $GITHUB_OUTPUT
             echo "```" >> $GITHUB_OUTPUT
             echo "Run gocompat"
-            (gocompat compare --go1compat --git-refs="$PREV_TAG..HEAD" ./...) 2>&1 || true | tee -a $GITHUB_OUTPUT
+            2>&1 gocompat compare --go1compat --git-refs="$PREV_TAG..HEAD" ./... || true | tee -a $GITHUB_OUTPUT
             echo "```" >> $GITHUB_OUTPUT
           fi
           echo "$EOF" >> $GITHUB_OUTPUT
