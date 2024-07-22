@@ -186,17 +186,17 @@ jobs:
             go mod download
             go install golang.org/x/exp/cmd/gorelease@f062dba9d201f5ec084d25785efec05637818c00 # https://cs.opensource.google/go/x/exp/+/f062dba9d201f5ec084d25785efec05637818c00
             go install github.com/smola/gocompat/cmd/gocompat@8498b97a44792a3a6063c47014726baa63e2e669 # v0.3.0
-            echo "`gorelease` says:" >> $GITHUB_OUTPUT
-            echo "```" >> $GITHUB_OUTPUT
+            echo "\`gorelease\` says:" >> $GITHUB_OUTPUT
+            echo "\`\`\`" >> $GITHUB_OUTPUT
             echo "Run gorelease"
             2>&1 gorelease -base "$PREV_TAG" || true | tee -a $GITHUB_OUTPUT
-            echo "```" >> $GITHUB_OUTPUT
+            echo "\`\`\`" >> $GITHUB_OUTPUT
             echo "" >> $GITHUB_OUTPUT
-            echo "`gocompat` says:" >> $GITHUB_OUTPUT
-            echo "```" >> $GITHUB_OUTPUT
+            echo "\`gocompat\` says:" >> $GITHUB_OUTPUT
+            echo "\`\`\`" >> $GITHUB_OUTPUT
             echo "Run gocompat"
             2>&1 gocompat compare --go1compat --git-refs="$PREV_TAG..HEAD" ./... || true | tee -a $GITHUB_OUTPUT
-            echo "```" >> $GITHUB_OUTPUT
+            echo "\`\`\`" >> $GITHUB_OUTPUT
           fi
           echo "$EOF" >> $GITHUB_OUTPUT
         working-directory: ${{ steps.version.outputs.root }}
