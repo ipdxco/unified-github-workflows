@@ -222,7 +222,7 @@ jobs:
             ${{ steps.git-diff.outputs.output }}
             ```
 
-            ${{ steps.language.outputs.content }}
+            ${{ steps.language.outputs.output }}
           BODY_ALT: |
             This is the first release of this module.
 
