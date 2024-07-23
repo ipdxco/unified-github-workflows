@@ -2,7 +2,7 @@ name: Release Checker
 
 on:
   pull_request_target:
-    paths: [ 'version.json' ]
+    paths: ${{{ .github.languages | map(select(. == "Rust")) | if length == 0 then ["version.json"] else ["Cargo.toml"] end }}}
     types: [ opened, synchronize, reopened, labeled, unlabeled ]
   workflow_dispatch:
 
@@ -17,3 +17,5 @@ concurrency:
 jobs:
   release-check:
     uses: ipdxco/unified-github-workflows/.github/workflows/release-check.yml@${{{ .config.versions.uci // (.source.tag | sub("\\.[^.\\-\\+]+(?=\\-|\\+|$)"; "")) }}}
+    with:
+      sources: '${{{ .github.languages | map(select(. == "Rust")) | if length == 0 then ["version.json"] else ["Cargo.toml"] end }}}'

@@ -12,7 +12,8 @@ inputs:
           "protected_branches": [
             "main",
             "release"
-          ]
+          ],
+          "languages": []
         },
         "config": {
           "go": {

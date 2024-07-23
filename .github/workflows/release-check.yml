@@ -6,10 +6,18 @@ on:
         required: false
         type: string
         default: ${{ format('["{0}"]', github.event.repository.default_branch) }}
+      sources:
+        required: false
+        type: string
+        default: '["version.json"]'
 
 jobs:
   release-check:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        source: ${{ fromJSON(inputs.sources) }}
     steps:
       - run: echo "EOF=EOF$RANDOM" >> $GITHUB_ENV
       - id: pr
@@ -43,20 +51,32 @@ jobs:
         uses: ipdxco/unified-github-workflows/.github/actions/read-go-mod@main
       - uses: actions/setup-go@v5
         with:
-          go-version: ${{ fromJSON(steps.go-mod.outputs.json).Go }}.x
+          go-version: ${{ fromJSON(steps.go-mod.outputs.json).Go && format('{0}.x', fromJSON(steps.go-mod.outputs.json).Go) || 'stable' }}
           cache: false
       - id: version
         name: Determine version
         env:
           GITHUB_TOKEN: ${{ github.token }}
+          SOURCE: ${{ matrix.source }}
           HEAD_FULL_NAME: ${{ fromJSON(steps.pr.outputs.json).head.repo.full_name }}
           HEAD_SHA: ${{ fromJSON(steps.pr.outputs.json).head.sha }}
         run: |
+          root="$(dirname "$SOURCE")"
+          echo "root=$root" | tee -a $GITHUB_OUTPUT
+          if [[ "$root" == "." ]]; then
+            prefix="v"
+          else
+            prefix="$root/v"
+          fi
+          echo "prefix=$prefix" | tee -a $GITHUB_OUTPUT
           # If `version.json` file doesn't exists, `version` is `""` and `404` is printed on stderr.
           # The step won't be marked as a failure though because the error happens in a subshell.
-          version="$(gh api -X GET "repos/$HEAD_FULL_NAME/contents/version.json" -f ref="$HEAD_SHA" --jq '.content' | base64 -d | jq -r '.version')"
-          echo "version=$version"
-          echo "version=$version" >> $GITHUB_OUTPUT
+          gh api -X GET "repos/$HEAD_FULL_NAME/contents/$SOURCE" -f ref="$HEAD_SHA" --jq '.content' | base64 -d > $SOURCE
+          version="$(yq -r '.workspace.package.version // .package.version // .version // ""' "$SOURCE")"
+          git checkout HEAD -- "$SOURCE"
+          version="${version#"$prefix"}"
+          echo "version=$version" | tee -a $GITHUB_OUTPUT
+          echo "tag=${prefix}${version}" | tee -a $GITHUB_OUTPUT
       - id: branch
         name: Check if the branch is a release branch
         if: steps.version.outputs.version != ''
@@ -78,12 +98,12 @@ jobs:
         name: Check if the tag already exists
         if: steps.version.outputs.version != ''
         env:
-          VERSION: ${{ steps.version.outputs.version }}
+          TAG: ${{ steps.version.outputs.tag }}
           ALLOWED: ${{ steps.branch.outputs.release == 'true' || contains(fromJSON(steps.pr.outputs.json).labels.*.name, 'release') }}
         run: |
           git fetch origin --tags
           status=0
-          git rev-list "$VERSION" &> /dev/null || status=$?
+          git rev-list "$TAG" &> /dev/null || status=$?
           if [[ $status == 0 ]]; then
             echo "exists=true" >> $GITHUB_OUTPUT
             echo "needed=false" >> $GITHUB_OUTPUT
@@ -97,21 +117,23 @@ jobs:
       - name: Check version
         if: steps.tag.outputs.needed == 'true'
         env:
-          VERSION: ${{ steps.version.outputs.version }}
+          VERSION: v${{ steps.version.outputs.version }}
         # semver fails if the version is not valid (e.g. v0.1 would fail)
         run: semver "$VERSION"
       - id: prerelease
         if: steps.tag.outputs.needed == 'true'
         name: Check if this is a pre-release
         env:
-          VERSION: ${{ steps.version.outputs.version }}
+          VERSION: v${{ steps.version.outputs.version }}
         # semver -r fails if the version is not valid or if it is a pre-release (e.g v0.1 or v0.1.0-rc1 would fail)
-        run: echo "prerelease=$(semver -r "$VERSION" && echo false || echo true)" >> $GITHUB_OUTPUT
+        run: echo "prerelease=$(semver -r "$VERSION" && echo false || echo true)" | tee -a $GITHUB_OUTPUT
       - id: prev
         name: Determine version number to compare to
         if: steps.tag.outputs.needed == 'true'
         env:
-          VERSION: ${{ steps.version.outputs.version }}
+          PREFIX: ${{ steps.version.outputs.prefix }}
+          VERSION: v${{ steps.version.outputs.version }}
+          TAG: ${{ steps.version.outputs.tag }}
           PRERELEASE: ${{ steps.prerelease.outputs.prerelease }}
         # We need to determine the version number we want to compare to,
         # taking into account that this might be a (patch) release on a release branch.
@@ -123,85 +145,85 @@ jobs:
         run: |
           git fetch origin --tags
           go install github.com/marten-seemann/semver-highest@fcdc98f8820ff0e6613c1bee071c096febd98dbf
-          vs=$(git tag | paste -sd , -)
+          vs=$(git tag | grep "^${PREFIX}" | sed "s#^${PREFIX}#v#" | paste -sd , -)
           if [[ ! -z "$vs" ]]; then
             v=$(semver-highest -target "$VERSION" -versions "$vs" -prerelease="$PRERELEASE")
             status=$?
             if [[ $status != 0 ]]; then
-              echo $v
+              echo "v=$v"
               exit $status
             fi
-            echo "version=$v" >> $GITHUB_OUTPUT
+            if [[ -n "$v" ]]; then
+              echo "tag=$PREFIX${v#v}" | tee -a $GITHUB_OUTPUT
+            fi
           fi
       - id: git-diff
-        name: run git diff on go.mod file(s)
-        if: steps.tag.outputs.needed == 'true' && steps.prev.outputs.version != ''
+        name: Run git diff on configuration file(s)
+        if: steps.tag.outputs.needed == 'true' && steps.prev.outputs.tag != ''
         env:
-          PREV_VERSION: ${{ steps.prev.outputs.version }}
+          PREV_TAG: ${{ steps.prev.outputs.tag }}
         run: |
-          # First get the diff for the go.mod file in the root directory...
-          output=$(git diff "$PREV_VERSION..HEAD" -- './go.mod')
-          # ... then get the diff for all go.mod files in subdirectories.
-          # Note that this command also finds go.mod files more than one level deep in the directory structure.
-          output+=$(git diff "$PREV_VERSION..HEAD" -- '*/go.mod')
+          # First get the diff for the go.mod/Cargo.toml file in the root directory...
+          output=$(git diff "$PREV_TAG..HEAD" -- './go.mod' './Cargo.toml')
+          # ... then get the diff for all go.mod/Cargo.toml files in subdirectories.
+          # Note that this command also finds go.mod/Cargo.toml files more than one level deep in the directory structure.
+          output+=$(git diff "$PREV_TAG..HEAD" -- '*/go.mod' '*/Cargo.toml')
           if [[ -z "$output" ]]; then
             output="(empty)"
           fi
-          printf "output<<$EOF\n%s\n$EOF" "$output" >> $GITHUB_OUTPUT
-      - id: gorelease
-        name: Run gorelease
-        if: steps.tag.outputs.needed == 'true' && steps.prev.outputs.version != ''
+          printf "output<<$EOF\n%s\n$EOF" "$output" | tee -a $GITHUB_OUTPUT
+        working-directory: ${{ steps.version.outputs.root }}
+      - id: language
+        name: Run language specific checks
+        if: steps.tag.outputs.needed == 'true' && steps.prev.outputs.tag != ''
         env:
-          PREV_VERSION: ${{ steps.prev.outputs.version }}
+          LANGUAGE: ${{ github.event.pull_request.base.repo.language }}
+          PREV_TAG: ${{ steps.prev.outputs.tag }}
         # see https://github.com/golang/exp/commits/master/cmd/gorelease
         run: |
-          go mod download
-          go install golang.org/x/exp/cmd/gorelease@f062dba9d201f5ec084d25785efec05637818c00 # https://cs.opensource.google/go/x/exp/+/f062dba9d201f5ec084d25785efec05637818c00
-          output=$((gorelease -base "$PREV_VERSION") 2>&1 || true)
-          printf "output<<$EOF\n%s\n$EOF" "$output" >> $GITHUB_OUTPUT
-      - id: gocompat
-        name: Check Compatibility
-        if: steps.tag.outputs.needed == 'true' && steps.prev.outputs.version != ''
-        env:
-          PREV_VERSION: ${{ steps.prev.outputs.version }}
-        run: |
-          go install github.com/smola/gocompat/cmd/gocompat@8498b97a44792a3a6063c47014726baa63e2e669 # v0.3.0
-          output=$(gocompat compare --go1compat --git-refs="$PREV_VERSION..HEAD" ./... || true)
-          if [[ -z "$output" ]]; then
-            output="(empty)"
+          git config advice.detachedHead false
+          echo "output<<$EOF" >> $GITHUB_OUTPUT
+          if [[ "$LANGUAGE" == "Go" ]]; then
+            go mod download
+            go install golang.org/x/exp/cmd/gorelease@f062dba9d201f5ec084d25785efec05637818c00 # https://cs.opensource.google/go/x/exp/+/f062dba9d201f5ec084d25785efec05637818c00
+            go install github.com/smola/gocompat/cmd/gocompat@8498b97a44792a3a6063c47014726baa63e2e669 # v0.3.0
+            echo "\`gorelease\` says:" >> $GITHUB_OUTPUT
+            echo "\`\`\`" >> $GITHUB_OUTPUT
+            echo "Run gorelease"
+            ((gorelease -base "$PREV_TAG") 2>&1 || true) | tee -a $GITHUB_OUTPUT
+            echo "\`\`\`" >> $GITHUB_OUTPUT
+            echo "" >> $GITHUB_OUTPUT
+            echo "\`gocompat\` says:" >> $GITHUB_OUTPUT
+            echo "\`\`\`" >> $GITHUB_OUTPUT
+            echo "Run gocompat"
+            ((gocompat compare --go1compat --git-refs="$PREV_TAG..HEAD" ./...) 2>&1 || true) | tee -a $GITHUB_OUTPUT
+            echo "\`\`\`" >> $GITHUB_OUTPUT
           fi
-          printf "output<<$EOF\n%s\n$EOF" "$output" >> $GITHUB_OUTPUT
+          echo "$EOF" >> $GITHUB_OUTPUT
+        working-directory: ${{ steps.version.outputs.root }}
       - id: release
         if: steps.tag.outputs.needed == 'true' && fromJSON(steps.pr.outputs.json).head.repo.full_name == fromJSON(steps.pr.outputs.json).base.repo.full_name
         uses: galargh/action-gh-release@571276229e7c9e6ea18f99bad24122a4c3ec813f # https://github.com/galargh/action-gh-release/pull/1
         with:
           draft: true
-          tag_name: ${{ steps.version.outputs.version }}
+          tag_name: ${{ steps.version.outputs.tag }}
           generate_release_notes: true
           target_commitish: ${{ fromJSON(steps.pr.outputs.json).base.ref }}
       - id: message
         if: steps.tag.outputs.exists == 'false'
         env:
+          SOURCE: ${{ matrix.source }}
           HEADER: |
             Suggested version: `${{ steps.version.outputs.version }}`
           BODY: |
-            Comparing to: [${{ steps.prev.outputs.version }}](${{ fromJSON(steps.pr.outputs.json).base.repo.html_url }}/releases/tag/${{ steps.prev.outputs.version }}) ([diff](${{ fromJSON(steps.pr.outputs.json).base.repo.html_url }}/compare/${{ steps.prev.outputs.version }}..${{ fromJSON(steps.pr.outputs.json).head.label }}))
+            Comparing to: [${{ steps.prev.outputs.tag }}](${{ fromJSON(steps.pr.outputs.json).base.repo.html_url }}/releases/tag/${{ steps.prev.outputs.tag }}) ([diff](${{ fromJSON(steps.pr.outputs.json).base.repo.html_url }}/compare/${{ steps.prev.outputs.tag }}..${{ fromJSON(steps.pr.outputs.json).head.label }}))
 
-            Changes in `go.mod` file(s):
+            Changes in configuration file(s):
             ```diff
             ${{ steps.git-diff.outputs.output }}
             ```
 
-            `gorelease` says:
-            ```
-            ${{ steps.gorelease.outputs.output }}
-            ```
-
-            `gocompat` says:
-            ```
-            ${{ steps.gocompat.outputs.output }}
-            ```
-
+            ${{ steps.language.outputs.output }}
           BODY_ALT: |
             This is the first release of this module.
 
@@ -214,7 +236,7 @@ jobs:
           DIFF_NOTICE: |
             ## Cutting a Release (and modifying non-markdown files)
 
-            This PR is modifying both `version.json` and non-markdown files.
+            This PR is modifying both `${{ matrix.source }}` and non-markdown files.
             The Release Checker is not able to analyse files that are not checked in to `${{ fromJSON(steps.pr.outputs.json).base.ref }}`. This might cause the above analysis to be inaccurate.
             Please consider performing all the code changes in a separate PR before cutting the release.
 
@@ -229,7 +251,7 @@ jobs:
             ## Automatically created GitHub Release
 
             Pre-creating GitHub Releases on release PRs initiated from forks is not supported.
-            If you wish to prepare release notes yourself, you should create a draft GitHub Release for tag `${{ steps.version.outputs.version }}` manually.
+            If you wish to prepare release notes yourself, you should create a draft GitHub Release for tag `${{ steps.version.outputs.tag }}` manually.
             The draft GitHub Release is going to be published when this PR is merged.
             If you choose not to create a draft GitHub Release, a published GitHub Released is going to be created when this PR is merged.
 
@@ -237,7 +259,7 @@ jobs:
           HEAD_LABEL: ${{ fromJSON(steps.pr.outputs.json).head.label }}
           HEAD_FULL_NAME: ${{ fromJSON(steps.pr.outputs.json).head.repo.full_name }}
           GITHUB_TOKEN: ${{ github.token }}
-          PREV_VERSION: ${{ steps.prev.outputs.version }}
+          PREV_TAG: ${{ steps.prev.outputs.tag }}
           TAG_NEEDED: ${{ steps.tag.outputs.needed }}
         run: |
           echo "output<<$EOF" >> $GITHUB_OUTPUT
@@ -246,12 +268,12 @@ jobs:
             echo "$RELEASE_BRANCH_NOTICE" >> $GITHUB_OUTPUT
           else
             echo "$HEADER" >> $GITHUB_OUTPUT
-            if [[ "$PREV_VERSION" != "" ]]; then
+            if [[ "$PREV_TAG" != "" ]]; then
               echo "$BODY" >> $GITHUB_OUTPUT
             else
               echo "$BODY_ALT" >> $GITHUB_OUTPUT
             fi
-            diff="$(gh api -X GET "repos/$GITHUB_REPOSITORY/compare/$BASE_REF...$HEAD_LABEL" --jq '.files | map(.filename) | map(select(test("^(version\\.json|.*\\.md)$") | not)) | .[]')"
+            diff="$(gh api -X GET "repos/$GITHUB_REPOSITORY/compare/$BASE_REF...$HEAD_LABEL" --jq '.files | map(.filename)' | jq -r --arg source "$SOURCE" 'map(select(test("^(\($source)|.*\\.md)$") | not)) | .[]')"
             if [[ "$diff" != "" ]]; then
               echo "$DIFF_NOTICE" >> $GITHUB_OUTPUT
             fi
@@ -266,7 +288,7 @@ jobs:
         uses: marocchino/sticky-pull-request-comment@331f8f5b4215f0445d3c07b4967662a32a2d3e31 # v2.9.0
         if: steps.tag.outputs.exists == 'false'
         with:
-          header: release-check
+          header: release-check (${{ matrix.source }})
           recreate: true
           message: ${{ steps.message.outputs.output }}
           number: ${{ fromJSON(steps.pr.outputs.json).number }}
