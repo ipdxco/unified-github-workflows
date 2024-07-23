@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
-## [1.1.0] - 2024-07-23
+## [1.0.5] - 2024-07-23
 ### Added
 - support for rust to release workflows
 
