@@ -292,3 +292,26 @@ jobs:
           recreate: true
           message: ${{ steps.message.outputs.output }}
           number: ${{ fromJSON(steps.pr.outputs.json).number }}
+      - name: Create release.json
+        if: steps.release.outputs.id != ''
+        id: json
+        env:
+          SOURCE: ${{ matrix.source }}
+          RELEASE: |
+            {
+              "draft": true,
+              "version": "${{ steps.version.outputs.tag }}",
+              "url": "${{ steps.release.outputs.url }}",
+              "id": "${{ steps.release.outputs.id }}",
+              "upload_url": "${{ steps.release.outputs.upload_url }}",
+              "assets": ${{ steps.release.outputs.assets }}
+            }
+        run: |
+          jq . <<< "$RELEASE" > release.json
+          sed 's/[":<>|*?\r\n\\\/]/_/g' <<< "$SOURCE" | xargs -I {} -0 echo "name={}" | tee -a $GITHUB_OUTPUT
+      - name: Upload release.json
+        if: steps.release.outputs.id != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.json.outputs.name }}
+          path: release.json
