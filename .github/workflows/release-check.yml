@@ -10,6 +10,10 @@ on:
         required: false
         type: string
         default: '["version.json"]'
+      separator:
+        required: false
+        type: string
+        default: '/'
     outputs:
       json:
         description: JSON aggregation of release.json artifacts
@@ -62,6 +66,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
           SOURCE: ${{ matrix.source }}
+          SEPARATOR: ${{ inputs.separator }}
           HEAD_FULL_NAME: ${{ fromJSON(steps.pr.outputs.json).head.repo.full_name }}
           HEAD_SHA: ${{ fromJSON(steps.pr.outputs.json).head.sha }}
         run: |
@@ -70,7 +75,7 @@ jobs:
           if [[ "$root" == "." ]]; then
             prefix="v"
           else
-            prefix="$root/v"
+            prefix="${root}${SEPARATOR}v"
           fi
           echo "prefix=$prefix" | tee -a $GITHUB_OUTPUT
           # If `version.json` file doesn't exists, `version` is `""` and `404` is printed on stderr.

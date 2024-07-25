@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [1.0.8] - 2024-07-25
+### Added
+- separator input to releaser and releaser-check workflows
+
 ## [1.0.7] - 2024-07-25
 ### Added
 - aggregation of release.json artifacts as workflow outputs

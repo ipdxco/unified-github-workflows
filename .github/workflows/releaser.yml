@@ -10,6 +10,10 @@ on:
         required: false
         type: string
         default: '["version.json"]'
+      separator:
+        required: false
+        type: string
+        default: '/'
     outputs:
       json:
         description: JSON aggregation of release.json artifacts
@@ -31,12 +35,13 @@ jobs:
         name: Determine version
         env:
           SOURCE: ${{ matrix.source }}
+          SEPARATOR: ${{ inputs.separator }}
         run: |
-          prefix="$(dirname "$SOURCE")"
-          if [[ "$prefix" == "." ]]; then
+          root="$(dirname "$SOURCE")"
+          if [[ "$root" == "." ]]; then
             prefix="v"
           else
-            prefix="$prefix/v"
+            prefix="${root}${SEPARATOR}v"
           fi
           echo "prefix=$prefix" | tee -a $GITHUB_OUTPUT
           version="$(yq -r '.workspace.package.version // .package.version // .version // ""' "$SOURCE")"
