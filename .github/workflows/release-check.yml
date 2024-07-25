@@ -10,6 +10,10 @@ on:
         required: false
         type: string
         default: '["version.json"]'
+    outputs:
+      json:
+        description: JSON aggregation of release.json artifacts
+        value: ${{ toJSON(jobs.aggregate.outputs.json) }}
 
 jobs:
   release-check:
@@ -315,3 +319,22 @@ jobs:
         with:
           name: ${{ steps.json.outputs.name }}
           path: release.json
+  aggregate:
+    needs: [release-check]
+    runs-on: ubuntu-latest
+    outputs:
+      json: ${{ steps.aggregate.outputs.json }}
+    steps:
+      - uses: actions/download-artifact@v4
+      - id: aggregate
+        run: |
+          echo "json<<EOF" >> $GITHUB_OUTPUT
+          echo "{" | tee -a $GITHUB_OUTPUT
+          for d in *; do
+            f="$d/release.json"
+            if [[ -d "$d" && -f "$f" ]]; then
+              echo "\"$d\": $(jq . "$f")" | tee -a $GITHUB_OUTPUT
+            fi
+          done
+          echo "}" | tee -a $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
