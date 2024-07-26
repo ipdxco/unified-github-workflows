@@ -71,19 +71,29 @@ jobs:
           HEAD_SHA: ${{ fromJSON(steps.pr.outputs.json).head.sha }}
         run: |
           root="$(dirname "$SOURCE")"
+          source="$(basename "$SOURCE")"
           echo "root=$root" | tee -a $GITHUB_OUTPUT
+          echo "source=$source" | tee -a $GITHUB_OUTPUT
           if [[ "$root" == "." ]]; then
             prefix="v"
           else
-            prefix="${root}${SEPARATOR}v"
+            name="$(yq -r '.package.name // .name // "'"$root'"' "$root/$source")"
+            prefix="${name}${SEPARATOR}v"
           fi
           echo "prefix=$prefix" | tee -a $GITHUB_OUTPUT
-          # If `version.json` file doesn't exists, `version` is `""` and `404` is printed on stderr.
-          # The step won't be marked as a failure though because the error happens in a subshell.
-          gh api -X GET "repos/$HEAD_FULL_NAME/contents/$SOURCE" -f ref="$HEAD_SHA" --jq '.content' | base64 -d > $SOURCE
-          version="$(yq -r '.workspace.package.version // .package.version // .version // ""' "$SOURCE")"
-          git checkout HEAD -- "$SOURCE"
-          version="${version#"$prefix"}"
+          while [[ -z "$version" ]]; do
+            # If `version.json` file doesn't exists, `version` is `""` and `404` is printed on stderr.
+            # The step won't be marked as a failure though because the error happens in a subshell.
+            gh api -X GET "repos/$HEAD_FULL_NAME/contents/$root/$source" -f ref="$HEAD_SHA" --jq '.content' | base64 -d > $root/$source
+            version="$(yq -r '.package.version // .version // ""' "$root/$source")"
+            git checkout HEAD -- "$root/$source"
+            version="${version#v}"
+            if [[ "$root" == "." ]]; then
+              break
+            else
+              root="$(dirname "$root")"
+            fi
+          done
           echo "version=$version" | tee -a $GITHUB_OUTPUT
           echo "tag=${prefix}${version}" | tee -a $GITHUB_OUTPUT
       - id: branch
