@@ -167,7 +167,7 @@ jobs:
               "upload_url": "${{ steps.release.outputs.upload_url }}",
               "assets": ${{ steps.release.outputs.assets }},
               "make_latest": ${{ steps.version.outputs.prefix == 'v' && steps.version.outputs.tag == steps.latest.outputs.latest }},
-              "source": ${{ matrix.source }}
+              "source": "${{ matrix.source }}"
             }
         run: |
           jq . <<< "$RELEASE" > release.json

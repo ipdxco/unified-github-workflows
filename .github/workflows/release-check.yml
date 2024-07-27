@@ -325,7 +325,7 @@ jobs:
               "id": "${{ steps.release.outputs.id }}",
               "upload_url": "${{ steps.release.outputs.upload_url }}",
               "assets": ${{ steps.release.outputs.assets }},
-              "source": ${{ matrix.source }}
+              "source": "${{ matrix.source }}"
             }
         run: |
           jq . <<< "$RELEASE" > release.json
