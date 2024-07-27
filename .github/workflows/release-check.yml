@@ -86,7 +86,7 @@ jobs:
             if [[ -f "$root/$source" ]]; then
               echo "Checking $root/$source"
               git checkout "$HEAD_SHA" -- "$root/$source"
-              version="$(yq -r '.package.version // .version // ""' "$root/$source")"
+              version="$(yq -r '.package.version // .version | select(type == "string")' "$root/$source")"
               git checkout HEAD -- "$root/$source"
               version="${version#v}"
               if [[ "$root" == "." ]]; then
