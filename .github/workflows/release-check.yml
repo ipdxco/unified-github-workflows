@@ -83,6 +83,7 @@ jobs:
           echo "prefix=$prefix" | tee -a $GITHUB_OUTPUT
           git fetch origin "$HEAD_SHA"
           while [[ -z "$version" ]]; do
+            echo "Checking $root/$source"
             if [[ -f "$root/$source" ]]; then
               echo "Checking $root/$source"
               git checkout "$HEAD_SHA" -- "$root/$source"
@@ -91,9 +92,8 @@ jobs:
               version="${version#v}"
               if [[ "$root" == "." ]]; then
                 break
-              else
-                root="$(dirname "$root")"
               fi
+              root="$(dirname "$root")"
             fi
           done
           echo "version=$version" | tee -a $GITHUB_OUTPUT
