@@ -77,7 +77,7 @@ jobs:
           if [[ "$root" == "." ]]; then
             prefix="v"
           else
-            name="$(yq -r '.package.name // .name // "'"$root'"' "$root/$source")"
+            name="$(yq -r '.package.name // .name // "'"$root"'"' "$root/$source")"
             prefix="${name}${SEPARATOR}v"
           fi
           echo "prefix=$prefix" | tee -a $GITHUB_OUTPUT
