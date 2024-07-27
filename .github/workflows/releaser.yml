@@ -49,19 +49,18 @@ jobs:
           fi
           echo "prefix=$prefix" | tee -a $GITHUB_OUTPUT
           git fetch origin "$HEAD_SHA"
-          version=""
           while [[ -z "$version" ]]; do
             echo "Checking $root/$source"
             if [[ -f "$root/$source" ]]; then
               git checkout "$HEAD_SHA" -- "$root/$source"
-              version="$(yq -r '.workspace.package.version // .package.version // .version | select(type == "string")' "$root/$source")"
+              version="$(yq -r '.workspace.package.version // .package.version // .version | select(type == "!!str")' "$root/$source")"
               git checkout HEAD -- "$root/$source"
               version="${version#v}"
-              if [[ "$root" == "." ]]; then
-                break
-              fi
-              root="$(dirname "$root")"
             fi
+            if [[ "$root" == "." ]]; then
+              break
+            fi
+            root="$(dirname "$root")"
           done
           echo "version=$version" | tee -a $GITHUB_OUTPUT
           echo "tag=${prefix}${version}" | tee -a $GITHUB_OUTPUT
