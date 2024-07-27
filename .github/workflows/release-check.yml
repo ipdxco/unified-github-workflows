@@ -82,10 +82,10 @@ jobs:
           fi
           echo "prefix=$prefix" | tee -a $GITHUB_OUTPUT
           git fetch origin "$HEAD_SHA"
+          version=""
           while [[ -z "$version" ]]; do
             echo "Checking $root/$source"
             if [[ -f "$root/$source" ]]; then
-              echo "Checking $root/$source"
               git checkout "$HEAD_SHA" -- "$root/$source"
               version="$(yq -r '.workspace.package.version // .package.version // .version | select(type == "string")' "$root/$source")"
               git checkout HEAD -- "$root/$source"
