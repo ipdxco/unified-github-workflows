@@ -48,17 +48,19 @@ jobs:
             prefix="${name}${SEPARATOR}v"
           fi
           echo "prefix=$prefix" | tee -a $GITHUB_OUTPUT
+          git fetch "$HEAD_SHA"
           while [[ -z "$version" ]]; do
-            # If `version.json` file doesn't exists, `version` is `""` and `404` is printed on stderr.
-            # The step won't be marked as a failure though because the error happens in a subshell.
-            gh api -X GET "repos/$HEAD_FULL_NAME/contents/$root/$source" -f ref="$HEAD_SHA" --jq '.content' | base64 -d > $root/$source
-            version="$(yq -r '.package.version // .version // ""' "$root/$source")"
-            git checkout HEAD -- "$root/$source"
-            version="${version#v}"
-            if [[ "$root" == "." ]]; then
-              break
-            else
-              root="$(dirname "$root")"
+            if [[ -f "$root/$source" ]]; then
+              echo "Checking $root/$source"
+              git checkout "$HEAD_SHA" -- "$root/$source"
+              version="$(yq -r '.package.version // .version // ""' "$root/$source")"
+              git checkout HEAD -- "$root/$source"
+              version="${version#v}"
+              if [[ "$root" == "." ]]; then
+                break
+              else
+                root="$(dirname "$root")"
+              fi
             fi
           done
           echo "version=$version" | tee -a $GITHUB_OUTPUT
