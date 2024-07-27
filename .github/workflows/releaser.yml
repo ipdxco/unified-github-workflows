@@ -17,7 +17,7 @@ on:
     outputs:
       json:
         description: JSON aggregation of release.json artifacts
-        value: ${{ toJSON(jobs.aggregate.outputs.json) }}
+        value: ${{ jobs.aggregate.outputs.json }}
     secrets:
       UCI_GITHUB_TOKEN:
         required: false
@@ -182,7 +182,7 @@ jobs:
     needs: [releaser]
     runs-on: ubuntu-latest
     outputs:
-      json: ${{ steps.aggregate.outputs.json }}
+      json: ${{ toJSON(fromJSON(steps.aggregate.outputs.json)) }}
     steps:
       - uses: actions/download-artifact@v4
       - id: aggregate
