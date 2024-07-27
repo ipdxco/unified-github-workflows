@@ -48,7 +48,7 @@ jobs:
             prefix="${name}${SEPARATOR}v"
           fi
           echo "prefix=$prefix" | tee -a $GITHUB_OUTPUT
-          git fetch "$HEAD_SHA"
+          git fetch origin "$HEAD_SHA"
           while [[ -z "$version" ]]; do
             if [[ -f "$root/$source" ]]; then
               echo "Checking $root/$source"
