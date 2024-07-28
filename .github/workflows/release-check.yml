@@ -17,7 +17,7 @@ on:
     outputs:
       json:
         description: JSON aggregation of release.json artifacts
-        value: ${{ toJSON(jobs.aggregate.outputs.json) }}
+        value: ${{ jobs.aggregate.outputs.json }}
 
 jobs:
   release-check:
@@ -71,19 +71,30 @@ jobs:
           HEAD_SHA: ${{ fromJSON(steps.pr.outputs.json).head.sha }}
         run: |
           root="$(dirname "$SOURCE")"
+          source="$(basename "$SOURCE")"
           echo "root=$root" | tee -a $GITHUB_OUTPUT
+          echo "source=$source" | tee -a $GITHUB_OUTPUT
           if [[ "$root" == "." ]]; then
             prefix="v"
           else
-            prefix="${root}${SEPARATOR}v"
+            name="$(yq -r '.package.name // .name // "'"$root"'"' "$root/$source")"
+            prefix="${name}${SEPARATOR}v"
           fi
           echo "prefix=$prefix" | tee -a $GITHUB_OUTPUT
-          # If `version.json` file doesn't exists, `version` is `""` and `404` is printed on stderr.
-          # The step won't be marked as a failure though because the error happens in a subshell.
-          gh api -X GET "repos/$HEAD_FULL_NAME/contents/$SOURCE" -f ref="$HEAD_SHA" --jq '.content' | base64 -d > $SOURCE
-          version="$(yq -r '.workspace.package.version // .package.version // .version // ""' "$SOURCE")"
-          git checkout HEAD -- "$SOURCE"
-          version="${version#"$prefix"}"
+          git fetch origin "$HEAD_SHA"
+          while [[ -z "$version" ]]; do
+            echo "Checking $root/$source"
+            if [[ -f "$root/$source" ]]; then
+              git checkout "$HEAD_SHA" -- "$root/$source"
+              version="$(yq -r '.workspace.package.version // .package.version // .version | select(type == "!!str")' "$root/$source")"
+              git checkout HEAD -- "$root/$source"
+              version="${version#v}"
+            fi
+            if [[ "$root" == "." ]]; then
+              break
+            fi
+            root="$(dirname "$root")"
+          done
           echo "version=$version" | tee -a $GITHUB_OUTPUT
           echo "tag=${prefix}${version}" | tee -a $GITHUB_OUTPUT
       - id: branch
@@ -313,7 +324,8 @@ jobs:
               "url": "${{ steps.release.outputs.url }}",
               "id": "${{ steps.release.outputs.id }}",
               "upload_url": "${{ steps.release.outputs.upload_url }}",
-              "assets": ${{ steps.release.outputs.assets }}
+              "assets": ${{ steps.release.outputs.assets }},
+              "source": "${{ matrix.source }}"
             }
         run: |
           jq . <<< "$RELEASE" > release.json
@@ -328,18 +340,20 @@ jobs:
     needs: [release-check]
     runs-on: ubuntu-latest
     outputs:
-      json: ${{ steps.aggregate.outputs.json }}
+      json: ${{ toJSON(fromJSON(steps.aggregate.outputs.json)) }}
     steps:
       - uses: actions/download-artifact@v4
       - id: aggregate
         run: |
           echo "json<<EOF" >> $GITHUB_OUTPUT
-          echo "{" | tee -a $GITHUB_OUTPUT
+          echo "[" | tee -a $GITHUB_OUTPUT
           for d in *; do
             f="$d/release.json"
             if [[ -d "$d" && -f "$f" ]]; then
-              echo "\"$d\": $(jq . "$f")" | tee -a $GITHUB_OUTPUT
+              echo "$comma" | tee -a $GITHUB_OUTPUT
+              jq . "$f" | tee -a $GITHUB_OUTPUT
+              comma=","
             fi
           done
-          echo "}" | tee -a $GITHUB_OUTPUT
+          echo "]" | tee -a $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT

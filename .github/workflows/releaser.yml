@@ -17,7 +17,7 @@ on:
     outputs:
       json:
         description: JSON aggregation of release.json artifacts
-        value: ${{ toJSON(jobs.aggregate.outputs.json) }}
+        value: ${{ jobs.aggregate.outputs.json }}
     secrets:
       UCI_GITHUB_TOKEN:
         required: false
@@ -38,14 +38,27 @@ jobs:
           SEPARATOR: ${{ inputs.separator }}
         run: |
           root="$(dirname "$SOURCE")"
+          source="$(basename "$SOURCE")"
+          echo "root=$root" | tee -a $GITHUB_OUTPUT
+          echo "source=$source" | tee -a $GITHUB_OUTPUT
           if [[ "$root" == "." ]]; then
             prefix="v"
           else
-            prefix="${root}${SEPARATOR}v"
+            name="$(yq -r '.package.name // .name // "'"$root"'"' "$root/$source")"
+            prefix="${name}${SEPARATOR}v"
           fi
           echo "prefix=$prefix" | tee -a $GITHUB_OUTPUT
-          version="$(yq -r '.workspace.package.version // .package.version // .version // ""' "$SOURCE")"
-          version="${version#"$prefix"}"
+          while [[ -z "$version" ]]; do
+            echo "Checking $root/$source"
+            if [[ -f "$root/$source" ]]; then
+              version="$(yq -r '.workspace.package.version // .package.version // .version | select(type == "!!str")' "$root/$source")"
+              version="${version#v}"
+            fi
+            if [[ "$root" == "." ]]; then
+              break
+            fi
+            root="$(dirname "$root")"
+          done
           echo "version=$version" | tee -a $GITHUB_OUTPUT
           echo "tag=${prefix}${version}" | tee -a $GITHUB_OUTPUT
       - id: latest
@@ -150,7 +163,8 @@ jobs:
               "id": "${{ steps.release.outputs.id }}",
               "upload_url": "${{ steps.release.outputs.upload_url }}",
               "assets": ${{ steps.release.outputs.assets }},
-              "make_latest": ${{ steps.version.outputs.prefix == 'v' && steps.version.outputs.tag == steps.latest.outputs.latest }}
+              "make_latest": ${{ steps.version.outputs.prefix == 'v' && steps.version.outputs.tag == steps.latest.outputs.latest }},
+              "source": "${{ matrix.source }}"
             }
         run: |
           jq . <<< "$RELEASE" > release.json
@@ -165,18 +179,20 @@ jobs:
     needs: [releaser]
     runs-on: ubuntu-latest
     outputs:
-      json: ${{ steps.aggregate.outputs.json }}
+      json: ${{ toJSON(fromJSON(steps.aggregate.outputs.json)) }}
     steps:
       - uses: actions/download-artifact@v4
       - id: aggregate
         run: |
           echo "json<<EOF" >> $GITHUB_OUTPUT
-          echo "{" | tee -a $GITHUB_OUTPUT
+          echo "[" | tee -a $GITHUB_OUTPUT
           for d in *; do
             f="$d/release.json"
             if [[ -d "$d" && -f "$f" ]]; then
-              echo "\"$d\": $(jq . "$f")" | tee -a $GITHUB_OUTPUT
+              echo "$comma" | tee -a $GITHUB_OUTPUT
+              jq . "$f" | tee -a $GITHUB_OUTPUT
+              comma=","
             fi
           done
-          echo "}" | tee -a $GITHUB_OUTPUT
+          echo "]" | tee -a $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT

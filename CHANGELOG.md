@@ -5,6 +5,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+### Added
+- preserve source information in release.json artifacts
+
+### Changed
+- try finding version in parent sources
+- retrieve subpackage name from .package.name or .name field of the source
 
 ## [1.0.8] - 2024-07-25
 ### Added
