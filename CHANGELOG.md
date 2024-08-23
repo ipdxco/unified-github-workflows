@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [1.0.11] - 2024-08-23
+### Changed
+- updated dependencies in prep for Go 1.23 support
+
 ## [1.0.10] - 2024-08-05
 ### Changed
 - show git diff on go generation check failure
