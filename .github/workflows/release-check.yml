@@ -346,14 +346,16 @@ jobs:
       - id: aggregate
         run: |
           echo "json<<EOF" >> $GITHUB_OUTPUT
-          echo "[" | tee -a $GITHUB_OUTPUT
+          echo "{" | tee -a $GITHUB_OUTPUT
           for d in *; do
             f="$d/release.json"
             if [[ -d "$d" && -f "$f" ]]; then
               echo "$comma" | tee -a $GITHUB_OUTPUT
+              jq .source "$f" | tee -a $GITHUB_OUTPUT
+              echo ":" | tee -a $GITHUB_OUTPUT
               jq . "$f" | tee -a $GITHUB_OUTPUT
               comma=","
             fi
           done
-          echo "]" | tee -a $GITHUB_OUTPUT
+          echo "}" | tee -a $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT

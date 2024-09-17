@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [1.0.12] - 2024-09-17
+### Changed
+- the release-checker outputs an object instead of an array as intended
+
 ## [1.0.11] - 2024-08-23
 ### Changed
 - updated dependencies in prep for Go 1.23 support
