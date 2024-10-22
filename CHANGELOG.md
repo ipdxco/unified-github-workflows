@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [1.0.13] - 2024-10-22
+### Changed
+- add `docker-registry` input to the js-test-and-maybe-release workflow
+
+### Fixed
+- handle Go versions from the go.mod file correctly in the go-test and go-check workflows
+
 ## [1.0.12] - 2024-09-17
 ### Changed
 - the release-checker outputs an object instead of an array as intended
