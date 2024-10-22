@@ -37,7 +37,7 @@ jobs:
         id: go
         uses: actions/setup-go@v5
         with:
-          go-version: ${{ inputs.go-version || (fromJSON(steps.go-mod.outputs.json).Go && format('{0}.x', fromJSON(steps.go-mod.outputs.json).Go)) }}
+          go-version: ${{ inputs.go-version || (fromJSON(steps.go-mod.outputs.json).Go && fromJSON(steps.go-mod.outputs.json).Go) }}
           cache: ${{ inputs.go-cache }}
       - name: Run repo-specific setup
         uses: ./.github/actions/go-check-setup
