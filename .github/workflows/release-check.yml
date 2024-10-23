@@ -59,7 +59,7 @@ jobs:
         uses: ipdxco/unified-github-workflows/.github/actions/read-go-mod@main
       - uses: actions/setup-go@v5
         with:
-          go-version: ${{ fromJSON(steps.go-mod.outputs.json).Go && format('{0}.x', fromJSON(steps.go-mod.outputs.json).Go) || 'stable' }}
+          go-version: ${{ fromJSON(steps.go-mod.outputs.json).Go || 'stable' }}
           cache: false
       - id: version
         name: Determine version
