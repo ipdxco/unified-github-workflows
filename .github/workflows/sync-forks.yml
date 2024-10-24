@@ -2,6 +2,9 @@ name: Sync forks
 
 on:
   workflow_dispatch:
+  schedule:
+    # https://crontab.guru/#0_22_*_*_1
+    - cron: "0 22 * * 1"
 
 jobs:
   sync:
