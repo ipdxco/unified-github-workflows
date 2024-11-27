@@ -55,7 +55,7 @@ while read file; do
   git add .
 
   if ! git diff-index --quiet HEAD; then
-    git commit -m "chore: bump go.mod to Go $expected and run go fix"
+    git commit -m "chore!: bump go.mod to Go $expected and run go fix" -m "BREAKING CHANGE: Updating the Go version to $expected"
   fi
 
   if [[ -f go.work ]]; then
@@ -64,7 +64,7 @@ while read file; do
     go work use
     git add .
     if ! git diff-index --quiet HEAD; then
-      git commit -m "chore: bump go.work to Go $expected"
+      git commit -m "chore!: bump go.work to Go $expected" -m "BREAKING CHANGE: Updating the Go version to $expected"
     fi
   fi
 
