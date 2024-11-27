@@ -95,22 +95,21 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
           REPOSITORY: ${{ github.repository }}
-          QUERY: repository:${{ github.repository }} is:pr is:merged ${{ github.sha }}
+          REF: ${{ github.ref }}
           SHA: ${{ github.sha }}
         uses: actions/github-script@v7
         with:
           script: |
             const [owner, repo] = process.env.REPOSITORY.split('/');
-            const items = await github.paginate(github.rest.search.issuesAndPullRequests, {
-              q: process.env.QUERY,
+            const ref = process.env.REF.replace(/^refs\/heads\//, '');
+            const candidates = await github.paginate(github.rest.pulls.list, {
+              owner,
+              repo,
+              state: 'closed',
+              base: ref,
             });
             let pr;
-            for (const item of items) {
-              const candidate = await github.rest.pulls.get({
-                owner,
-                repo,
-                pull_number: item.number,
-              });
+            for (const candidate of candidates) {
               if (candidate.data.merge_commit_sha === process.env.SHA) {
                 pr = candidate;
                 break;

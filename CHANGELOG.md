@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - do not install the same version of Go twice in the go-test and go-check workflows
 - mark the Go update commits as breaking changes in the style of conventional commits
+- removed usage of search API from the releaser workflow
 
 ### Fixed
 - do not mark prereleases or versions with build strings as latest in the releaser workflow
