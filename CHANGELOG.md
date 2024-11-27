@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+### Added
+- a `cgo` job specific configuration variable which disables cgo in the go-test workflow
+
 ### Changed
 - do not install the same version of Go twice in the go-test and go-check workflows
 

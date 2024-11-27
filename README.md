@@ -113,6 +113,13 @@ If you want to disable verbose logging or test shuffling, you can do so by setti
 }
 ```
 
+If you want to disable cgo, you can do so by setting `cgo` to `false` in `.github/workflows/go-test-config.json`:
+```json
+{
+  "cgo": false
+}
+```
+
 ### Workflow Modification
 
 You can modify the workflows distributed by Unified CI as you wish. Unified CI will only ever try to update the versions of reusables after the initial distribution. Similarly to how dependabot operates.
