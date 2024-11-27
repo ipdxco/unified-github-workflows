@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - do not install the same version of Go twice in the go-test and go-check workflows
 
+### Fixed
+- do not mark prereleases or versions with build strings as latest in the releaser workflow
+
 ## [1.0.15] - 2024-11-28
 ### Changed
 - updated references to aegir master to main after the default branch rename
