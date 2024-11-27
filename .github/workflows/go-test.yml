@@ -44,6 +44,7 @@ jobs:
         with:
           submodules: recursive
       - name: Check out the latest stable version of Go
+        id: stable
         uses: actions/setup-go@v5
         with:
           go-version: stable
@@ -94,6 +95,7 @@ jobs:
           echo "GORACEFLAGS=-v $GORACEFLAGS" >> $GITHUB_ENV
       - name: Set up the Go version read from the go.mod file
         uses: actions/setup-go@v5
+        if: steps.go.outputs.version == steps.stable.outputs.go-version && inputs.go-cache == 'false'
         with:
           go-version: ${{ steps.go.outputs.version }}
           cache: ${{ inputs.go-cache }}
