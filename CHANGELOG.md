@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [1.0.15] - 2024-11-28
+### Changed
+- updated references to aegir master to main after the default branch rename
+
 ## [1.0.14] - 2024-10-23
 ### Changed
 - simplified the default `go-version` input calculation in the go-check workflow
