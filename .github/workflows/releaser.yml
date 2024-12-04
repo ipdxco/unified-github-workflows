@@ -110,7 +110,7 @@ jobs:
             });
             let pr;
             for (const candidate of candidates) {
-              if (candidate.data.merge_commit_sha === process.env.SHA) {
+              if (candidate.merge_commit_sha === process.env.SHA) {
                 pr = candidate;
                 break;
               }
