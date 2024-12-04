@@ -116,8 +116,8 @@ jobs:
               }
             }
             if (pr !== undefined) {
-              console.log(`Found PR: ${pr.data.html_url}`);
-              const labels = pr.data.labels.map(l => l.name);
+              console.log(`Found PR: ${pr.html_url}`);
+              const labels = pr.labels.map(l => l.name);
               const release = labels.includes('release');
               console.log(`This is a release PR: ${release}`);
               core.setOutput('release', release);
