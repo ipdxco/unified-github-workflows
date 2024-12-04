@@ -44,6 +44,7 @@ jobs:
         with:
           submodules: recursive
       - name: Check out the latest stable version of Go
+        id: stable
         uses: actions/setup-go@v5
         with:
           go-version: stable
@@ -94,6 +95,7 @@ jobs:
           echo "GORACEFLAGS=-v $GORACEFLAGS" >> $GITHUB_ENV
       - name: Set up the Go version read from the go.mod file
         uses: actions/setup-go@v5
+        if: steps.go.outputs.version != steps.stable.outputs.go-version || inputs.go-cache != 'false'
         with:
           go-version: ${{ steps.go.outputs.version }}
           cache: ${{ inputs.go-cache }}
@@ -109,6 +111,7 @@ jobs:
         uses: protocol/multiple-go-modules@v1.4
         env:
           GOFLAGS: ${{ format('{0} {1}', env.GOTESTFLAGS, env.GOFLAGS) }}
+          CGO_ENABLED: ${{ toJSON(fromJSON(steps.config.outputs.json).cgo) != 'false' }}
         with:
           run: go test ./...
       - name: Run tests (32 bit)
@@ -120,6 +123,7 @@ jobs:
         env:
           GOARCH: 386
           GOFLAGS: ${{ format('{0} {1}', env.GO386FLAGS, env.GOFLAGS) }}
+          CGO_ENABLED: ${{ toJSON(fromJSON(steps.config.outputs.json).cgo) != 'false' }}
         with:
           run: |
             export "PATH=$PATH_386:$PATH"
@@ -132,6 +136,7 @@ jobs:
         uses: protocol/multiple-go-modules@v1.4
         env:
           GOFLAGS: ${{ format('{0} {1}', env.GORACEFLAGS, env.GOFLAGS) }}
+          CGO_ENABLED: ${{ toJSON(fromJSON(steps.config.outputs.json).cgo) != 'false' }}
         with:
           run: go test -race ./...
       - name: Collect coverage files

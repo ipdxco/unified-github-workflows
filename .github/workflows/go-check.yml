@@ -23,6 +23,7 @@ jobs:
         with:
           submodules: recursive
       - name: Check out the latest stable version of Go
+        id: stable
         uses: actions/setup-go@v5
         with:
           go-version: stable
@@ -35,6 +36,7 @@ jobs:
         uses: ipdxco/unified-github-workflows/.github/actions/read-go-mod@main
       - name: Set up the Go version read from the go.mod file
         id: go
+        if: (inputs.go-version || fromJSON(steps.go-mod.outputs.json).Go) != steps.stable.outputs.go-version || inputs.go-cache != 'false'
         uses: actions/setup-go@v5
         with:
           go-version: ${{ inputs.go-version || fromJSON(steps.go-mod.outputs.json).Go }}

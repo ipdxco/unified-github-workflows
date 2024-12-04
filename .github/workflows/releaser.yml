@@ -61,6 +61,7 @@ jobs:
           done
           echo "version=$version" | tee -a $GITHUB_OUTPUT
           echo "tag=${prefix}${version}" | tee -a $GITHUB_OUTPUT
+          echo "suffix=${version#*[-+]}" | tee -a $GITHUB_OUTPUT
       - id: latest
         if: steps.version.outputs.version != ''
         name: Determine latest version
@@ -94,30 +95,29 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
           REPOSITORY: ${{ github.repository }}
-          QUERY: repository:${{ github.repository }} is:pr is:merged ${{ github.sha }}
+          REF: ${{ github.ref }}
           SHA: ${{ github.sha }}
         uses: actions/github-script@v7
         with:
           script: |
             const [owner, repo] = process.env.REPOSITORY.split('/');
-            const items = await github.paginate(github.rest.search.issuesAndPullRequests, {
-              q: process.env.QUERY,
+            const ref = process.env.REF.replace(/^refs\/heads\//, '');
+            const candidates = await github.paginate(github.rest.pulls.list, {
+              owner,
+              repo,
+              state: 'closed',
+              base: ref,
             });
             let pr;
-            for (const item of items) {
-              const candidate = await github.rest.pulls.get({
-                owner,
-                repo,
-                pull_number: item.number,
-              });
-              if (candidate.data.merge_commit_sha === process.env.SHA) {
+            for (const candidate of candidates) {
+              if (candidate.merge_commit_sha === process.env.SHA) {
                 pr = candidate;
                 break;
               }
             }
             if (pr !== undefined) {
-              console.log(`Found PR: ${pr.data.html_url}`);
-              const labels = pr.data.labels.map(l => l.name);
+              console.log(`Found PR: ${pr.html_url}`);
+              const labels = pr.labels.map(l => l.name);
               const release = labels.includes('release');
               console.log(`This is a release PR: ${release}`);
               core.setOutput('release', release);
@@ -148,7 +148,7 @@ jobs:
           tag_name: ${{ steps.version.outputs.tag }}
           generate_release_notes: true
           target_commitish: ${{ github.sha }}
-          make_latest: ${{ steps.version.outputs.prefix == 'v' && steps.version.outputs.tag == steps.latest.outputs.latest }}
+          make_latest: ${{ steps.version.outputs.prefix == 'v' && steps.version.outputs.suffix == '' && steps.version.outputs.tag == steps.latest.outputs.latest }}
           token: ${{ secrets.UCI_GITHUB_TOKEN || github.token }}
       - name: Create release.json
         if: steps.release.outputs.id != ''
@@ -163,7 +163,7 @@ jobs:
               "id": "${{ steps.release.outputs.id }}",
               "upload_url": "${{ steps.release.outputs.upload_url }}",
               "assets": ${{ steps.release.outputs.assets }},
-              "make_latest": ${{ steps.version.outputs.prefix == 'v' && steps.version.outputs.tag == steps.latest.outputs.latest }},
+              "make_latest": ${{ steps.version.outputs.prefix == 'v' && steps.version.outputs.suffix == '' && steps.version.outputs.tag == steps.latest.outputs.latest }},
               "source": "${{ matrix.source }}"
             }
         run: |
