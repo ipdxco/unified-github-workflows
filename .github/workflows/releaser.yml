@@ -60,8 +60,11 @@ jobs:
             root="$(dirname "$root")"
           done
           echo "version=$version" | tee -a $GITHUB_OUTPUT
-          echo "tag=${prefix}${version}" | tee -a $GITHUB_OUTPUT
-          echo "suffix=${version#*[-+]}" | tee -a $GITHUB_OUTPUT
+          tag="${prefix}${version}"
+          echo "tag=$tag" | tee -a $GITHUB_OUTPUT
+          suffix="${version#*[-+]}"
+          suffix="${suffix#"$version"}"
+          echo "suffix=$suffix" | tee -a $GITHUB_OUTPUT
       - id: latest
         if: steps.version.outputs.version != ''
         name: Determine latest version

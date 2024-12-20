@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [1.0.17] - 2024-12-06
+### Fixed
+- the releaser workflow was not setting the suffix correctly
+
 ## [1.0.16] - 2024-12-05
 ### Added
 - a `cgo` job specific configuration variable which disables cgo in the go-test workflow
