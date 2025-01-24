@@ -143,7 +143,7 @@ jobs:
         id: coverages
         run: echo "files=$(find . -type f -name 'module-coverage.txt' | tr -s '\n' ',' | sed 's/,$//')" >> $GITHUB_OUTPUT
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@e28ff129e5465c2c0dcc6f003fc735cb6ae0c673 # v4.5.0
+        uses: codecov/codecov-action@13ce06bfc6bbe3ecf90edbbf1bc32fe5978ca1d3 # v5.3.1
         with:
           files: ${{ steps.coverages.outputs.files }}
           env_vars: OS=${{ matrix.os }}, GO=${{ steps.go.outputs.version }}
