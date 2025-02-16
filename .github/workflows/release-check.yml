@@ -205,7 +205,7 @@ jobs:
           echo "output<<$EOF" >> $GITHUB_OUTPUT
           if [[ "$LANGUAGE" == "Go" ]]; then
             go mod download
-            go install golang.org/x/exp/cmd/gorelease@9b4947da3948bdd8d6ae728bc4ba72b93f61e841 # https://cs.opensource.google/go/x/exp/+/9b4947da3948bdd8d6ae728bc4ba72b93f61e841
+            go install golang.org/x/exp/cmd/gorelease@eff6e970281f06e676cb2d92dab7eebf70f6b968 # https://cs.opensource.google/go/x/exp/+/eff6e970281f06e676cb2d92dab7eebf70f6b968
             go install github.com/smola/gocompat/cmd/gocompat@8498b97a44792a3a6063c47014726baa63e2e669 # v0.3.0
             echo "\`gorelease\` says:" >> $GITHUB_OUTPUT
             echo "\`\`\`" >> $GITHUB_OUTPUT
