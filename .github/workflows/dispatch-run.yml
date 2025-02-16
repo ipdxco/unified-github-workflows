@@ -4,14 +4,14 @@ on:
   workflow_dispatch:
     inputs:
       workflow:
-        description: "Workflow to dispatch"
+        description: "Workflow to dispatch (e.g. .github/workflows/update-go.yml)"
         required: true
       inputs:
-        description: "Workflow inputs"
+        description: 'Workflow inputs (e.g {"version": "1.24", "dry-run": "true"})'
         required: false
         default: '{}'
       filter:
-        description: "Filter to apply to the list of repositories"
+        description: 'Filter to apply to the list of repositories (e.g. .language == "Go" and .owner.login == "ipdxco")'
         required: false
         default: 'true'
       dry-run:
