@@ -9,4 +9,4 @@ on:
 
 jobs:
   main:
-    uses: ipdxco/unified-github-workflows/.github/workflows/reusable-semantic-pull-request.yml@${{{ .config.versions.uci // (.source.tag | sub("\\.[^.\\-\\+]+(?=\\-|\\+|$)"; "")) }}}
+    uses: ipdxco/unified-github-workflows/.github/workflows/reusable-semantic-pull-request.yml@${{{ .config.versions.uci // (.source.tag | sub("\\.[^\\.]+\\.[^\\.\\-\\+]+(?=\\-|\\+|$)"; "")) }}}
