@@ -26,12 +26,10 @@ jobs:
       branch: uci/copy-templates
       script: copy-templates.sh
       defaults: |
-        common:
-          files:
-            - .github/uci.yml
+        files:
+          - .github/uci.yml
       override: |
-        common:
-          force: ${{ github.event.inputs.force }}
-          versions:
-            uci: ${{ github.event.inputs.version }}
+        force: ${{ github.event.inputs.force }}
+        versions:
+          uci: ${{ github.event.inputs.version }}
       dry-run: ${{ github.event.inputs.dry-run == 'true' }}

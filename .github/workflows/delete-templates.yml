@@ -23,6 +23,5 @@ jobs:
       branch: uci/delete-templates
       script: delete-templates.sh
       override: |
-        common:
-          files: ${{ github.event.inputs.files }}
+        files: ${{ github.event.inputs.files }}
       dry-run: ${{ github.event.inputs.dry-run == 'true' }}
