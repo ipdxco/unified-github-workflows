@@ -1,0 +1,27 @@
+name: Close Generated Issues
+
+on:
+  workflow_call:
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+    steps:
+    - uses: actions/stale@v9
+      with:
+        repo-token: ${{ github.token }}
+        stale-issue-message: |
+          It seems this issue might have been automatically generated. To help us address it effectively, please provide additional details.
+
+          We value the use of LLMs for code generation and welcome your contributions but please ensure your submission is of such quality that a maintainer will spend less time reviewing it than implementing it themselves. Verify the code functions correctly and meets our standards. If your change requires tests, kindly include them and ensure they pass.
+
+          If no further information is provided, the issue may be automatically closed. Thank you for your understanding and for aiding us in maintaining quality contributions!
+        stale-issue-label: 'need/author-input'
+        any-of-labels: 'kind/generated'
+        days-before-issue-stale: 0
+        days-before-issue-close: -1
+        enable-statistics: true
+        remove-stale-when-updated: false
