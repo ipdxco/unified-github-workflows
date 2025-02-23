@@ -26,26 +26,9 @@ jobs:
       branch: uci/copy-templates
       script: copy-templates.sh
       defaults: |
-        language:
-          Go:
-            files:
-              - .github/workflows/go-test.yml
-              - .github/workflows/go-check.yml
-              - .github/workflows/releaser.yml
-              - .github/workflows/release-check.yml
-              - .github/workflows/tagpush.yml
-              - version.json
-          JavaScript:
-            files:
-              - .github/workflows/js-test-and-release.yml
-          TypeScript:
-            files:
-              - .github/workflows/js-test-and-release.yml
-          Rust:
-            files:
-              - .github/workflows/releaser.yml
-              - .github/workflows/release-check.yml
-              - .github/workflows/tagpush.yml
+        common:
+          files:
+            - .github/uci.yml
       override: |
         common:
           force: ${{ github.event.inputs.force }}

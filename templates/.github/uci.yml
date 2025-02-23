@@ -1,0 +1,29 @@
+# Welcome to Unified CI! This file contains the configuration for your project.
+# You can edit it to customize the behavior of Unified CI.
+# For more information, see https://github.com/ipdxco/unified-github-workflows
+
+# The Unified CI templates which should be distributed to your project.
+files: ${{{
+  .github.languages[0] as $language |
+  {
+    "Go": [
+      ".github/workflows/go-test.yml",
+      ".github/workflows/go-check.yml",
+      ".github/workflows/releaser.yml",
+      ".github/workflows/release-check.yml",
+      ".github/workflows/tagpush.yml",
+      "version.json"
+    ],
+    "JavaScript": [
+      ".github/workflows/js-test-and-release.yml"
+    ],
+    "TypeScript": [
+      ".github/workflows/js-test-and-release.yml"
+    ],
+    "Rust": [
+      ".github/workflows/releaser.yml",
+      ".github/workflows/release-check.yml",
+      ".github/workflows/tagpush.yml"
+    ]
+  } | .[$language] // []
+}}}
