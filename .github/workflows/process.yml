@@ -77,15 +77,12 @@ jobs:
         path: ${{ github.repository }}
         ref: ${{ github.ref }}
         fetch-depth: 0
-    - id: date
-      name: Get current date
-      run: echo "today=$(date +%Y-%m-%d)" | tee -a $GITHUB_OUTPUT
     - id: github-cache
       name: Get ${{ github.repository }} GitHub info from cache
       uses: actions/cache/restore@v4
       with:
         path: ${{ github.repository }}.info
-        key: ${{ github.repository }}-${{ steps.date.outputs.today }}
+        key: ${{ github.repository }}
     - name: Get ${{ matrix.repository }} GitHub info from GitHub API
       if: steps.github-cache.outputs.cache-hit != 'true'
       env:
@@ -118,7 +115,7 @@ jobs:
       uses: actions/cache/save@v4
       with:
         path: ${{ github.repository }}.info
-        key: ${{ github.repository }}-${{ steps.date.outputs.today }}
+        key: ${{ github.repository }}
     - id: source
       name: Get ${{ github.repository }} GitHub info
       working-directory: ${{ github.repository }}
