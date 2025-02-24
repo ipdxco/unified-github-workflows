@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [1.0.19] - 2025-02-24
+### Added
+- an optional `spell-check` step to the `js-test-and-release` workflow
+
+### Changed
+- made `build` the job the other jobs depend on in the `js-test-and-release` workflow to improve caching
+
 ## [1.0.18] - 2025-02-16
 ### Changed
 - update `gorelease` and `staticcheck` ahead of the Go 1.24 rollout
