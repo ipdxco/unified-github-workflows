@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [1.0.20] - 2025-02-24
+### Added
+- an optional `draft` input to the `releaser` workflow
+
 ## [1.0.19] - 2025-02-24
 ### Added
 - an optional `spell-check` step to the `js-test-and-release` workflow

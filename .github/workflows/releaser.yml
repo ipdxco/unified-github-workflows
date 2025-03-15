@@ -14,6 +14,10 @@ on:
         required: false
         type: string
         default: '/'
+      draft:
+        required: false
+        type: boolean
+        default: false
     outputs:
       json:
         description: JSON aggregation of release.json artifacts
@@ -147,7 +151,7 @@ jobs:
         if: steps.tag.outputs.exists == 'false'
         uses: galargh/action-gh-release@571276229e7c9e6ea18f99bad24122a4c3ec813f # https://github.com/galargh/action-gh-release/pull/1
         with:
-          draft: false
+          draft: ${{ inputs.draft }}
           tag_name: ${{ steps.version.outputs.tag }}
           generate_release_notes: true
           target_commitish: ${{ github.sha }}
@@ -160,7 +164,7 @@ jobs:
           SOURCE: ${{ matrix.source }}
           RELEASE: |
             {
-              "draft": false,
+              "draft": ${{ inputs.draft }},
               "version": "${{ steps.version.outputs.tag }}",
               "url": "${{ steps.release.outputs.url }}",
               "id": "${{ steps.release.outputs.id }}",
