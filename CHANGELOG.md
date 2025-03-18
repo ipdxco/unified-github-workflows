@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [1.0.21] - 2025-02-24
+### Fixed
+- allow overwriting release.json artifacts
+
 ## [1.0.20] - 2025-02-24
 ### Added
 - an optional `draft` input to the `releaser` workflow
