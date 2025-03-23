@@ -10,19 +10,19 @@ jobs:
       issues: write
       pull-requests: write
     steps:
-    - uses: actions/stale@v9
-      with:
-        repo-token: ${{ github.token }}
-        stale-issue-message: |
-          Oops, seems like we needed more information for this issue, please comment with more details or this issue will be closed in 7 days.
-        close-issue-message: |
-          This issue was closed because it is missing author input.
-        stale-issue-label: 'kind/stale'
-        only-issue-labels: 'need/author-input'
-        exempt-issue-labels: 'need/triage,need/community-input,need/maintainer-input,need/maintainers-input,need/analysis,status/blocked,status/in-progress,status/ready,status/deferred,status/inactive'
-        days-before-issue-stale: 6
-        days-before-issue-close: 7
-        enable-statistics: true
-        only-pr-labels: 'This workflow should process only issues - this ensures we finish processing PRs early'
-        days-before-pr-stale: -1
-        days-before-pr-close: -1
+      - uses: galargh/stale@main # TODO: replace actions/stale once https://github.com/actions/stale/issues/1136 and https://github.com/actions/stale/issues/1133 are resolved
+        with:
+          repo-token: ${{ github.token }}
+          stale-issue-message: |
+            Oops, seems like we needed more information for this issue, please comment with more details or this issue will be closed in 7 days.
+          close-issue-message: |
+            This issue was closed because it is missing author input.
+          stale-issue-label: 'kind/stale'
+          only-issue-labels: 'need/author-input'
+          exempt-issue-labels: 'need/triage,need/community-input,need/maintainer-input,need/maintainers-input,need/analysis,status/blocked,status/in-progress,status/ready,status/deferred,status/inactive'
+          days-before-issue-stale: 6
+          days-before-issue-close: 7
+          enable-statistics: true
+          only-pr-labels: 'This workflow should process only issues - this ensures we finish processing PRs early'
+          days-before-pr-stale: -1
+          days-before-pr-close: -1
