@@ -106,7 +106,7 @@ jobs:
       env:
         REPO: ${{ matrix.repository }}
       run: |
-        workflows="$(ls "REPO/.github/workflows" || echo "" | jq -Rc 'split("\n")[:-1]')"
+        workflows="$(ls "REPO/.github/workflows" || echo "" | jq -Rcs 'split("\n")[:-1]')"
         eof="EOF$RANDOM"
         echo "json<<$eof" >> $GITHUB_OUTPUT
         jq --argjson workflows "$workflows" '. + { workflows: $workflows }' "$REPO.info" | tee -a $GITHUB_OUTPUT
@@ -121,7 +121,7 @@ jobs:
       name: Get ${{ github.repository }} GitHub info
       working-directory: ${{ github.repository }}
       run: |
-        workflows="$(ls templates/.github/workflows | jq -Rc 'split("\n")[:-1]')"
+        workflows="$(ls templates/.github/workflows | jq -Rcs 'split("\n")[:-1]')"
         eof="EOF$RANDOM"
         tag="$(git tag --points-at $(git describe --tags --abbrev=0 || true) | sort -V | tail -n-1)"
         echo "json<<$eof" >> $GITHUB_OUTPUT
