@@ -106,7 +106,7 @@ jobs:
       env:
         REPO: ${{ matrix.repository }}
       run: |
-        workflows="$(ls .github/workflows | jq -Rc 'split("\n")[:-1]')"
+        workflows="$(ls "REPO/.github/workflows" || echo "" | jq -Rc 'split("\n")[:-1]')"
         eof="EOF$RANDOM"
         echo "json<<$eof" >> $GITHUB_OUTPUT
         jq --argjson workflows "$workflows" '. + { workflows: $workflows }' "$REPO.info" | tee -a $GITHUB_OUTPUT
