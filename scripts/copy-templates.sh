@@ -13,7 +13,7 @@ root="$(pwd)"
 
 pushd "$TARGET" > /dev/null
 
-for f in $(jq -r '.config.files[] // []' <<< "$CONTEXT"); do
+for f in $(jq -r '.config.files // [] | .[]' <<< "$CONTEXT"); do
   if [[ -f "$f" && "$force" != "true" ]]; then
     # Temporarily always force copy .github/workflows/stale-issue.yml and .github/workflows/semantic-pull-request.yml
     if [[ "$f" != ".github/workflows/stale-issue.yml" && "$f" != ".github/workflows/semantic-pull-request.yml" ]]; then
@@ -82,7 +82,7 @@ if [[ "$force" != "true" ]]; then
     done <<< "$(jq -c '.["updated-dependency-files"] | .[] // []' <<< "$pr")"
   done <<< "$(yq -c '.output | map(select(.type == "create_pull_request")) | map(.expect.data) | .[]' "$plan")"
 
-  for f in $(jq -r '.config.files[] // []' <<< "$CONTEXT"); do
+  for f in $(jq -r '.config.files // [] | .[]' <<< "$CONTEXT"); do
     if [[ ! -f "$f" ]]; then
       echo "$f does not exist. Skipping."
       continue
