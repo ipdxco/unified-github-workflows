@@ -24,6 +24,8 @@ jobs:
         stale-pr-label: 'need/author-input'
         any-of-pr-labels: 'kind/generated'
         days-before-pr-stale: 0
+        days-before-issue-stale: -1
         days-before-pr-close: 7
+        days-before-issue-close: -1
         enable-statistics: true
         remove-stale-when-updated: false

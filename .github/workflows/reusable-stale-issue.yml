@@ -21,5 +21,7 @@ jobs:
         any-of-issue-labels: 'need/author-input'
         exempt-issue-labels: 'need/triage,need/community-input,need/maintainer-input,need/maintainers-input,need/analysis,status/blocked,status/in-progress,status/ready,status/deferred,status/inactive'
         days-before-issue-stale: 6
+        days-before-pr-stale: -1
         days-before-issue-close: 7
+        days-before-pr-close: -1
         enable-statistics: true
