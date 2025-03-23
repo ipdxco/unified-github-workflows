@@ -26,6 +26,10 @@ org:
             - .github/workflows/releaser.yml
             - .github/workflows/release-check.yml
             - .github/workflows/tagpush.yml
+    repo:
+      unified-github-workflows:
+        defaults:
+          files: []
   ipfs-examples:
     defaults: &ipshipyard-defaults
       files:
@@ -297,6 +301,9 @@ org:
       specs: *ipshipyard-repo
       start-ipfs-daemon-action: *ipshipyard-repo
       steering-wg: *ipshipyard-repo
+      uci:
+        defaults:
+          files: []
       working-groups: *ipshipyard-repo
   ipld:
     defaults: *ipshipyard-defaults
@@ -455,6 +462,9 @@ org:
       team-mgmt: *ipshipyard-repo
       test-plans: *ipshipyard-repo
       test: *ipshipyard-repo
+      uci:
+        defaults:
+          files: []
       universal-connectivity: *ipshipyard-repo
       website-new: *ipshipyard-repo
       website: *ipshipyard-repo
