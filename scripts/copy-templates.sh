@@ -15,8 +15,10 @@ pushd "$TARGET" > /dev/null
 
 for f in $(jq -r '.config.files[] // []' <<< "$CONTEXT"); do
   if [[ -f "$f" && "$force" != "true" ]]; then
-    echo "$f already exists. Skipping."
-    continue
+    if [[ "$f" != ".github/workflows/stale-issue.yml" && "$f" != ".github/workflows/semantic-pull-request.yml" ]]; then
+      echo "$f already exists. Skipping."
+      continue
+    fi
   fi
 
   dir="$(dirname "$f")"
