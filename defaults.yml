@@ -30,7 +30,7 @@ org:
     defaults: &ipshipyard-defaults
       files:
         - .github/workflows/stale-issue.yml
-        - .github/workflows/generated-issue.yml
+        - .github/workflows/generated-pr.yml
   ipfs-shipyard: &ipshipyard
     defaults: *ipshipyard-defaults
     language: &ipshipyard-language
@@ -44,13 +44,13 @@ org:
             - .github/workflows/tagpush.yml
             - version.json
             - .github/workflows/stale-issue.yml
-            - .github/workflows/generated-issue.yml
+            - .github/workflows/generated-pr.yml
       JavaScript: &ipshipyard-js
         defaults:
           files:
             - .github/workflows/js-test-and-release.yml
             - .github/workflows/stale-issue.yml
-            - .github/workflows/generated-issue.yml
+            - .github/workflows/generated-pr.yml
       TypeScript: *ipshipyard-js
       Rust:
         defaults:
@@ -59,7 +59,7 @@ org:
             - .github/workflows/release-check.yml
             - .github/workflows/tagpush.yml
             - .github/workflows/stale-issue.yml
-            - .github/workflows/generated-issue.yml
+            - .github/workflows/generated-pr.yml
     repo:
       Durin: &ipshipyard-repo
         defaults: *ipshipyard-defaults
@@ -350,7 +350,7 @@ org:
             - .github/workflows/js-test-and-release.yml
             - .github/workflows/semantic-pull-request.yml
             - .github/workflows/stale-issue.yml
-            - .github/workflows/generated-issue.yml
+            - .github/workflows/generated-pr.yml
       TypeScript: *libp2p-js
     repo:
       .github: *ipshipyard-repo
@@ -399,7 +399,7 @@ org:
           files:
             - .github/workflows/semantic-pull-request.yml
             - .github/workflows/stale-issue.yml
-            - .github/workflows/generated-issue.yml
+            - .github/workflows/generated-pr.yml
       js-libp2p-daemon-client: *libp2p-repo
       js-libp2p-devtools: *libp2p-repo
       js-libp2p-example-auto-tls: *libp2p-repo
