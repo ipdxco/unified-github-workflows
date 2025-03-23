@@ -21,7 +21,7 @@ jobs:
           If no further information is provided, the issue may be automatically closed. Thank you for your understanding and for aiding us in maintaining quality contributions!
         stale-issue-label: 'need/author-input'
         any-of-labels: 'kind/generated'
-        days-before-issue-stale: 0
-        days-before-issue-close: -1
+        days-before-stale: 0
+        days-before-close: -1
         enable-statistics: true
         remove-stale-when-updated: false
