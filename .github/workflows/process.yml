@@ -106,9 +106,10 @@ jobs:
       env:
         REPO: ${{ matrix.repository }}
       run: |
+        workflows="$(ls .github/workflows | jq -Rc 'split("\n")[:-1]')"
         eof="EOF$RANDOM"
         echo "json<<$eof" >> $GITHUB_OUTPUT
-        jq . "$REPO.info" | tee -a $GITHUB_OUTPUT
+        jq --argjson workflows "$workflows" '. + { workflows: $workflows }' "$REPO.info" | tee -a $GITHUB_OUTPUT
         echo "$eof" >> $GITHUB_OUTPUT
     - if: steps.github-cache.outputs.cache-hit != 'true'
       name: Save ${{ matrix.repository }} GitHub info to cache
@@ -120,12 +121,11 @@ jobs:
       name: Get ${{ github.repository }} GitHub info
       working-directory: ${{ github.repository }}
       run: |
+        workflows="$(ls templates/.github/workflows | jq -Rc 'split("\n")[:-1]')"
         eof="EOF$RANDOM"
         tag="$(git tag --points-at $(git describe --tags --abbrev=0 || true) | sort -V | tail -n-1)"
         echo "json<<$eof" >> $GITHUB_OUTPUT
-        echo '{' >> $GITHUB_OUTPUT
-        echo '"tag":"'"$tag"'"' >> $GITHUB_OUTPUT
-        echo '}' >> $GITHUB_OUTPUT
+        jq -n --arg tag "$tag" --argjson workflows "$workflows" '{ tag: $tag, workflows: $workflows }' | tee -a $GITHUB_OUTPUT
         echo "$eof" >> $GITHUB_OUTPUT
     - id: config
       name: Get ${{ matrix.repository }} config
