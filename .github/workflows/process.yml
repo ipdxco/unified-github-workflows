@@ -78,11 +78,11 @@ jobs:
         ref: ${{ github.ref }}
         fetch-depth: 0
     - id: github-cache
-      name: Get ${{ github.repository }} GitHub info from cache
+      name: Get ${{ matrix.repository }} GitHub info from cache
       uses: actions/cache/restore@v4
       with:
-        path: ${{ github.repository }}.info
-        key: ${{ github.repository }}
+        path: ${{ matrix.repository }}.info
+        key: ${{ matrix.repository }}
     - name: Get ${{ matrix.repository }} GitHub info from GitHub API
       if: steps.github-cache.outputs.cache-hit != 'true'
       env:
@@ -102,20 +102,20 @@ jobs:
         echo '"tag":"'"$tag"'"' >> "$REPO.info"
         echo '}' >> "$REPO.info"
     - id: github
-      name: Get ${{ github.repository }} GitHub info
+      name: Get ${{ matrix.repository }} GitHub info
       env:
-        REPO: ${{ github.repository }}
+        REPO: ${{ matrix.repository }}
       run: |
         eof="EOF$RANDOM"
         echo "json<<$eof" >> $GITHUB_OUTPUT
         jq . "$REPO.info" | tee -a $GITHUB_OUTPUT
         echo "$eof" >> $GITHUB_OUTPUT
     - if: steps.github-cache.outputs.cache-hit != 'true'
-      name: Save ${{ github.repository }} GitHub info to cache
+      name: Save ${{ matrix.repository }} GitHub info to cache
       uses: actions/cache/save@v4
       with:
-        path: ${{ github.repository }}.info
-        key: ${{ github.repository }}
+        path: ${{ matrix.repository }}.info
+        key: ${{ matrix.repository }}
     - id: source
       name: Get ${{ github.repository }} GitHub info
       working-directory: ${{ github.repository }}
