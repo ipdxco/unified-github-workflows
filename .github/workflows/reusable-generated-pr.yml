@@ -22,10 +22,11 @@ jobs:
         close-pr-message: |
           This PR was closed because it is missing author input.
         stale-pr-label: 'need/author-input'
-        any-of-pr-labels: 'kind/generated'
+        only-pr-labels: 'kind/generated'
         days-before-pr-stale: 0
-        days-before-issue-stale: -1
         days-before-pr-close: 7
-        days-before-issue-close: -1
         enable-statistics: true
         remove-stale-when-updated: false
+        only-issue-labels: 'This workflow should process only PRs - this ensures we finish processing issues early'
+        days-before-issue-stale: -1
+        days-before-issue-close: -1
