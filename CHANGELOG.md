@@ -11,10 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `.github/workflows/stale-issue.yml` template
 - `.github/workflows/semantic-pull-request.yml` template
 - caching of repository info to reduce the number of GitHub API calls made by the `process` workflow
-- copying of `.github/uci.yml` template to the repository when `web3-bot` is added as a collaborator
-
-### Changed
-- made the `.github/uci.yml` configuration file a requirement
+- copying of `.github/uci.yml` template to the repository when `web3-bot` is added as a collaborator (for orgs/repositories not managed by DX)
 
 ## [1.0.21] - 2025-02-24
 ### Fixed
