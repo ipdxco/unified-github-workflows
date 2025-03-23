@@ -136,7 +136,7 @@ jobs:
         DEFAULTS: ${{ inputs.defaults }}
         OVERRIDE: ${{ inputs.override }}
       run: |
-        org="${REPO#*/}"
+        org="${REPO%/*}"
         defaults="$(yq --arg org "$org" --arg language "$LANGUAGE" 'del(.. | nulls) | .org[$org].language[$language].defaults // .org[$org].defaults // .language[$language].defaults // .defaults // .' <<< "$DEFAULTS")"
         override="$(yq --arg org "$org" --arg language "$LANGUAGE" 'del(.. | nulls) | .org[$org].language[$language].override // .org[$org].override // .language[$language].override // .override // .' <<< "$OVERRIDE")"
         if [[ -f .github/uci.yml ]]; then
