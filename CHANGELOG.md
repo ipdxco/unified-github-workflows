@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - `.github/uci.yml` template
 - `.github/workflows/generated-pr.yml` template
-- `.github/workflows/stale-issue.yml` template
+- `.github/workflows/stale.yml` template
 - `.github/workflows/semantic-pull-request.yml` template
 - caching of repository info to reduce the number of GitHub API calls made by the `process` workflow
 - copying of `.github/uci.yml` template to the repository when `web3-bot` is added as a collaborator (for orgs/repositories not managed by DX)
