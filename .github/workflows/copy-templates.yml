@@ -75,7 +75,6 @@ jobs:
                 defaults:
                   files:
                     - .github/workflows/js-test-and-release.yml
-                    - .github/workflows/semantic-pull-request.yml
                     - .github/workflows/stale-issue.yml
                     - .github/workflows/generated-issue.yml
               TypeScript: *ipshipyard-js
@@ -91,7 +90,17 @@ jobs:
           ipfs: *ipshipyard
           ipld: *ipshipyard
           ipshipyard: *ipshipyard
-          libp2p: *ipshipyard
+          libp2p:
+            <<: *ipshipyard
+            language:
+              JavaScript: &libp2p-js
+                defaults:
+                  files:
+                    - .github/workflows/js-test-and-release.yml
+                    - .github/workflows/semantic-pull-request.yml
+                    - .github/workflows/stale-issue.yml
+                    - .github/workflows/generated-issue.yml
+              TypeScript: *libp2p-js
           multiformats: *ipshipyard
           plprobelab: *ipshipyard
       override: |
