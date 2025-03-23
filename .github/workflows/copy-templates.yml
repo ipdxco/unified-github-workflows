@@ -34,27 +34,26 @@ jobs:
             defaults:
               files: []
             language:
-              language:
-                Go:
-                  defaults:
-                    files:
-                      - .github/workflows/go-test.yml
-                      - .github/workflows/go-check.yml
-                      - .github/workflows/releaser.yml
-                      - .github/workflows/release-check.yml
-                      - .github/workflows/tagpush.yml
-                      - version.json
-                JavaScript: &filoz-js
-                  defaults:
-                    files:
-                      - .github/workflows/js-test-and-release.yml
-                TypeScript: *filoz-js
-                Rust:
-                  defaults:
-                    files:
-                      - .github/workflows/releaser.yml
-                      - .github/workflows/release-check.yml
-                      - .github/workflows/tagpush.yml
+              Go:
+                defaults:
+                  files:
+                    - .github/workflows/go-test.yml
+                    - .github/workflows/go-check.yml
+                    - .github/workflows/releaser.yml
+                    - .github/workflows/release-check.yml
+                    - .github/workflows/tagpush.yml
+                    - version.json
+              JavaScript: &filoz-js
+                defaults:
+                  files:
+                    - .github/workflows/js-test-and-release.yml
+              TypeScript: *filoz-js
+              Rust:
+                defaults:
+                  files:
+                    - .github/workflows/releaser.yml
+                    - .github/workflows/release-check.yml
+                    - .github/workflows/tagpush.yml
           ipfs-examples: &ipshipyard
             defaults:
               files:
