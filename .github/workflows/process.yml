@@ -132,11 +132,13 @@ jobs:
       working-directory: ${{ matrix.repository }}
       env:
         REPO: ${{ matrix.repository }}
+        LANGUAGE: ${{ fromJSON(steps.github.outputs.json).languages[0] }}
         DEFAULTS: ${{ inputs.defaults }}
         OVERRIDE: ${{ inputs.override }}
       run: |
-        defaults="$(yq "del(.. | nulls)" <<< "$DEFAULTS")"
-        override="$(yq "del(.. | nulls)" <<< "$OVERRIDE")"
+        org="${REPO#*/}"
+        defaults="$(yq --arg org "$org" --arg language "$LANGUAGE" 'del(.. | nulls) | .org[$org].language[$language].defaults // .org[$org].defaults // .language[$language].defaults // .defaults // .' <<< "$DEFAULTS")"
+        override="$(yq --arg org "$org" --arg language "$LANGUAGE" 'del(.. | nulls) | .org[$org].language[$language].override // .org[$org].override // .language[$language].override // .override // .' <<< "$OVERRIDE")"
         if [[ -f .github/uci.yml ]]; then
           echo "json=$(yq -c --argjson defaults "$defaults" --argjson override "$override" '$defaults + . + $override' .github/uci.yml)" >> $GITHUB_OUTPUT
         else

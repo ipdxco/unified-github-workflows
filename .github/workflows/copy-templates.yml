@@ -26,8 +26,75 @@ jobs:
       branch: uci/copy-templates
       script: copy-templates.sh
       defaults: |
-        files:
-          - .github/uci.yml
+        defaults:
+          files:
+            - .github/uci.yml
+        org:
+          filecoin-project:
+            defaults:
+              files: []
+            language:
+              language:
+                Go:
+                  defaults:
+                    files:
+                      - .github/workflows/go-test.yml
+                      - .github/workflows/go-check.yml
+                      - .github/workflows/releaser.yml
+                      - .github/workflows/release-check.yml
+                      - .github/workflows/tagpush.yml
+                      - version.json
+                JavaScript: &filoz-js
+                  defaults:
+                    files:
+                      - .github/workflows/js-test-and-release.yml
+                TypeScript: *filoz-js
+                Rust:
+                  defaults:
+                    files:
+                      - .github/workflows/releaser.yml
+                      - .github/workflows/release-check.yml
+                      - .github/workflows/tagpush.yml
+          ipfs-examples: &ipshipyard
+            defaults:
+              files:
+                - .github/workflows/stale-issue.yml
+                - .github/workflows/generated-issue.yml
+            language:
+              Go:
+                defaults:
+                  files:
+                    - .github/workflows/go-test.yml
+                    - .github/workflows/go-check.yml
+                    - .github/workflows/releaser.yml
+                    - .github/workflows/release-check.yml
+                    - .github/workflows/tagpush.yml
+                    - version.json
+                    - .github/workflows/stale-issue.yml
+                    - .github/workflows/generated-issue.yml
+              JavaScript: &ipshipyard-js
+                defaults:
+                  files:
+                    - .github/workflows/js-test-and-release.yml
+                    - .github/workflows/semantic-pull-request.yml
+                    - .github/workflows/stale-issue.yml
+                    - .github/workflows/generated-issue.yml
+              TypeScript: *ipshipyard-js
+              Rust:
+                defaults:
+                  files:
+                    - .github/workflows/releaser.yml
+                    - .github/workflows/release-check.yml
+                    - .github/workflows/tagpush.yml
+                    - .github/workflows/stale-issue.yml
+                    - .github/workflows/generated-issue.yml
+          ipfs-shipyard: *ipshipyard
+          ipfs: *ipshipyard
+          ipld: *ipshipyard
+          ipshipyard: *ipshipyard
+          libp2p: *ipshipyard
+          multiformats: *ipshipyard
+          plprobelab: *ipshipyard
       override: |
         force: ${{ github.event.inputs.force }}
         versions:
