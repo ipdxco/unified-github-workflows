@@ -27,7 +27,6 @@ jobs:
       branch: ${{ github.event.inputs.branch }}
       script: update-go.sh
       defaults: |
-        common:
-          versions:
-            go: "${{ github.event.inputs.version }}"
+        versions:
+          go: "${{ github.event.inputs.version }}"
       dry-run: ${{ github.event.inputs.dry-run == 'true' }}

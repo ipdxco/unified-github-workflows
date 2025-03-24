@@ -16,6 +16,6 @@ concurrency:
 
 jobs:
   go-test:
-    uses: ipdxco/unified-github-workflows/.github/workflows/go-test.yml@${{{ .config.versions.uci // (.source.tag | sub("\\.[^.\\-\\+]+(?=\\-|\\+|$)"; "")) }}}
+    uses: ipdxco/unified-github-workflows/.github/workflows/go-test.yml@${{{ .config.versions.uci // (.source.tag | sub("\\.[^\\.]+\\.[^\\.\\-\\+]+(?=\\-|\\+|$)"; "")) }}}
     secrets:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

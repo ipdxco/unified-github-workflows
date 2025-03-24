@@ -5,6 +5,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+### Added
+- `.github/uci.yml` template
+- `.github/workflows/generated-pr.yml` template
+- `.github/workflows/stale.yml` template
+- `.github/workflows/semantic-pull-request.yml` template
+- caching of repository info to reduce the number of GitHub API calls made by the `process` workflow
+- copying of `.github/uci.yml` template to the repository when `web3-bot` is added as a collaborator (for orgs/repositories not managed by DX)
 
 ## [1.0.21] - 2025-02-24
 ### Fixed

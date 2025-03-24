@@ -18,37 +18,29 @@ on:
         default: 'false'
 
 jobs:
+  read-defaults:
+    runs-on: ubuntu-latest
+    outputs:
+      defaults: ${{ steps.defaults.outputs.defaults }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: defaults
+        name: Read defaults
+        run: |
+          echo "defaults<<EOF" >> $GITHUB_OUTPUT
+          cat defaults.yml >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
   copy-templates:
+    needs: read-defaults
     uses: ./.github/workflows/process.yml
     secrets: inherit
     with:
       targets: ${{ github.event.inputs.targets }}
       branch: uci/copy-templates
       script: copy-templates.sh
-      defaults: |
-        language:
-          Go:
-            files:
-              - .github/workflows/go-test.yml
-              - .github/workflows/go-check.yml
-              - .github/workflows/releaser.yml
-              - .github/workflows/release-check.yml
-              - .github/workflows/tagpush.yml
-              - version.json
-          JavaScript:
-            files:
-              - .github/workflows/js-test-and-release.yml
-          TypeScript:
-            files:
-              - .github/workflows/js-test-and-release.yml
-          Rust:
-            files:
-              - .github/workflows/releaser.yml
-              - .github/workflows/release-check.yml
-              - .github/workflows/tagpush.yml
+      defaults: ${{ needs.read-defaults.outputs.defaults }}
       override: |
-        common:
-          force: ${{ github.event.inputs.force }}
-          versions:
-            uci: ${{ github.event.inputs.version }}
+        force: ${{ github.event.inputs.force }}
+        versions:
+          uci: ${{ github.event.inputs.version }}
       dry-run: ${{ github.event.inputs.dry-run == 'true' }}

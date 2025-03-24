@@ -2,7 +2,7 @@
 
 set -euo pipefail -o nounset
 
-for f in $(jq -r '.config.files[]' <<< "$CONTEXT"); do
+for f in $(jq -r '.config.files // [] | .[]' <<< "$CONTEXT"); do
   echo -e "\nProcessing $f."
   if [[ ! -f "$TARGET/$f" ]]; then
     echo "$f does not exist. Skipping.\n"
