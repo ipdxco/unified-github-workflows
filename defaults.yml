@@ -502,7 +502,7 @@ org:
       specs: *ipshipyard-repo
       unsigned-varint: *ipshipyard-repo
       website: *ipshipyard-repo
-  plprobelab:
+  probe-lab:
     defaults: *ipshipyard-defaults
     language: *ipshipyard-language
     repo:
