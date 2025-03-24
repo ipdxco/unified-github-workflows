@@ -25,3 +25,4 @@ jobs:
     with:
       workflow: 'copy-templates.yml'
       inputs: ${{ toJSON(github.event.inputs) || '{}' }}
+      filter: '.owner.login == "probe-lab"'
