@@ -30,3 +30,4 @@ jobs:
           only-issue-labels: 'This workflow should process only PRs - this ensures we finish processing issues early'
           days-before-issue-stale: -1
           days-before-issue-close: -1
+          operations-per-run: 2
