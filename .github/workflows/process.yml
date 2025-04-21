@@ -176,7 +176,7 @@ jobs:
     - name: Configure global git user
       run: |
         git config --global user.name web3-bot
-        git config --global user.email web3-bot@protocol.ai
+        git config --global user.email 81333946+web3-bot@users.noreply.github.com
     - env:
         SOURCE: ${{ github.repository }}
         TARGET: ${{ matrix.repository }}
