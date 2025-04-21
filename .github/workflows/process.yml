@@ -162,7 +162,7 @@ jobs:
       # If that fails, reset the uci/* branch to the default branch.
       run: |
         git config user.name web3-bot
-        git config user.email web3-bot@protocol.ai
+        git config user.email 81333946+web3-bot@users.noreply.github.com
         git checkout "$BRANCH" || git checkout -B "$BRANCH"
         # Registering SHA before rebase to push even if only the default branch moved
         git rev-parse HEAD | xargs -I{} echo "sha={}" | tee -a $GITHUB_OUTPUT
