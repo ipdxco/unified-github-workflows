@@ -85,6 +85,7 @@ org:
       discussify-styleguide: *ipshipyard-repo
       dnslink-cloudflare: *ipshipyard-repo
       dnslink-deploy: *ipshipyard-repo
+      drop-in-service-worker: *ipshipyard-repo
       ecosystem-dashboard: *ipshipyard-repo
       ecosystem-directory: *ipshipyard-repo
       electron-mocha-main: *ipshipyard-repo
