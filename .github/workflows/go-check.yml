@@ -22,6 +22,15 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
+      - name: Check out the base sha
+        id: base
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
+        run: |
+          if [[ -n "$BASE_SHA" ]]; then
+            echo "sha=$BASE_SHA" | tee -a $GITHUB_OUTPUT
+            git fetch origin "$BASE_SHA"
+          fi
       - name: Check out the latest stable version of Go
         id: stable
         uses: actions/setup-go@v5
@@ -44,44 +53,6 @@ jobs:
       - name: Run repo-specific setup
         uses: ./.github/actions/go-check-setup
         if: hashFiles('./.github/actions/go-check-setup') != ''
-      - name: Install staticcheck
-        env:
-          STATICCHECK_VERSIONS: |
-            {
-              "1.24": "5af2e5fc3b08ba46027eb48ebddeba34dc0bd02c",
-              "1.23": "56172d41b117cc2c2f99f65fe0a790c8d7d7ea66",
-              "1.22": "a093f7c2d3d45d5104fb3414ae939a98be37be02",
-              "1.21": "f57fec247eddf41c04774af84b91e41dd78a3173",
-              "1.20": "9e12e6014d3b0a854950490051ad1338fc6badd1",
-              "1.19": "376210a89477dedbe6fdc4484b233998650d7b3c",
-              "1.18": "376210a89477dedbe6fdc4484b233998650d7b3c",
-              "1.17": "c8caa92bad8c27ae734c6725b8a04932d54a147b",
-              "1.16": "4dc1992c9bb4310ba1e98b30c8d7d46444891d3b",
-              "1.15": "5b7de96f09104e2be384aa93a7c821eb5e77378b",
-              "1.14": "5b7de96f09104e2be384aa93a7c821eb5e77378b",
-              "1.13": "afd67930eec2a9ed3e9b19f684d17a062285f16a"
-            }
-          GO_VERSION: ${{ steps.go.outputs.go-version }}
-          GO111MODULE: on
-        run: |
-          version="$(jq -nr 'env.STATICCHECK_VERSIONS | fromjson | .[env.GO_VERSION | sub("\\.[^.]+$"; "")] // "latest"')"
-          echo "Installing staticcheck@$version"
-          go install honnef.co/go/tools/cmd/staticcheck@$version || go get honnef.co/go/tools/cmd/staticcheck@$version
-      - name: Set up golangci-lint
-        id: golangci-lint
-        if: hashFiles('./.golangci.yml') != '' || hashFiles('./.golangci.yaml') != '' || hashFiles('./.golangci.toml') != '' || hashFiles('./.golangci.json') != ''
-        env:
-          GOLANGCI_LINT_VERSION: eabc2638a66daf5bb6c6fb052a32fa3ef7b6600d # v2.1.6
-          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
-          GO111MODULE: on
-        run: |
-          echo "Installing golangci-lint@$GOLANGCI_LINT_VERSION"
-          go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$GOLANGCI_LINT_VERSION || go get github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$GOLANGCI_LINT_VERSION
-
-          if [[ -n "$BASE_SHA" ]]; then
-            git fetch origin "$BASE_SHA"
-          fi
-          echo "args=--new=false --new-from-merge-base= --new-from-patch= --new-from-rev=$BASE_SHA" | tee -a $GITHUB_OUTPUT
       - name: Check that go.mod is tidy
         uses: protocol/multiple-go-modules@v1.4
         with:
@@ -92,45 +63,36 @@ jobs:
               exit 1
             fi
             git diff --exit-code -- go.sum go.mod
-      - name: gofmt
-        if: success() || failure() # run this step even if the previous one failed
+      - name: Set up golangci-lint
+        id: golangci-lint
+        env:
+          GOLANGCI_LINT_VERSION: eabc2638a66daf5bb6c6fb052a32fa3ef7b6600d # v2.1.6
+          GO111MODULE: on
         run: |
-          out=$(gofmt -s -l .)
-          if [[ -n "$out" ]]; then
-            echo $out | awk '{print "::error file=" $0 ",line=0,col=0::File is not gofmt-ed."}'
-            exit 1
+          echo "Installing golangci-lint@$GOLANGCI_LINT_VERSION"
+          go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$GOLANGCI_LINT_VERSION || go get github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$GOLANGCI_LINT_VERSION
+
+          if [[ ! -f .golangci.yml && ! -f .golangci.toml && ! -f .golangci.json && ! -f .golangci.yaml ]]; then
+            echo "default_linters=none" | tee -a $GITHUB_OUTPUT
           fi
-      - name: go vet
-        if: success() || failure() # run this step even if the previous one failed
+      - name: golangci-lint run
+        if: success() || failure()
         uses: protocol/multiple-go-modules@v1.4
+        env:
+          BASE_SHA: ${{ steps.base.outputs.sha }}
+          DEFAULT_LINTERS: ${{ steps.golangci-lint.outputs.default_linters }}
         with:
-          run: go vet ./...
-      - name: staticcheck
-        if: success() || failure() # run this step even if the previous one failed
+          run: golangci-lint run --default=$DEFAULT_LINTERS --enable=govet --enable=staticcheck --new=false --new-from-merge-base= --new-from-patch= --new-from-rev=$BASE_SHA --verbose
+      - name: golangci-lint fmt
+        if: success() || failure()
         uses: protocol/multiple-go-modules@v1.4
         with:
           run: |
-            set -o pipefail
-            staticcheck ./... | sed -e 's@\(.*\)\.go@./\1.go@g'
-      - name: golangci-lint (Linux)
-        if: (success() || failure()) && steps.golangci-lint.outcome == 'success'
-        uses: protocol/multiple-go-modules@v1.4
-        with:
-          run: golangci-lint run ${{ steps.golangci-lint.outputs.args }}
-      - name: golangci-lint (Windows)
-        if: (success() || failure()) && steps.golangci-lint.outcome == 'success'
-        uses: protocol/multiple-go-modules@v1.4
-        env:
-          GOOS: "windows"
-        with:
-          run: golangci-lint run ${{ steps.golangci-lint.outputs.args }}
-      - name: golangci-lint (OSX)
-        if: (success() || failure()) && steps.golangci-lint.outcome == 'success'
-        uses: protocol/multiple-go-modules@v1.4
-        env:
-          GOOS: "darwin"
-        with:
-          run: golangci-lint run ${{ steps.golangci-lint.outputs.args }}
+            out="$(golangci-lint fmt --enable=gofmt --diff | grep '^diff' || echo '' | cut -d' ' -f3)"
+            if [[ -n "$out" ]]; then
+              echo "$out" | awk '{print "::error file=" $0 ",line=0,col=0::File is not formatted."}'
+              exit 1
+            fi
       - name: go generate
         uses: protocol/multiple-go-modules@v1.4
         if: (success() || failure()) && fromJSON(steps.config.outputs.json).gogenerate == true
