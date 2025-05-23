@@ -85,7 +85,6 @@ org:
       discussify-styleguide: *ipshipyard-repo
       dnslink-cloudflare: *ipshipyard-repo
       dnslink-deploy: *ipshipyard-repo
-      drop-in-service-worker: *ipshipyard-repo
       ecosystem-dashboard: *ipshipyard-repo
       ecosystem-directory: *ipshipyard-repo
       electron-mocha-main: *ipshipyard-repo
@@ -340,6 +339,7 @@ org:
     repo:
       .github: *ipshipyard-repo
       cf-gateway-stats: *ipshipyard-repo
+      drop-in-service-worker: *ipshipyard-repo
       github-mgmt: *ipshipyard-repo
       helia-react-components: *ipshipyard-repo
       ipns-inspector: *ipshipyard-repo
