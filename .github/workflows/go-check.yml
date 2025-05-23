@@ -67,6 +67,21 @@ jobs:
           version="$(jq -nr 'env.STATICCHECK_VERSIONS | fromjson | .[env.GO_VERSION | sub("\\.[^.]+$"; "")] // "latest"')"
           echo "Installing staticcheck@$version"
           go install honnef.co/go/tools/cmd/staticcheck@$version || go get honnef.co/go/tools/cmd/staticcheck@$version
+      - name: Set up golangci-lint
+        id: golangci-lint
+        if: hashFiles('./.golangci.yml') != '' || hashFiles('./.golangci.yaml') != '' || hashFiles('./.golangci.toml') != '' || hashFiles('./.golangci.json') != ''
+        env:
+          GOLANGCI_LINT_VERSION: eabc2638a66daf5bb6c6fb052a32fa3ef7b6600d # v2.1.6
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
+          GO111MODULE: on
+        run: |
+          echo "Installing golangci-lint@$GOLANGCI_LINT_VERSION"
+          go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$GOLANGCI_LINT_VERSION || go get github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$GOLANGCI_LINT_VERSION
+
+          if [[ -n "$BASE_SHA" ]]; then
+            git fetch origin "$BASE_SHA"
+          fi
+          echo "args=--new=false --new-from-merge-base= --new-from-patch= --new-from-rev=$BASE_SHA" | tee -a $GITHUB_OUTPUT
       - name: Check that go.mod is tidy
         uses: protocol/multiple-go-modules@v1.4
         with:
@@ -97,6 +112,25 @@ jobs:
           run: |
             set -o pipefail
             staticcheck ./... | sed -e 's@\(.*\)\.go@./\1.go@g'
+      - name: golangci-lint (Linux)
+        if: (success() || failure()) && steps.golangci-lint.outcome == 'success'
+        uses: protocol/multiple-go-modules@v1.4
+        with:
+          run: golangci-lint run ${{ steps.golangci-lint.outputs.args }}
+      - name: golangci-lint (Windows)
+        if: (success() || failure()) && steps.golangci-lint.outcome == 'success'
+        uses: protocol/multiple-go-modules@v1.4
+        env:
+          GOOS: "windows"
+        with:
+          run: golangci-lint run ${{ steps.golangci-lint.outputs.args }}
+      - name: golangci-lint (OSX)
+        if: (success() || failure()) && steps.golangci-lint.outcome == 'success'
+        uses: protocol/multiple-go-modules@v1.4
+        env:
+          GOOS: "darwin"
+        with:
+          run: golangci-lint run ${{ steps.golangci-lint.outputs.args }}
       - name: go generate
         uses: protocol/multiple-go-modules@v1.4
         if: (success() || failure()) && fromJSON(steps.config.outputs.json).gogenerate == true
