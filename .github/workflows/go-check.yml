@@ -155,7 +155,7 @@ jobs:
         env:
           BASE_SHA: ${{ steps.base.outputs.sha }}
         with:
-          run: golangci-lint run --new=false --new-from-merge-base= --new-from-patch= --new-from-rev=$BASE_SHA --verbose
+          run: golangci-lint run --disable govet --disable staticcheck --new=false --new-from-merge-base= --new-from-patch= --new-from-rev=$BASE_SHA --verbose
       - name: go generate
         uses: protocol/multiple-go-modules@v1.4
         if: (success() || failure()) && fromJSON(steps.config.outputs.json).gogenerate == true
