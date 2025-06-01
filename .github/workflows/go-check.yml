@@ -31,7 +31,7 @@ jobs:
             echo "base_sha=$BASE_SHA" | tee -a $GITHUB_OUTPUT
             git fetch origin "$BASE_SHA"
             git diff --name-only "$BASE_SHA" |
-              jq -Rc '[inputs]' |
+              jq -Rnc '[inputs]' |
               xargs -I {} -0 echo "changed_files={}" |
               tee -a $GITHUB_OUTPUT
           fi
