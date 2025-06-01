@@ -22,14 +22,18 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
-      - name: Check out the base sha
-        id: base
+      - name: Extend the GitHub context
+        id: github
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
         run: |
           if [[ -n "$BASE_SHA" ]]; then
-            echo "sha=$BASE_SHA" | tee -a $GITHUB_OUTPUT
+            echo "base_sha=$BASE_SHA" | tee -a $GITHUB_OUTPUT
             git fetch origin "$BASE_SHA"
+            git diff --name-only "$BASE_SHA" |
+              jq -Rc '[inputs]' |
+              xargs -I {} -0 echo "changed_files={}" |
+              tee -a $GITHUB_OUTPUT
           fi
       - name: Check out the latest stable version of Go
         id: stable
@@ -153,9 +157,20 @@ jobs:
         if: (success() || failure()) && hashFiles('.golangci.yml', '.golangci.toml', '.golangci.json', '.golangci.yaml') != ''
         uses: protocol/multiple-go-modules@v1.4
         env:
-          BASE_SHA: ${{ steps.base.outputs.sha }}
+          NEW_FROM_REV: ${{
+              steps.github.outputs.base_sha && !(
+                contains(fromJSON(steps.github.outputs.changed_files), 'go.mod') ||
+                contains(fromJSON(steps.github.outputs.changed_files), '.github/workflows/go-check.yml') ||
+                (
+                  contains(fromJSON(steps.github.outputs.changed_files), '.golangci.yml') ||
+                  contains(fromJSON(steps.github.outputs.changed_files), '.golangci.toml') ||
+                  contains(fromJSON(steps.github.outputs.changed_files), '.golangci.json') ||
+                  contains(fromJSON(steps.github.outputs.changed_files), '.golangci.yaml')
+                )
+              ) && steps.github.outputs.base_sha || ''
+            }}
         with:
-          run: golangci-lint run --disable govet --disable staticcheck --new=false --new-from-patch= --new-from-rev=$BASE_SHA --verbose
+          run: golangci-lint run --disable govet --disable staticcheck --new=false --new-from-patch= --new-from-rev=$NEW_FROM_REV --verbose
       - name: go generate
         uses: protocol/multiple-go-modules@v1.4
         if: (success() || failure()) && fromJSON(steps.config.outputs.json).gogenerate == true
