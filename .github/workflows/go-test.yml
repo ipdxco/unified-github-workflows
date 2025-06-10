@@ -149,3 +149,4 @@ jobs:
           env_vars: OS=${{ matrix.os }}, GO=${{ steps.go.outputs.version }}
           token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: false
+          disable_safe_directory: ${{ runner.os == 'Windows' }} # NOTE: The workspace on Windows runners is on the C: drive and the codecov action is unable to lock the git directory on it
