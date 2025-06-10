@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - added a repository checkout to fix the gh cli usage in the tagpush workflow
 - disabled the safe directory locking in the go-test workflow on Windows runners
+- fixed how the env vars are passed to the codecov uploader
 
 ## [1.0.22] - 2025-03-24
 ### Added
