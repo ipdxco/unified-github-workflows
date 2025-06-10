@@ -144,8 +144,12 @@ jobs:
         run: echo "files=$(find . -type f -name 'module-coverage.txt' | tr -s '\n' ',' | sed 's/,$//')" >> $GITHUB_OUTPUT
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@18283e04ce6e62d37312384ff67231eb8fd56d24 # v5.4.3
+        env:
+          OS: ${{ matrix.os }}
+          GO: ${{ steps.go.outputs.version }}
         with:
           files: ${{ steps.coverages.outputs.files }}
-          env_vars: OS=${{ matrix.os }}, GO=${{ steps.go.outputs.version }}
+          env_vars: OS,GO
           token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: false
+          disable_safe_directory: ${{ runner.os == 'Windows' }} # NOTE: The workspace on Windows runners is on the C: drive and the codecov action is unable to lock the git directory on it
