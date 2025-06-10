@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+
+## [1.0.23] - 2025-06-10
 ### Fixed
 - added a repository checkout to fix the gh cli usage in the tagpush workflow
 - disabled the safe directory locking in the go-test workflow on Windows runners
