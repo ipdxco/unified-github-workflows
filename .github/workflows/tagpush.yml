@@ -9,6 +9,8 @@ jobs:
     runs-on: ubuntu-latest
     name: All
     steps:
+      # TODO: Check why gh cli needs to be run within a git context
+      - uses: actions/checkout@v4
       - name: create an issue
         env:
           GITHUB_TOKEN: ${{ github.token }}
