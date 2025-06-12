@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [1.0.24] - 2025-06-10
+### Added
+- support for `golangci-lint` in the `go-check` workflow
+  The `go-check` workflow will now execute `golangci-lint` if `.golangci.[yml|toml|json|yaml]` is found in the repository. The `golangci-lint` will check the diff in the pull request context and the entire codebase otherwise. The `golangci-lint` will skip `staticcheck` and `govet` checks because the workflow executes them separately.
+
 ## [1.0.23] - 2025-06-10
 ### Fixed
 - added a repository checkout to fix the gh cli usage in the tagpush workflow
