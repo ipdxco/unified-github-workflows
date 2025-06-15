@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [1.0.25] - 2025-06-15
+### Fixed
+- fixed the usage of GitHub env variables in the `tagpush` workflow
+
 ## [1.0.24] - 2025-06-10
 ### Added
 - support for `golangci-lint` in the `go-check` workflow

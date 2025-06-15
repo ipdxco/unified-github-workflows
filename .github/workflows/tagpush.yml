@@ -9,17 +9,16 @@ jobs:
     runs-on: ubuntu-latest
     name: All
     steps:
-      # TODO: Check why gh cli needs to be run within a git context
-      - uses: actions/checkout@v4
+      - id: tag
+        run: echo "name=${GITHUB_REF#refs/tags/}" | tee -a "$GITHUB_OUTPUT"
       - name: create an issue
         env:
           GITHUB_TOKEN: ${{ github.token }}
           GITHUB_EVENT_PUSHER_NAME: ${{ github.event.pusher.name }}
-          TITLE: manual release created (${GITHUB_REF#refs/tags/})
-          ASSIGNEE: '@$GITHUB_EVENT_PUSHER_NAME'
+          TITLE: manual release created (${{ steps.tag.outputs.name }})
           BODY: |
-            @$GITHUB_EVENT_PUSHER_NAME just pushed a release tag: ${GITHUB_REF#refs/tags/}.
-            Please manually verify validity (using [\`gorelease\`](https://pkg.go.dev/golang.org/x/exp/cmd/gorelease)), and update \`version.json\` to reflect the manually released version, if necessary.
+            @${{ github.event.pusher.name }} just pushed a release tag: ${{ steps.tag.outputs.name }}.
+            Please manually verify validity (using [`gorelease`](https://pkg.go.dev/golang.org/x/exp/cmd/gorelease)), and update `version.json` to reflect the manually released version, if necessary.
             In the future, please use the [automated process](https://github.com/ipdxco/unified-github-workflows/blob/master/VERSIONING.md).
         run: |
-          gh issue create --title="$(echo "$TITLE" | envsubst)" --assignee="$(echo "$ASSIGNEE" | envsubst)" --body="$(echo "$BODY" | envsubst)" --repo="$GITHUB_REPO"
+          gh issue create --title="$TITLE" --assignee="$GITHUB_EVENT_PUSHER_NAME" --body="$BODY" --repo="$GITHUB_REPOSITORY"
