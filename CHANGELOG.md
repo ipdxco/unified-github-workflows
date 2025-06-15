@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [1.0.26] - 2025-06-15
+### Changed
+- updated the body of the issues created by the `tagpush` workflow
+
 ## [1.0.25] - 2025-06-15
 ### Fixed
 - fixed the usage of GitHub env variables in the `tagpush` workflow

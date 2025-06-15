@@ -17,8 +17,10 @@ jobs:
           GITHUB_EVENT_PUSHER_NAME: ${{ github.event.pusher.name }}
           TITLE: manual release created (${{ steps.tag.outputs.name }})
           BODY: |
-            @${{ github.event.pusher.name }} just pushed a release tag: ${{ steps.tag.outputs.name }}.
+            @${{ github.event.pusher.name }} just pushed a release tag: [${{ steps.tag.outputs.name }}](${{ github.event.repository.html_url }}/releases/tag/${{ steps.tag.outputs.name }}).
+
             Please manually verify validity (using [`gorelease`](https://pkg.go.dev/golang.org/x/exp/cmd/gorelease)), and update `version.json` to reflect the manually released version, if necessary.
-            In the future, please use the [automated process](https://github.com/ipdxco/unified-github-workflows/blob/master/VERSIONING.md).
+
+            In the future, please use the [automated process](https://github.com/ipdxco/unified-github-workflows?tab=readme-ov-file#versioning).
         run: |
           gh issue create --title="$TITLE" --assignee="$GITHUB_EVENT_PUSHER_NAME" --body="$BODY" --repo="$GITHUB_REPOSITORY"
