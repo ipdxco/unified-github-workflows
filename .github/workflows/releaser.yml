@@ -71,13 +71,13 @@ jobs:
           echo "suffix=$suffix" | tee -a $GITHUB_OUTPUT
       - id: latest
         if: steps.version.outputs.version != ''
-        name: Determine latest version
+        name: Determine latest version (only final versions)
         env:
           PREFIX: ${{ steps.version.outputs.prefix }}
           TAG: ${{ steps.version.outputs.tag }}
         run: |
           git fetch origin --tags
-          echo -e "${TAG}\n$(git tag)" | grep "^${PREFIX}" | sort -V | tail -n1 | xargs -I{} echo "latest={}" | tee -a $GITHUB_OUTPUT
+          echo -e "${TAG}\n$(git tag)" | grep "^${PREFIX}" | grep -v - | sort -V | tail -n1 | xargs -I{} echo "latest={}" | tee -a $GITHUB_OUTPUT
       - id: branch
         name: Check if the branch is a release branch
         if: steps.version.outputs.version != ''
