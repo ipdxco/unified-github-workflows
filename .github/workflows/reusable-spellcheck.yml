@@ -79,8 +79,6 @@ jobs:
         env:
           IGNORE_WORDS: |
 
-          IGNORE_PATTERNS: |
-
           IGNORE_PATHS: |
             **/*.mod
             **/*.sum
@@ -95,16 +93,6 @@ jobs:
               config.ignoreWords.push(word);
             }
 
-            config.patterns = config.patterns ?? [];
-            config.ignoreRegExpList = config.ignoreRegExpList ?? [];
-            for (const pattern of process.env.IGNORE_PATTERNS.trim().split("\n")) {
-              config.patterns.push({
-                name: pattern,
-                pattern: pattern,
-              });
-              config.ignoreRegExpList.push(pattern);
-            }
-
             config.ignorePaths = config.ignorePaths ?? [];
             for (const path of process.env.IGNORE_PATHS.trim().split("\n")) {
               config.ignorePaths.push(path);
@@ -114,7 +102,7 @@ jobs:
 
       - run: jq . .cspell.json
 
-      - uses: streetsidesoftware/cspell-action@69543c3f9f14d4fcc6004c7bee03c4d366f11d64 # v7.0.1
+      - uses: galargh/cspell-action@report
         with:
           incremental_files_only: ${{
               steps.github.outputs.base_sha && !(
@@ -126,3 +114,4 @@ jobs:
               ) && 'true' || 'false'
             }}
           config: '.cspell.json'
+          report: typos
