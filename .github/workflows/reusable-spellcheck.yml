@@ -91,13 +91,13 @@ jobs:
             const config = JSON.parse(fs.readFileSync(".cspell.json"));
 
             config.ignoreWords = config.ignoreWords ?? [];
-            for (const word of process.env.IGNORE_WORDS.split("\n")) {
+            for (const word of process.env.IGNORE_WORDS.trim().split("\n")) {
               config.ignoreWords.push(word);
             }
 
             config.patterns = config.patterns ?? [];
             config.ignoreRegExpList = config.ignoreRegExpList ?? [];
-            for (const pattern of process.env.IGNORE_PATTERNS.split("\n")) {
+            for (const pattern of process.env.IGNORE_PATTERNS.trim().split("\n")) {
               config.patterns.push({
                 name: pattern,
                 pattern: pattern,
@@ -106,7 +106,7 @@ jobs:
             }
 
             config.ignorePaths = config.ignorePaths ?? [];
-            for (const path of process.env.IGNORE_PATHS.split("\n")) {
+            for (const path of process.env.IGNORE_PATHS.trim().split("\n")) {
               config.ignorePaths.push(path);
             }
 
