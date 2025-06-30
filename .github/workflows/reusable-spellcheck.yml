@@ -32,14 +32,15 @@ jobs:
             const jsonConfigPaths = [
               ".cspell.json",
               "cspell.json",
-              "cSpell.json",
               "cspell.config.json",
             ];
             const yamlConfigPaths = [
-              "cspell.config.yaml",
-              "cspell.config.yml",
+              ".cspell.yaml",
+              ".cspell.yml",
               "cspell.yaml",
               "cspell.yml",
+              "cspell.config.yaml",
+              "cspell.config.yml",
             ];
 
             for (const configPath of jsonConfigPaths) {
