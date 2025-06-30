@@ -81,6 +81,9 @@ jobs:
 
           IGNORE_PATTERNS: |
 
+          IGNORE_PATHS: |
+            **/*.mod
+            **/*.sum
         with:
           script: |
             const fs = require("fs");
@@ -100,6 +103,11 @@ jobs:
                 pattern: pattern,
               });
               config.ignoreRegExpList.push(pattern);
+            }
+
+            config.ignorePaths = config.ignorePaths ?? [];
+            for (const path of process.env.IGNORE_PATHS.split("\n")) {
+              config.ignorePaths.push(path);
             }
 
             fs.writeFileSync(".cspell.json", JSON.stringify(config, null, 2));
