@@ -79,9 +79,6 @@ jobs:
         env:
           IGNORE_WORDS: |
             Adin
-            Santiago Botto
-            Chris Boddy
-            dag-case
           IGNORE_PATHS: |
             **/*.mod
             **/*.sum
