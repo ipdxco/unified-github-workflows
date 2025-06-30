@@ -63,7 +63,7 @@ jobs:
       - if: steps.config.outputs.path == ''
         run: echo '{}' > '.cspell.json'
 
-      - if: steps.config.outputs.type == 'json'
+      - if: steps.config.outputs.type == 'json' && steps.config.outputs.path != '.cspell.json'
         env:
           CONFIG_PATH: ${{ steps.config.outputs.path }}
         run: mv "$CONFIG_PATH" '.cspell.json'
