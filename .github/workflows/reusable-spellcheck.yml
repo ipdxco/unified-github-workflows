@@ -103,7 +103,7 @@ jobs:
 
       - run: jq . .cspell.json
 
-      - uses: galargh/cspell-action@report
+      - uses: streetsidesoftware/cspell-action@157048954070986ce4315d0813573a2d8faee361 # v7.1.1
         with:
           incremental_files_only: ${{
               steps.github.outputs.base_sha && !(
