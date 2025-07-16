@@ -1,0 +1,19 @@
+name: Spellcheck
+
+on:
+  pull_request:
+  push:
+    branches: ${{{ .github.protected_branches + [.github.default_branch] | unique }}}
+  workflow_dispatch:
+  merge_group:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event_name == 'push' && github.sha || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  go-check:
+    uses: ipdxco/unified-github-workflows/.github/workflows/reusable-spellcheck.yml@${{{ .config.versions.uci // (.source.tag | sub("\\.[^\\.]+\\.[^\\.\\-\\+]+(?=\\-|\\+|$)"; "")) }}}

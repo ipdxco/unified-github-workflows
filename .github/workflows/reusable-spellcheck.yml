@@ -1,0 +1,118 @@
+name: Check Spelling
+
+on:
+  workflow_call:
+
+jobs:
+  spellcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extend the GitHub context
+        id: github
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
+        run: |
+          if [[ -n "$BASE_SHA" ]]; then
+            echo "base_sha=$BASE_SHA" | tee -a $GITHUB_OUTPUT
+            git fetch origin "$BASE_SHA"
+            git diff --name-only "$BASE_SHA" |
+              jq -Rnc '[inputs]' |
+              xargs -I {} -0 echo "changed_files={}" |
+              tee -a $GITHUB_OUTPUT
+          fi
+
+      - id: config
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require("fs");
+
+            const jsonConfigPaths = [
+              ".cspell.json",
+              "cspell.json",
+              "cspell.config.json",
+            ];
+            const yamlConfigPaths = [
+              ".cspell.yaml",
+              ".cspell.yml",
+              "cspell.yaml",
+              "cspell.yml",
+              "cspell.config.yaml",
+              "cspell.config.yml",
+            ];
+
+            for (const configPath of jsonConfigPaths) {
+              if (fs.existsSync(configPath)) {
+                console.log(`Found config file at ${configPath}`);
+                core.setOutput("path", configPath);
+                core.setOutput("type", "json");
+                return;
+              }
+            }
+
+            for (const configPath of yamlConfigPaths) {
+              if (fs.existsSync(configPath)) {
+                console.log(`Found config file at ${configPath}`);
+                core.setOutput("path", configPath);
+                core.setOutput("type", "yaml");
+                return;
+              }
+            }
+
+      - if: steps.config.outputs.path == ''
+        run: echo '{}' > '.cspell.json'
+
+      - if: steps.config.outputs.type == 'json' && steps.config.outputs.path != '.cspell.json'
+        env:
+          CONFIG_PATH: ${{ steps.config.outputs.path }}
+        run: mv "$CONFIG_PATH" '.cspell.json'
+
+      - if: steps.config.outputs.type == 'yaml'
+        env:
+          CONFIG_PATH: ${{ steps.config.outputs.path }}
+        run: |
+          yq -o=json '.' "$CONFIG_PATH" > '.cspell.json'
+          rm "$CONFIG_PATH"
+
+      - uses: actions/github-script@v7
+        env:
+          IGNORE_WORDS: |
+            Adin
+          IGNORE_PATHS: |
+            **/*.mod
+            **/*.sum
+        with:
+          script: |
+            const fs = require("fs");
+
+            const config = JSON.parse(fs.readFileSync(".cspell.json"));
+
+            config.ignoreWords = config.ignoreWords ?? [];
+            for (const word of process.env.IGNORE_WORDS.trim().split("\n")) {
+              config.ignoreWords.push(word);
+            }
+
+            config.ignorePaths = config.ignorePaths ?? [];
+            for (const path of process.env.IGNORE_PATHS.trim().split("\n")) {
+              config.ignorePaths.push(path);
+            }
+
+            fs.writeFileSync(".cspell.json", JSON.stringify(config, null, 2));
+
+      - run: jq . .cspell.json
+
+      - uses: streetsidesoftware/cspell-action@157048954070986ce4315d0813573a2d8faee361 # v7.1.1
+        with:
+          incremental_files_only: ${{
+              steps.github.outputs.base_sha && !(
+                contains(fromJSON(steps.github.outputs.changed_files), '.github/workflows/spellcheck.yml') ||
+                (
+                  steps.config.outputs.path != '' &&
+                  contains(fromJSON(steps.github.outputs.changed_files), steps.config.outputs.path)
+                )
+              ) && 'true' || 'false'
+            }}
+          config: '.cspell.json'
+          report: typos

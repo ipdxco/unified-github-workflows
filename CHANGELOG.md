@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [1.0.28] - 2025-07-16
+### Added
+- new `spellcheck` workflow template that uses `cspell` to check spelling
+
 ## [1.0.27] - 2025-06-15
 ### Fixed
 - fixed the latest version check in the `releaser` workflow
