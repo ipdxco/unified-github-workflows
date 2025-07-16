@@ -8,11 +8,27 @@ const stdout = execSync('cspell lint --reporter @cspell/cspell-json-reporter --r
 
 const { issues } = JSON.parse(stdout.toString());
 
+const seen = new Map();
+
 for (const issue of issues) {
     if (!issue.hasSimpleSuggestions || !issue.hasPreferredSuggestions) {
         console.debug(`Issue ${issue.text} has no simple, preferred suggestions`);
         continue;
     }
+
+    const filePath = fileURLToPath(issue.uri);
+    const text = issue.text;
+
+    if (!seen.has(filePath)) {
+        seen.set(filePath, new Set());
+    }
+
+    if (seen.get(filePath).has(text)) {
+        console.debug(`Skipping ${text} in ${filePath}`);
+        continue;
+    }
+
+    seen.get(filePath).add(text);
 
     let suggestion;
     for (const s of issue.suggestionsEx) {
@@ -28,10 +44,9 @@ for (const issue of issues) {
     }
 
     const word = suggestion.wordAdjustedToMatchCase ?? suggestion.word;
-    const filePath = fileURLToPath(issue.uri);
 
     const content = readFileSync(filePath, 'utf8');
-    writeFileSync(filePath, content.replace(issue.text, word));
+    writeFileSync(filePath, content.replaceAll(text, word));
 
-    console.debug(`Replaced ${issue.text} with ${word} in ${filePath}`);
+    console.debug(`Replaced ${text} with ${word} in ${filePath}`);
 }
