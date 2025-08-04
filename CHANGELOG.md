@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+
+## [1.0.29] - 2025-08-04
 ### Changed
 - skip 32-bit tests in the `go-test` workflow by default (they can still be enabled by setting `skip32bit` to `false` in the `go-test-config.json`)
 
