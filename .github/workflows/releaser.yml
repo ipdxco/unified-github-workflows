@@ -189,7 +189,7 @@ jobs:
     outputs:
       json: ${{ toJSON(fromJSON(steps.aggregate.outputs.json)) }}
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
       - id: aggregate
         run: |
           echo "json<<EOF" >> $GITHUB_OUTPUT
