@@ -25,6 +25,14 @@ on:
         required: false
       CODECOV_TOKEN:
         required: false
+      CHROME_CLIENT_ID:
+        required: false
+      CHROME_CLIENT_SECRET:
+        required: false
+      CHROME_REFRESH_TOKEN:
+        required: false
+      CHROME_EXTENSION_ID:
+        required: false
 
 defaults:
   run:
@@ -275,3 +283,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.UCI_GITHUB_TOKEN || github.token }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          CHROME_CLIENT_ID: ${{ secrets.CHROME_CLIENT_ID || vars.CHROME_CLIENT_ID }}
+          CHROME_CLIENT_SECRET: ${{ secrets.CHROME_CLIENT_SECRET }}
+          CHROME_REFRESH_TOKEN: ${{ secrets.CHROME_REFRESH_TOKEN }}
+          CHROME_EXTENSION_ID: ${{ secrets.CHROME_EXTENSION_ID || vars.CHROME_EXTENSION_ID }}
