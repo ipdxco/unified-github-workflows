@@ -10,6 +10,10 @@ on:
         required: false
         type: string
         default: 'ghcr.io'
+    outputs:
+      release:
+        description: Whether or not the workflow was triggered by a release branch
+        value: ${{ jobs.release-check.outputs.release }}
     secrets:
       DOCKER_TOKEN:
         required: false

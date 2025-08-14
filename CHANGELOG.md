@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [1.0.30] - 2025-08-04
+### Added
+- `release` output to the `js-test-and-release` workflow which is `true` if the workflow was triggered by a release branch
+
 ## [1.0.29] - 2025-08-04
 ### Changed
 - skip 32-bit tests in the `go-test` workflow by default (they can still be enabled by setting `skip32bit` to `false` in the `go-test-config.json`)
