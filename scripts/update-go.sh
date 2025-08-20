@@ -14,6 +14,18 @@ if [[ "$language" != "Go" ]]; then
   exit 0
 fi
 
+# Check if .github/workflows/go-test.yml exists
+if [[ ! -f .github/workflows/go-test.yml ]]; then
+  echo "No .github/workflows/go-test.yml file found. Skipping."
+  exit 0
+fi
+
+# Check if .github/workflows/go-check.yml exists
+if [[ ! -f .github/workflows/go-check.yml ]]; then
+  echo "No .github/workflows/go-check.yml file found. Skipping."
+  exit 0
+fi
+
 expected="$(jq -r '.config.versions.go' <<< "$CONTEXT")"
 version="$(curl -sSfL https://go.dev/dl/\?mode\=json | jq -r --arg expected "$expected" 'map(.version) | map(select(startswith("go\($expected)"))) | .[0]')"
 
@@ -27,7 +39,7 @@ popd > /dev/null
 echo "Go version: $(go version)"
 echo "Go path: $(go env GOPATH)"
 
-go install golang.org/x/tools/cmd/goimports@v0.19.0
+go install golang.org/x/tools/cmd/goimports@v0.36.0
 
 pushd "$TARGET" > /dev/null
 
@@ -36,8 +48,11 @@ while read file; do
 
   current="$(go list -m -json | jq 'select(.Dir == "'"$(pwd)"'")' | jq -r .GoVersion)"
 
-  if [[ "$current" == "$expected" ]]; then
-    echo "Go version $expected already in use."
+  currentMinor="$(echo "$current" | cut -d. -f2)"
+  expectedMinor="$(echo "$expected" | cut -d. -f2)"
+
+  if [[ "$currentMinor" -ge "$expectedMinor" ]]; then
+    echo "Go version $current is greater than or equal to $expected. Skipping."
     popd > /dev/null
     continue
   fi
