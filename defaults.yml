@@ -503,37 +503,3 @@ org:
       specs: *ipshipyard-repo
       unsigned-varint: *ipshipyard-repo
       website: *ipshipyard-repo
-  probe-lab:
-    defaults: *ipshipyard-defaults
-    language: *ipshipyard-language
-    repo:
-      .github: *ipshipyard-repo
-      akai: *ipshipyard-repo
-      antikythera: *ipshipyard-repo
-      ants-watch: *ipshipyard-repo
-      api: *ipshipyard-repo
-      avail-light: *ipshipyard-repo
-      blob-tx-hit-rate-report: *ipshipyard-repo
-      btcd: *ipshipyard-repo
-      celenium-api-exchange: *ipshipyard-repo
-      celestia-dht-scripts: *ipshipyard-repo
-      data-platform: *ipshipyard-repo
-      design: *ipshipyard-repo
-      erigon: *ipshipyard-repo
-      github-mgmt: *ipshipyard-repo
-      go-ethereum: *ipshipyard-repo
-      go-libdht: *ipshipyard-repo
-      go-libp2p-kad-dht: *ipshipyard-repo
-      go-libp2p: *ipshipyard-repo
-      gossips: *ipshipyard-repo
-      mercury: *ipshipyard-repo
-      nebula-analysis: *ipshipyard-repo
-      network-measurements: *ipshipyard-repo
-      ookla: *ipshipyard-repo
-      p2p-forge: *ipshipyard-repo
-      parsec: *ipshipyard-repo
-      probelab-infra: *ipshipyard-repo
-      prysm: *ipshipyard-repo
-      tiros: *ipshipyard-repo
-      website: *ipshipyard-repo
-      zikade: *ipshipyard-repo
