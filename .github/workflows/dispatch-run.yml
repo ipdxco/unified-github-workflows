@@ -7,7 +7,7 @@ on:
         description: "Workflow to dispatch (e.g. .github/workflows/update-go.yml)"
         required: true
       inputs:
-        description: 'Workflow inputs (e.g {"version": "1.24", "dry-run": "true"})'
+        description: 'Workflow inputs (e.g {"version": "1.25", "dry-run": "true"})'
         required: false
         default: '{}'
       filter:
