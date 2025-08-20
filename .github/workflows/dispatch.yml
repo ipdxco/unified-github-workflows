@@ -133,7 +133,7 @@ jobs:
         run: |
           # checks every 3 seconds until the most recent workflow run's created_at is later than this job's start_date
           while sleep 3; do
-            run="$(gh api "/repos/$REPO/actions/workflows/$WORKFLOW/runs?per_page=1" --jq '.workflow_runs[0]')"
+            run="$(gh api "/repos/$REPO/actions/workflows/${WORKFLOW#.github/workflows/}/runs?per_page=1" --jq '.workflow_runs[0]')"
             # nothing to check if no workflow run was returned
             if [[ ! -z "$run" ]]; then
               run_start_date="$(date --date="$(jq -r '.created_at' <<< "$run")" +%s)"
