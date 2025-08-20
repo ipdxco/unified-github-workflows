@@ -14,17 +14,16 @@ if [[ "$language" != "Go" ]]; then
   exit 0
 fi
 
-# Check if .github/workflows/go-test.yml exists
+pushd "$TARGET" > /dev/null
 if [[ ! -f .github/workflows/go-test.yml ]]; then
   echo "No .github/workflows/go-test.yml file found. Skipping."
   exit 0
 fi
-
-# Check if .github/workflows/go-check.yml exists
 if [[ ! -f .github/workflows/go-check.yml ]]; then
   echo "No .github/workflows/go-check.yml file found. Skipping."
   exit 0
 fi
+popd > /dev/null
 
 expected="$(jq -r '.config.versions.go' <<< "$CONTEXT")"
 version="$(curl -sSfL https://go.dev/dl/\?mode\=json | jq -r --arg expected "$expected" 'map(.version) | map(select(startswith("go\($expected)"))) | .[0]')"
