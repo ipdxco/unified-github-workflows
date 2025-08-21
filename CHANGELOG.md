@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [1.0.32] - 2025-08-20
+### Changed
+- do not recurse submodules when fetching the base SHA in the `go-check` workflow
+
 ## [1.0.31] - 2025-08-20
 ### Added
 - support for Go 1.25 in the `go-check` workflow

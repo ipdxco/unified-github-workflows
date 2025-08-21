@@ -29,7 +29,7 @@ jobs:
         run: |
           if [[ -n "$BASE_SHA" ]]; then
             echo "base_sha=$BASE_SHA" | tee -a $GITHUB_OUTPUT
-            git fetch origin "$BASE_SHA"
+            git fetch --recurse-submodules=no origin "$BASE_SHA"
             git diff --name-only "$BASE_SHA" |
               jq -Rnc '[inputs]' |
               xargs -I {} -0 echo "changed_files={}" |
