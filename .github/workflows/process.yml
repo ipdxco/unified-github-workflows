@@ -63,7 +63,7 @@ jobs:
       run: |
         pip install yq
     - name: Checkout ${{ matrix.repository }}
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
       with:
         path: ${{ matrix.repository }}
         repository: ${{ matrix.repository }}
@@ -72,7 +72,7 @@ jobs:
         submodules: recursive
         fetch-depth: 0
     - name: Checkout ${{ github.repository }}
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
       with:
         path: ${{ github.repository }}
         ref: ${{ github.ref }}
