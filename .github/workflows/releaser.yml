@@ -192,6 +192,7 @@ jobs:
       - uses: actions/download-artifact@v5
       - id: aggregate
         run: |
+          ls -la
           echo "json<<EOF" >> $GITHUB_OUTPUT
           echo "{" | tee -a $GITHUB_OUTPUT
           for d in *; do
