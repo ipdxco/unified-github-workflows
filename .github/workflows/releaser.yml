@@ -192,11 +192,11 @@ jobs:
       - uses: actions/download-artifact@v5
       - id: aggregate
         run: |
+          shopt -s globstar
           echo "json<<EOF" >> $GITHUB_OUTPUT
           echo "{" | tee -a $GITHUB_OUTPUT
-          for d in *; do
-            f="$d/release.json"
-            if [[ -d "$d" && -f "$f" ]]; then
+          for f in **/release.json; do
+            if [[ -f "$f" ]]; then
               echo "$comma" | tee -a $GITHUB_OUTPUT
               jq .source "$f" | tee -a $GITHUB_OUTPUT
               echo ":" | tee -a $GITHUB_OUTPUT

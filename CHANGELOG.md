@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [1.0.33] - 2025-09-04
+### Fixed
+- fixed outputs population in the `releaser` workflow 
+
 ## [1.0.32] - 2025-08-20
 ### Changed
 - do not recurse submodules when fetching the base SHA in the `go-check` workflow
