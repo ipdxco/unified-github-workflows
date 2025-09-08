@@ -84,7 +84,7 @@ jobs:
         env:
           BRANCHES: ${{ inputs.branches }}
           REF: ${{ github.ref }}
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const branches = JSON.parse(process.env.BRANCHES);
@@ -104,7 +104,7 @@ jobs:
           REPOSITORY: ${{ github.repository }}
           REF: ${{ github.ref }}
           SHA: ${{ github.sha }}
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const [owner, repo] = process.env.REPOSITORY.split('/');
