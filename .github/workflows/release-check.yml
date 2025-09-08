@@ -57,7 +57,7 @@ jobs:
       - uses: actions/checkout@v5
       - id: go-mod
         uses: ipdxco/unified-github-workflows/.github/actions/read-go-mod@main
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v6
         with:
           go-version: ${{ fromJSON(steps.go-mod.outputs.json).Go || 'stable' }}
           cache: false
