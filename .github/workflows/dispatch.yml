@@ -27,7 +27,7 @@ jobs:
       batches: ${{ steps.matrix.outputs.result }}
     steps:
       - id: matrix
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         env:
           FILTER: ${{ inputs.filter }}
         with:
