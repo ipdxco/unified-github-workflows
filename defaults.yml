@@ -296,6 +296,7 @@ org:
       npm-kubo: *ipshipyard-repo
       pinning-services-api-spec: *ipshipyard-repo
       roadmap: *ipshipyard-repo
+      service-worker-gateway: *ipshipyard-repo
       sharness: *ipshipyard-repo
       spec-generator: *ipshipyard-repo
       specs: *ipshipyard-repo
