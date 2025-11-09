@@ -55,6 +55,8 @@ jobs:
             let q = process.env.QUERY
             if (process.env.BRANCH) {
               q += ` head:${process.env.BRANCH}`
+            } else {
+              q += ` head:uci/`
             }
 
             core.info(`Looking for PRs matching the query: ${q}`)
