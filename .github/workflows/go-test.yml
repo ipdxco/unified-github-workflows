@@ -10,6 +10,9 @@ on:
         required: false
         type: boolean
         default: false
+      env:
+        required: false
+        type: string
     secrets:
       CODECOV_TOKEN:
         required: false
@@ -34,6 +37,12 @@ jobs:
     runs-on: ${{ fromJSON(vars[format('UCI_GO_TEST_RUNNER_{0}', matrix.os)] || format('"{0}-latest"', matrix.os)) }}
     name: ${{ matrix.os }} (go ${{ matrix.go }})
     steps:
+      - name: Set env
+        if: ${{ inputs.env }}
+        env:
+          ENV: ${{ inputs.env }}
+        run: |
+          echo "$ENV" >> $GITHUB_ENV
       - name: Use msys2 on windows
         if: matrix.os == 'windows'
         # The executable for msys2 is also called bash.cmd

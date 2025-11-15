@@ -12,6 +12,9 @@ on:
         required: false
         type: boolean
         default: false
+      env:
+        required: false
+        type: string
     secrets:
       CHECKOUT_TOKEN:
         required: false
@@ -21,6 +24,12 @@ jobs:
     runs-on: ubuntu-latest
     name: All
     steps:
+      - name: Set env
+        if: ${{ inputs.env }}
+        env:
+          ENV: ${{ inputs.env }}
+        run: |
+          echo "$ENV" >> $GITHUB_ENV
       - name: Check out the repository
         uses: actions/checkout@v5
         with:
