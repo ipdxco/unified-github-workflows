@@ -13,6 +13,8 @@ on:
     secrets:
       CODECOV_TOKEN:
         required: false
+      CHECKOUT_TOKEN:
+        required: false
 
 defaults:
   run:
@@ -43,6 +45,7 @@ jobs:
         uses: actions/checkout@v5
         with:
           submodules: recursive
+          token: ${{ secrets.CHECKOUT_TOKEN }}
       - name: Check out the latest stable version of Go
         id: stable
         uses: actions/setup-go@v5
