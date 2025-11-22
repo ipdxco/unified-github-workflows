@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - custom `runner` configuration to most workflows
 - `os-versions` input support to `go-test` workflow
 
+### Changed
+- disabled codecov when token is not available
+
 ## [1.0.34] - 2025-09-16
 ### Fixed
 - fixed outputs population in the `release-checker` workflow

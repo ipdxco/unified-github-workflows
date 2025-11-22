@@ -63,15 +63,20 @@ jobs:
           ENV: ${{ inputs.env }}
         run: |
           echo "$ENV" >> $GITHUB_ENV
-      - name: Inspect checkout secrets
-        id: checkout-app-secrets
+      - name: Inspect secrets
+        id: secrets
         env:
-          APP_ID: ${{ secrets.CHECKOUT_APP_ID }}
-          PRIVATE_KEY: ${{ secrets.CHECKOUT_PRIVATE_KEY }}
-        run: echo "available=$([[ -n \"$APP_ID\" && -n \"$PRIVATE_KEY\" ]] && echo true || echo false)" | tee -a "$GITHUB_OUTPUT"
+          SECRETS: ${{ toJSON(secrets) }}
+        run: |
+          while read -r key; do
+            jq -nr --arg k "$key" --argjson s "$SECRETS" \
+              'if ($s[$k] // "") == "" then "false" else "true" end' \
+              | xargs -I{} echo "$key={}" \
+              | tee -a "$GITHUB_OUTPUT"
+          done <<< "$(jq -r 'keys[]' <<< "$SECRETS")"
       - name: Create GitHub App installation token
         id: checkout-app
-        if: steps.checkout-app-secrets.outputs.available == 'true'
+        if: steps.secrets.outputs.CHECKOUT_APP_ID == 'true' && steps.secrets.outputs.CHECKOUT_PRIVATE_KEY == 'true'
         uses: actions/create-github-app-token@v2
         with:
           app-id: ${{ secrets.CHECKOUT_APP_ID }}
@@ -190,6 +195,7 @@ jobs:
         id: coverages
         run: echo "files=$(find . -type f -name 'module-coverage.txt' | tr -s '\n' ',' | sed 's/,$//')" >> $GITHUB_OUTPUT
       - name: Upload coverage to Codecov
+        if: steps.secrets.outputs.CODECOV_TOKEN == 'true'
         uses: codecov/codecov-action@fdcc8476540edceab3de004e990f80d881c6cc00 # v5.5.0
         env:
           OS: ${{ matrix.os }}
