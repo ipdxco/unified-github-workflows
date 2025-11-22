@@ -25,6 +25,10 @@ on:
         required: false
         type: string
         default: '"macos-latest"'
+      os-versions:
+        required: false
+        type: string
+        default: '["ubuntu", "windows", "macos"]'
     secrets:
       CODECOV_TOKEN:
         required: false
@@ -40,7 +44,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ "ubuntu", "windows", "macos" ]
+        os: ${{ fromJSON(inputs.os-versions) }}
         go: ${{ fromJSON(inputs.go-versions) }}
     env:
       GOTESTFLAGS: -cover -coverprofile=module-coverage.txt -coverpkg=./...
