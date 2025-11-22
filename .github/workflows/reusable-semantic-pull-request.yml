@@ -2,11 +2,16 @@ name: Semantic PR
 
 on:
   workflow_call:
+    inputs:
+      runner:
+        required: false
+        type: string
+        default: '"ubuntu-latest"'
 
 jobs:
   main:
     name: Validate PR title
-    runs-on: ubuntu-latest
+    runs-on: ${{ fromJSON(vars['UCI_SEMANTIC_PULL_REQUEST_RUNNER'] || inputs['runner']) }}
     steps:
       - uses: amannn/action-semantic-pull-request@48f256284bd46cdaab1048c3721360e808335d50 # v6.1.1
         env:

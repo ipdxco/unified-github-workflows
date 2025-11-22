@@ -18,6 +18,10 @@ on:
         required: false
         type: boolean
         default: false
+      runner:
+        required: false
+        type: string
+        default: '"ubuntu-latest"'
     outputs:
       json:
         description: JSON aggregation of release.json artifacts
@@ -28,7 +32,7 @@ on:
 
 jobs:
   releaser:
-    runs-on: ubuntu-latest
+    runs-on: ${{ fromJSON(vars['UCI_RELEASER_RUNNER'] || inputs['runner']) }}
     strategy:
       fail-fast: false
       matrix:
@@ -185,7 +189,7 @@ jobs:
           overwrite: true
   aggregate:
     needs: [releaser]
-    runs-on: ubuntu-latest
+    runs-on: ${{ fromJSON(vars['UCI_RELEASER_RUNNER'] || inputs['runner']) }}
     outputs:
       json: ${{ toJSON(fromJSON(steps.aggregate.outputs.json)) }}
     steps:

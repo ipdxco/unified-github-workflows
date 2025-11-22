@@ -12,16 +12,56 @@ on:
         required: false
         type: boolean
         default: false
+      runner:
+        required: false
+        type: string
+        default: '"ubuntu-latest"'
+      env:
+        required: false
+        type: string
+    secrets:
+      CHECKOUT_TOKEN:
+        required: false
+      CHECKOUT_APP_ID:
+        required: false
+      CHECKOUT_PRIVATE_KEY:
+        required: false
 
 jobs:
   unit:
-    runs-on: ubuntu-latest
+    runs-on: ${{ fromJSON(vars['UCI_GO_CHECK_RUNNER'] || inputs['runner']) }}
     name: All
     steps:
+      - name: Set env
+        if: ${{ inputs.env }}
+        env:
+          ENV: ${{ inputs.env }}
+        run: |
+          echo "$ENV" >> $GITHUB_ENV
+      - name: Inspect secrets
+        id: secrets
+        env:
+          SECRETS: ${{ toJSON(secrets) }}
+        run: |
+          while read -r key; do
+            jq -nr --arg k "$key" --argjson s "$SECRETS" \
+              'if ($s[$k] // "") == "" then "false" else "true" end' \
+              | xargs -I{} echo "$key={}" \
+              | tee -a "$GITHUB_OUTPUT"
+          done <<< "$(jq -r 'keys[]' <<< "$SECRETS")"
+      - name: Create GitHub App installation token
+        id: checkout-app
+        if: steps.secrets.outputs.CHECKOUT_APP_ID == 'true' && steps.secrets.outputs.CHECKOUT_PRIVATE_KEY == 'true'
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.CHECKOUT_APP_ID }}
+          private-key: ${{ secrets.CHECKOUT_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
       - name: Check out the repository
         uses: actions/checkout@v5
         with:
           submodules: recursive
+          token: ${{ steps.checkout-app.outputs.token || secrets.CHECKOUT_TOKEN }}
       - name: Extend the GitHub context
         id: github
         env:
