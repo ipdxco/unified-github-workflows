@@ -93,7 +93,7 @@ jobs:
         uses: actions/checkout@v5
         with:
           submodules: recursive
-          token: ${{ steps.checkout-app.outputs.token || secrets.CHECKOUT_TOKEN }}
+          token: ${{ steps.checkout-app.outputs.token || secrets.CHECKOUT_TOKEN || github.token }}
       - name: Check out the latest stable version of Go
         id: stable
         uses: actions/setup-go@v5
