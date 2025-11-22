@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - `env` input support to `go-test` and `go-check` workflows
 - `CHECKOUT_TOKEN` secret support to `go-test` and `go-check` workflows
+- custom `runner` configuration to most workflows
 
 ## [1.0.34] - 2025-09-16
 ### Fixed

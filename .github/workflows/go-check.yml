@@ -15,13 +15,17 @@ on:
       env:
         required: false
         type: string
+      runner:
+        required: false
+        type: string
+        default: '"ubuntu-latest"'
     secrets:
       CHECKOUT_TOKEN:
         required: false
 
 jobs:
   unit:
-    runs-on: ubuntu-latest
+    runs-on: ${{ fromJSON(vars['UCI_GO_CHECK_RUNNER'] || inputs['runner']) }}
     name: All
     steps:
       - name: Set env

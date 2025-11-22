@@ -13,6 +13,18 @@ on:
       env:
         required: false
         type: string
+      runner-ubuntu:
+        required: false
+        type: string
+        default: '"ubuntu-latest"'
+      runner-windows:
+        required: false
+        type: string
+        default: '"windows-latest"'
+      runner-macos:
+        required: false
+        type: string
+        default: '"macos-latest"'
     secrets:
       CODECOV_TOKEN:
         required: false
@@ -34,7 +46,7 @@ jobs:
       GOTESTFLAGS: -cover -coverprofile=module-coverage.txt -coverpkg=./...
       GO386FLAGS: ''
       GORACEFLAGS: ''
-    runs-on: ${{ fromJSON(vars[format('UCI_GO_TEST_RUNNER_{0}', matrix.os)] || format('"{0}-latest"', matrix.os)) }}
+    runs-on: ${{ fromJSON(vars[format('UCI_GO_TEST_RUNNER_{0}', matrix.os)] || inputs[format('runner-{0}', matrix.os)]) }}
     name: ${{ matrix.os }} (go ${{ matrix.go }})
     steps:
       - name: Set env
