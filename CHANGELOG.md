@@ -6,8 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 ### Added
-- `env` input support to `go-test` and `go-check` workflows
-- `CHECKOUT_TOKEN` secret support to `go-test` and `go-check` workflows
+- `env` input support to `go-test`, `go-check`, `releaser` and `release-check` workflows
+- `checkout-token` input support to `go-test`, `go-check`, `releaser` and `release-check` workflows
 - custom `runner` configuration to most workflows
 - `os-versions` input support to `go-test` workflow
 

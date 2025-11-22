@@ -14,10 +14,17 @@ on:
         required: false
         type: string
         default: '/'
+      env:
+        required: false
+        type: string
       runner:
         required: false
         type: string
         default: '"ubuntu-latest"'
+      checkout-token:
+        required: false
+        type: string
+        default: ${{ github.token }}
     outputs:
       json:
         description: JSON aggregation of release.json artifacts

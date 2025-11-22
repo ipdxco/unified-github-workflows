@@ -18,10 +18,21 @@ on:
         required: false
         type: boolean
         default: false
+      env:
+        required: false
+        type: string
       runner:
         required: false
         type: string
         default: '"ubuntu-latest"'
+      checkout-token:
+        required: false
+        type: string
+        default: ${{ github.token }}
+      release-token:
+        required: false
+        type: string
+        default: ${{ github.token }}
     outputs:
       json:
         description: JSON aggregation of release.json artifacts
@@ -160,7 +171,7 @@ jobs:
           generate_release_notes: true
           target_commitish: ${{ github.sha }}
           make_latest: ${{ steps.version.outputs.prefix == 'v' && steps.version.outputs.suffix == '' && steps.version.outputs.tag == steps.latest.outputs.latest }}
-          token: ${{ secrets.UCI_GITHUB_TOKEN || github.token }}
+          token: ${{ secrets.UCI_GITHUB_TOKEN || inputs.release-token }}
       - name: Create release.json
         if: steps.release.outputs.id != ''
         id: json
