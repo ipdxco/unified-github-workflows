@@ -12,17 +12,23 @@ on:
         required: false
         type: boolean
         default: false
-      env:
-        required: false
-        type: string
       runner:
         required: false
         type: string
         default: '"ubuntu-latest"'
+      env:
+        required: false
+        type: string
       checkout-token:
         required: false
         type: string
         default: ${{ github.token }}
+      checkout-app-id:
+        required: false
+        type: string
+      checkout-private-key:
+        required: false
+        type: string
 
 jobs:
   unit:
@@ -35,11 +41,19 @@ jobs:
           ENV: ${{ inputs.env }}
         run: |
           echo "$ENV" >> $GITHUB_ENV
+      - name: Create GitHub App installation token
+        id: checkout-app
+        if: ${{ inputs.checkout-app-id && inputs.checkout-private-key }}
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ inputs.checkout-app-id }}
+          private-key: ${{ inputs.checkout-private-key }}
+          owner: ${{ github.repository_owner }}
       - name: Check out the repository
         uses: actions/checkout@v5
         with:
           submodules: recursive
-          token: ${{ inputs.checkout-token }}
+          token: ${{ steps.checkout-app.outputs.token || inputs.checkout-token }}
       - name: Extend the GitHub context
         id: github
         env:
