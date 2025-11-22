@@ -19,16 +19,13 @@ on:
       env:
         required: false
         type: string
-      checkout-token:
+    secrets:
+      CHECKOUT_TOKEN:
         required: false
-        type: string
-        default: ${{ github.token }}
-      checkout-app-id:
+      CHECKOUT_APP_ID:
         required: false
-        type: string
-      checkout-private-key:
+      CHECKOUT_PRIVATE_KEY:
         required: false
-        type: string
 
 jobs:
   unit:
@@ -41,19 +38,25 @@ jobs:
           ENV: ${{ inputs.env }}
         run: |
           echo "$ENV" >> $GITHUB_ENV
+      - name: Inspect checkout secrets
+        id: checkout-app-secrets
+        env:
+          APP_ID: ${{ secrets.CHECKOUT_APP_ID }}
+          PRIVATE_KEY: ${{ secrets.CHECKOUT_PRIVATE_KEY }}
+        run: echo "available=$([[ -n \"$APP_ID\" && -n \"$PRIVATE_KEY\" ]] && echo true || echo false)" | tee -a "$GITHUB_OUTPUT"
       - name: Create GitHub App installation token
         id: checkout-app
-        if: ${{ inputs.checkout-app-id && inputs.checkout-private-key }}
+        if: steps.checkout-app-secrets.outputs.available == 'true'
         uses: actions/create-github-app-token@v2
         with:
-          app-id: ${{ inputs.checkout-app-id }}
-          private-key: ${{ inputs.checkout-private-key }}
+          app-id: ${{ secrets.CHECKOUT_APP_ID }}
+          private-key: ${{ secrets.CHECKOUT_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
       - name: Check out the repository
         uses: actions/checkout@v5
         with:
           submodules: recursive
-          token: ${{ steps.checkout-app.outputs.token || inputs.checkout-token }}
+          token: ${{ steps.checkout-app.outputs.token || secrets.CHECKOUT_TOKEN }}
       - name: Extend the GitHub context
         id: github
         env:
