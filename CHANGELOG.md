@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+
+## [1.0.35] - 2025-11-22
 ### Added
 - `env` input support to `go-test` and `go-check` workflows
 - `CHECKOUT_TOKEN`, `CHECKOUT_APP_ID` and `CHECKOUT_PRIVATE_KEY` secrets support to `go-test` and `go-check` workflows
