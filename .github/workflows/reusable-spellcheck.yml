@@ -2,10 +2,15 @@ name: Check Spelling
 
 on:
   workflow_call:
+    inputs:
+      runner:
+        required: false
+        type: string
+        default: '"ubuntu-latest"'
 
 jobs:
   spellcheck:
-    runs-on: ubuntu-latest
+    runs-on: ${{ fromJSON(vars['UCI_SPELLCHECK_RUNNER'] || inputs['runner']) }}
     steps:
       - uses: actions/checkout@v5
 

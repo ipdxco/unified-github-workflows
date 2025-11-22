@@ -2,11 +2,16 @@ name: Manual Release Nag
 
 on:
   workflow_call:
+    inputs:
+      runner:
+        required: false
+        type: string
+        default: '"ubuntu-latest"'
 
 jobs:
   nag:
     if: startsWith(github.ref, 'refs/tags') && github.event.pusher.name != 'web3-bot'
-    runs-on: ubuntu-latest
+    runs-on: ${{ fromJSON(vars['UCI_TAGPUSH_RUNNER'] || inputs['runner']) }}
     name: All
     steps:
       - id: tag
