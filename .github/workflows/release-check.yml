@@ -36,7 +36,7 @@ jobs:
         name: Retrieve PR information
         env:
           PULL_REQUEST: ${{ toJSON(github.event.pull_request) }}
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             let pr = JSON.parse(process.env.PULL_REQUEST);
@@ -107,7 +107,7 @@ jobs:
         env:
           BRANCHES: ${{ inputs.branches }}
           BASE_REF: ${{ fromJSON(steps.pr.outputs.json).base.ref }}
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const branches = JSON.parse(process.env.BRANCHES);
