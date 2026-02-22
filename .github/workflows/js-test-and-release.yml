@@ -36,8 +36,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
+          package-manager-cache: false
           node-version: lts/*
       - uses: ipfs/aegir/actions/cache-node-modules@main
 
@@ -46,8 +47,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
+          package-manager-cache: false
           node-version: lts/*
       - uses: ipfs/aegir/actions/cache-node-modules@main
       - run: npm run --if-present lint
@@ -65,8 +67,9 @@ jobs:
       fail-fast: true
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
+          package-manager-cache: false
           node-version: ${{ matrix.node }}
       - uses: ipfs/aegir/actions/cache-node-modules@main
       - run: npm run --if-present test:node
@@ -83,8 +86,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
+          package-manager-cache: false
           node-version: lts/*
       - uses: ipfs/aegir/actions/cache-node-modules@main
       - run: npm run --if-present test:chrome
@@ -100,8 +104,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
+          package-manager-cache: false
           node-version: lts/*
       - uses: ipfs/aegir/actions/cache-node-modules@main
       - run: npm run --if-present test:chrome-webworker
@@ -117,8 +122,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
+          package-manager-cache: false
           node-version: lts/*
       - uses: ipfs/aegir/actions/cache-node-modules@main
       - run: npm run --if-present test:firefox
@@ -134,8 +140,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
+          package-manager-cache: false
           node-version: lts/*
       - uses: ipfs/aegir/actions/cache-node-modules@main
       - run: npm run --if-present test:firefox-webworker
@@ -156,8 +163,9 @@ jobs:
       fail-fast: true
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
+          package-manager-cache: false
           node-version: lts/*
       - uses: ipfs/aegir/actions/cache-node-modules@main
       - run: npx playwright install-deps
@@ -180,8 +188,9 @@ jobs:
       fail-fast: true
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
+          package-manager-cache: false
           node-version: lts/*
       - uses: ipfs/aegir/actions/cache-node-modules@main
       - run: npx playwright install-deps
@@ -199,8 +208,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
+          package-manager-cache: false
           node-version: lts/*
       - uses: ipfs/aegir/actions/cache-node-modules@main
       - run: npx xvfb-maybe npm run --if-present test:electron-main
@@ -216,8 +226,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
+          package-manager-cache: false
           node-version: lts/*
       - uses: ipfs/aegir/actions/cache-node-modules@main
       - run: npx xvfb-maybe npm run --if-present test:electron-renderer
@@ -262,8 +273,9 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
+          package-manager-cache: false
           node-version: lts/*
       - uses: ipfs/aegir/actions/cache-node-modules@main
       - uses: ipfs/aegir/actions/docker-login@main
