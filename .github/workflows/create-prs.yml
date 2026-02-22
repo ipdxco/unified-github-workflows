@@ -106,12 +106,6 @@ jobs:
                   body: `This PR was created automatically by the @web3-bot as a part of the [Unified CI](https://github.com/ipdxco/unified-github-workflows) project.`
                 })
                 core.info(`${pr.data.html_url} created successfully`)
-                void github.rest.issues.addLabels({
-                  owner: repo.owner.login,
-                  repo: repo.name,
-                  issue_number: pr.number,
-                  labels: ["automerge"]
-                })
               } catch(error) {
                 core.error(`Couldn't create a PR for ${repo.html_url}/tree/${branch.name}, got: ${error}`)
                 failed.push({repo, branch})
