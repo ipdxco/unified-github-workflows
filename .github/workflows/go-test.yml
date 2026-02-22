@@ -96,7 +96,7 @@ jobs:
           token: ${{ steps.checkout-app.outputs.token || secrets.CHECKOUT_TOKEN || github.token }}
       - name: Check out the latest stable version of Go
         id: stable
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version: stable
           cache: false
@@ -145,7 +145,7 @@ jobs:
           echo "GO386FLAGS=-v $GO386FLAGS" >> $GITHUB_ENV
           echo "GORACEFLAGS=-v $GORACEFLAGS" >> $GITHUB_ENV
       - name: Set up the Go version read from the go.mod file
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         if: steps.go.outputs.version != steps.stable.outputs.go-version || inputs.go-cache != 'false'
         with:
           go-version: ${{ steps.go.outputs.version }}
@@ -196,7 +196,7 @@ jobs:
         run: echo "files=$(find . -type f -name 'module-coverage.txt' | tr -s '\n' ',' | sed 's/,$//')" >> $GITHUB_OUTPUT
       - name: Upload coverage to Codecov
         if: steps.secrets.outputs.CODECOV_TOKEN == 'true'
-        uses: codecov/codecov-action@fdcc8476540edceab3de004e990f80d881c6cc00 # v5.5.0
+        uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5.5.2
         env:
           OS: ${{ matrix.os }}
           GO: ${{ steps.go.outputs.version }}

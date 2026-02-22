@@ -36,7 +36,7 @@ jobs:
         name: Retrieve PR information
         env:
           PULL_REQUEST: ${{ toJSON(github.event.pull_request) }}
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             let pr = JSON.parse(process.env.PULL_REQUEST);
@@ -61,7 +61,7 @@ jobs:
       - uses: actions/checkout@v5
       - id: go-mod
         uses: ipdxco/unified-github-workflows/.github/actions/read-go-mod@main
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v6
         with:
           go-version: ${{ fromJSON(steps.go-mod.outputs.json).Go || 'stable' }}
           cache: false
@@ -107,7 +107,7 @@ jobs:
         env:
           BRANCHES: ${{ inputs.branches }}
           BASE_REF: ${{ fromJSON(steps.pr.outputs.json).base.ref }}
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const branches = JSON.parse(process.env.BRANCHES);
@@ -137,7 +137,7 @@ jobs:
           fi
       - name: Install semver (node command line tool)
         if: steps.tag.outputs.needed == 'true'
-        run: npm install -g "https://github.com/npm/node-semver#dc0fe202faaf19a545ce5eeab3480be84180a082" # v7.3.8
+        run: npm install -g "https://github.com/npm/node-semver#5993c2e42bdf17c5f03e6360da51bc707fcee460" # v7.7.4
       - name: Check version
         if: steps.tag.outputs.needed == 'true'
         env:
@@ -209,7 +209,7 @@ jobs:
           echo "output<<$EOF" >> $GITHUB_OUTPUT
           if [[ "$LANGUAGE" == "Go" ]]; then
             go mod download
-            go install golang.org/x/exp/cmd/gorelease@eff6e970281f06e676cb2d92dab7eebf70f6b968 # https://cs.opensource.google/go/x/exp/+/eff6e970281f06e676cb2d92dab7eebf70f6b968
+            go install golang.org/x/exp/cmd/gorelease@2735e65f0518bac4f30f0042ea19b4b5b14dcbf7 # https://cs.opensource.google/go/x/exp/+/2735e65f0518bac4f30f0042ea19b4b5b14dcbf7
             go install github.com/smola/gocompat/cmd/gocompat@8498b97a44792a3a6063c47014726baa63e2e669 # v0.3.0
             echo "\`gorelease\` says:" >> $GITHUB_OUTPUT
             echo "\`\`\`" >> $GITHUB_OUTPUT
@@ -336,7 +336,7 @@ jobs:
           sed 's/[":<>|*?\r\n\\\/]/_/g' <<< "$SOURCE" | xargs -I {} -0 echo "name={}" | tee -a $GITHUB_OUTPUT
       - name: Upload release.json
         if: steps.release.outputs.id != ''
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: ${{ steps.json.outputs.name }}
           path: release.json
@@ -346,7 +346,7 @@ jobs:
     outputs:
       json: ${{ toJSON(fromJSON(steps.aggregate.outputs.json)) }}
     steps:
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v7
       - id: aggregate
         run: |
           shopt -s globstar
