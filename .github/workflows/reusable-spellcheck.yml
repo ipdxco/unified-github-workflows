@@ -108,7 +108,7 @@ jobs:
 
       - run: jq . .cspell.json
 
-      - uses: streetsidesoftware/cspell-action@dcd03dc3e8a59ec2e360d0c62db517baa0b4bb6d # v7.2.0
+      - uses: streetsidesoftware/cspell-action@d5d910b521ad408f1e7383c24609079f5a88bdca # v8.2.0
         with:
           incremental_files_only: ${{
               steps.github.outputs.base_sha && !(
