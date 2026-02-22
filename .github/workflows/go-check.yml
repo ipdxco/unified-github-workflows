@@ -77,7 +77,7 @@ jobs:
           fi
       - name: Check out the latest stable version of Go
         id: stable
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version: stable
           cache: false
@@ -90,7 +90,7 @@ jobs:
       - name: Set up the Go version read from the go.mod file
         id: go
         if: (inputs.go-version || fromJSON(steps.go-mod.outputs.json).Go) != steps.stable.outputs.go-version || inputs.go-cache != 'false'
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version: ${{ inputs.go-version || fromJSON(steps.go-mod.outputs.json).Go }}
           cache: ${{ inputs.go-cache }}

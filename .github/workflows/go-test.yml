@@ -96,7 +96,7 @@ jobs:
           token: ${{ steps.checkout-app.outputs.token || secrets.CHECKOUT_TOKEN || github.token }}
       - name: Check out the latest stable version of Go
         id: stable
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version: stable
           cache: false
@@ -145,7 +145,7 @@ jobs:
           echo "GO386FLAGS=-v $GO386FLAGS" >> $GITHUB_ENV
           echo "GORACEFLAGS=-v $GORACEFLAGS" >> $GITHUB_ENV
       - name: Set up the Go version read from the go.mod file
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         if: steps.go.outputs.version != steps.stable.outputs.go-version || inputs.go-cache != 'false'
         with:
           go-version: ${{ steps.go.outputs.version }}
