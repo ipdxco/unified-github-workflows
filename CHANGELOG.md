@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 ### Changed
+- added go 1.26 versions of staticcheck and go-lint
 - upgraded setup-node
 - upgraded download-artifact
 - upgraded upload-artifact
