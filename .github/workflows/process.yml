@@ -79,7 +79,7 @@ jobs:
         fetch-depth: 0
     - id: github-cache
       name: Get ${{ matrix.repository }} GitHub info from cache
-      uses: actions/cache/restore@v4
+      uses: actions/cache/restore@v5
       with:
         path: ${{ matrix.repository }}.info
         key: ${{ matrix.repository }}
@@ -115,7 +115,7 @@ jobs:
         echo "$eof" >> $GITHUB_OUTPUT
     - if: steps.github-cache.outputs.cache-hit != 'true'
       name: Save ${{ matrix.repository }} GitHub info to cache
-      uses: actions/cache/save@v4
+      uses: actions/cache/save@v5
       with:
         path: ${{ matrix.repository }}.info
         key: ${{ matrix.repository }}
