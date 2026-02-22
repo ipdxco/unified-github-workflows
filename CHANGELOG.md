@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 ### Changed
+- upgraded github-script
 - upgraded cspell
 
 ## [1.0.35] - 2025-11-22
