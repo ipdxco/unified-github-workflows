@@ -137,7 +137,7 @@ jobs:
           fi
       - name: Install semver (node command line tool)
         if: steps.tag.outputs.needed == 'true'
-        run: npm install -g "https://github.com/npm/node-semver#dc0fe202faaf19a545ce5eeab3480be84180a082" # v7.3.8
+        run: npm install -g "https://github.com/npm/node-semver#5993c2e42bdf17c5f03e6360da51bc707fcee460" # v7.7.4
       - name: Check version
         if: steps.tag.outputs.needed == 'true'
         env:
@@ -209,7 +209,7 @@ jobs:
           echo "output<<$EOF" >> $GITHUB_OUTPUT
           if [[ "$LANGUAGE" == "Go" ]]; then
             go mod download
-            go install golang.org/x/exp/cmd/gorelease@eff6e970281f06e676cb2d92dab7eebf70f6b968 # https://cs.opensource.google/go/x/exp/+/eff6e970281f06e676cb2d92dab7eebf70f6b968
+            go install golang.org/x/exp/cmd/gorelease@2735e65f0518bac4f30f0042ea19b4b5b14dcbf7 # https://cs.opensource.google/go/x/exp/+/2735e65f0518bac4f30f0042ea19b4b5b14dcbf7
             go install github.com/smola/gocompat/cmd/gocompat@8498b97a44792a3a6063c47014726baa63e2e669 # v0.3.0
             echo "\`gorelease\` says:" >> $GITHUB_OUTPUT
             echo "\`\`\`" >> $GITHUB_OUTPUT
