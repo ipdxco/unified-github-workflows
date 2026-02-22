@@ -193,7 +193,7 @@ jobs:
     outputs:
       json: ${{ toJSON(fromJSON(steps.aggregate.outputs.json)) }}
     steps:
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v7
       - id: aggregate
         run: |
           shopt -s globstar
