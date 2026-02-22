@@ -196,7 +196,7 @@ jobs:
         run: echo "files=$(find . -type f -name 'module-coverage.txt' | tr -s '\n' ',' | sed 's/,$//')" >> $GITHUB_OUTPUT
       - name: Upload coverage to Codecov
         if: steps.secrets.outputs.CODECOV_TOKEN == 'true'
-        uses: codecov/codecov-action@fdcc8476540edceab3de004e990f80d881c6cc00 # v5.5.0
+        uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5.5.2
         env:
           OS: ${{ matrix.os }}
           GO: ${{ steps.go.outputs.version }}
