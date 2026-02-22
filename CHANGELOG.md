@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [1.0.38] - 2026-02-22
+### Changed
+- [revert] automerge only PRs with automerge label
+
+## [1.0.37] - 2026-02-22
+### Changed
+- automerge only PRs with automerge label
+
 ## [1.0.36] - 2026-02-22
 ### Changed
 - added go 1.26 versions of go-release
