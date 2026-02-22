@@ -23,7 +23,7 @@ jobs:
           QUERY: is:pr author:web3-bot state:open archived:false label:automerge
           BRANCH: ${{ github.event.inputs.branch }}
           DRY_RUN: ${{ github.event.inputs.dry-run }}
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           github-token: ${{ secrets.UCI_GITHUB_TOKEN }}
           retries: 0

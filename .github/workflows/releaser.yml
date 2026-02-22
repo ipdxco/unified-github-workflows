@@ -18,6 +18,10 @@ on:
         required: false
         type: boolean
         default: false
+      runner:
+        required: false
+        type: string
+        default: '"ubuntu-latest"'
     outputs:
       json:
         description: JSON aggregation of release.json artifacts
@@ -28,7 +32,7 @@ on:
 
 jobs:
   releaser:
-    runs-on: ubuntu-latest
+    runs-on: ${{ fromJSON(vars['UCI_RELEASER_RUNNER'] || inputs['runner']) }}
     strategy:
       fail-fast: false
       matrix:
@@ -84,7 +88,7 @@ jobs:
         env:
           BRANCHES: ${{ inputs.branches }}
           REF: ${{ github.ref }}
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const branches = JSON.parse(process.env.BRANCHES);
@@ -104,7 +108,7 @@ jobs:
           REPOSITORY: ${{ github.repository }}
           REF: ${{ github.ref }}
           SHA: ${{ github.sha }}
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const [owner, repo] = process.env.REPOSITORY.split('/');
@@ -178,18 +182,18 @@ jobs:
           sed 's/[":<>|*?\r\n\\\/]/_/g' <<< "$SOURCE" | xargs -I {} -0 echo "name={}" | tee -a $GITHUB_OUTPUT
       - name: Upload release.json
         if: steps.release.outputs.id != ''
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: ${{ steps.json.outputs.name }}
           path: release.json
           overwrite: true
   aggregate:
     needs: [releaser]
-    runs-on: ubuntu-latest
+    runs-on: ${{ fromJSON(vars['UCI_RELEASER_RUNNER'] || inputs['runner']) }}
     outputs:
       json: ${{ toJSON(fromJSON(steps.aggregate.outputs.json)) }}
     steps:
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v7
       - id: aggregate
         run: |
           shopt -s globstar

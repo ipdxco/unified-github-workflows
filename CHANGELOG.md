@@ -8,6 +8,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - automerge only PRs with automerge label
 
+## [1.0.36] - 2026-02-22
+### Changed
+- added go 1.26 versions of go-release
+- upgraded node-semver
+- added go 1.26 versions of staticcheck and go-lint
+- upgraded setup-node
+- upgraded download-artifact
+- upgraded upload-artifact
+- upgraded cache
+- upgraded codecov
+- upgraded setup-go
+- upgraded github-script
+- upgraded cspell
+
+## [1.0.35] - 2025-11-22
+### Added
+- `env` input support to `go-test` and `go-check` workflows
+- `CHECKOUT_TOKEN`, `CHECKOUT_APP_ID` and `CHECKOUT_PRIVATE_KEY` secrets support to `go-test` and `go-check` workflows
+- custom `runner` configuration to most workflows
+- `os-versions` input support to `go-test` workflow
+
+### Changed
+- disabled codecov when token is not available
+
 ## [1.0.34] - 2025-09-16
 ### Fixed
 - fixed outputs population in the `release-checker` workflow

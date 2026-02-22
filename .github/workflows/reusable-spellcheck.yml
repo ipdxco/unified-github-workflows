@@ -2,10 +2,15 @@ name: Check Spelling
 
 on:
   workflow_call:
+    inputs:
+      runner:
+        required: false
+        type: string
+        default: '"ubuntu-latest"'
 
 jobs:
   spellcheck:
-    runs-on: ubuntu-latest
+    runs-on: ${{ fromJSON(vars['UCI_SPELLCHECK_RUNNER'] || inputs['runner']) }}
     steps:
       - uses: actions/checkout@v5
 
@@ -24,7 +29,7 @@ jobs:
           fi
 
       - id: config
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const fs = require("fs");
@@ -76,7 +81,7 @@ jobs:
           yq -o=json '.' "$CONFIG_PATH" > '.cspell.json'
           rm "$CONFIG_PATH"
 
-      - uses: actions/github-script@v7
+      - uses: actions/github-script@v8
         env:
           IGNORE_WORDS: |
             Adin
@@ -103,7 +108,7 @@ jobs:
 
       - run: jq . .cspell.json
 
-      - uses: streetsidesoftware/cspell-action@dcd03dc3e8a59ec2e360d0c62db517baa0b4bb6d # v7.2.0
+      - uses: streetsidesoftware/cspell-action@d5d910b521ad408f1e7383c24609079f5a88bdca # v8.2.0
         with:
           incremental_files_only: ${{
               steps.github.outputs.base_sha && !(

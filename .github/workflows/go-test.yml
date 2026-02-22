@@ -2,6 +2,10 @@ name: Go Test
 on:
   workflow_call:
     inputs:
+      os-versions:
+        required: false
+        type: string
+        default: '["ubuntu", "windows", "macos"]'
       go-versions:
         required: false
         type: string
@@ -10,8 +14,29 @@ on:
         required: false
         type: boolean
         default: false
+      runner-ubuntu:
+        required: false
+        type: string
+        default: '"ubuntu-latest"'
+      runner-windows:
+        required: false
+        type: string
+        default: '"windows-latest"'
+      runner-macos:
+        required: false
+        type: string
+        default: '"macos-latest"'
+      env:
+        required: false
+        type: string
     secrets:
       CODECOV_TOKEN:
+        required: false
+      CHECKOUT_TOKEN:
+        required: false
+      CHECKOUT_APP_ID:
+        required: false
+      CHECKOUT_PRIVATE_KEY:
         required: false
 
 defaults:
@@ -23,15 +48,40 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ "ubuntu", "windows", "macos" ]
+        os: ${{ fromJSON(inputs.os-versions) }}
         go: ${{ fromJSON(inputs.go-versions) }}
     env:
       GOTESTFLAGS: -cover -coverprofile=module-coverage.txt -coverpkg=./...
       GO386FLAGS: ''
       GORACEFLAGS: ''
-    runs-on: ${{ fromJSON(vars[format('UCI_GO_TEST_RUNNER_{0}', matrix.os)] || format('"{0}-latest"', matrix.os)) }}
+    runs-on: ${{ fromJSON(vars[format('UCI_GO_TEST_RUNNER_{0}', matrix.os)] || inputs[format('runner-{0}', matrix.os)]) }}
     name: ${{ matrix.os }} (go ${{ matrix.go }})
     steps:
+      - name: Set env
+        if: ${{ inputs.env }}
+        env:
+          ENV: ${{ inputs.env }}
+        run: |
+          echo "$ENV" >> $GITHUB_ENV
+      - name: Inspect secrets
+        id: secrets
+        env:
+          SECRETS: ${{ toJSON(secrets) }}
+        run: |
+          while read -r key; do
+            jq -nr --arg k "$key" --argjson s "$SECRETS" \
+              'if ($s[$k] // "") == "" then "false" else "true" end' \
+              | xargs -I{} echo "$key={}" \
+              | tee -a "$GITHUB_OUTPUT"
+          done <<< "$(jq -r 'keys[]' <<< "$SECRETS")"
+      - name: Create GitHub App installation token
+        id: checkout-app
+        if: steps.secrets.outputs.CHECKOUT_APP_ID == 'true' && steps.secrets.outputs.CHECKOUT_PRIVATE_KEY == 'true'
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.CHECKOUT_APP_ID }}
+          private-key: ${{ secrets.CHECKOUT_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
       - name: Use msys2 on windows
         if: matrix.os == 'windows'
         # The executable for msys2 is also called bash.cmd
@@ -43,9 +93,10 @@ jobs:
         uses: actions/checkout@v5
         with:
           submodules: recursive
+          token: ${{ steps.checkout-app.outputs.token || secrets.CHECKOUT_TOKEN || github.token }}
       - name: Check out the latest stable version of Go
         id: stable
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version: stable
           cache: false
@@ -94,7 +145,7 @@ jobs:
           echo "GO386FLAGS=-v $GO386FLAGS" >> $GITHUB_ENV
           echo "GORACEFLAGS=-v $GORACEFLAGS" >> $GITHUB_ENV
       - name: Set up the Go version read from the go.mod file
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         if: steps.go.outputs.version != steps.stable.outputs.go-version || inputs.go-cache != 'false'
         with:
           go-version: ${{ steps.go.outputs.version }}
@@ -144,7 +195,8 @@ jobs:
         id: coverages
         run: echo "files=$(find . -type f -name 'module-coverage.txt' | tr -s '\n' ',' | sed 's/,$//')" >> $GITHUB_OUTPUT
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@fdcc8476540edceab3de004e990f80d881c6cc00 # v5.5.0
+        if: steps.secrets.outputs.CODECOV_TOKEN == 'true'
+        uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5.5.2
         env:
           OS: ${{ matrix.os }}
           GO: ${{ steps.go.outputs.version }}
