@@ -23,16 +23,13 @@ popd > /dev/null
 
 pushd "$TARGET" > /dev/null
 
-while read file; do
-  npm install
-  npm install "aegir@^v47.0.26" --save-dev
+npm install
+npm install "aegir@^v47.0.26" --save-dev
 
-  git add .
+git add .
 
-  if ! git diff-index --quiet HEAD; then
-    git commit -m "chore(deps): update aegir to v47.0.26"
-  fi
-  popd > /dev/null
-done <<< "$(git ls-tree --full-tree --name-only HEAD | grep 'package\.json$')"
+if ! git diff-index --quiet HEAD; then
+  git commit -m "chore(deps): update aegir to v47.0.26"
+fi
 
 popd > /dev/null
