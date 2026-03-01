@@ -29,7 +29,7 @@ npm install "aegir@^v47.0.26" --save-dev
 git add .
 
 if ! git diff-index --quiet HEAD; then
-  git commit -m "chore(deps): update aegir to v47.0.26"
+  git commit -m "chore(deps): update aegir to v47.0.26" --no-verify
 fi
 
 popd > /dev/null
