@@ -347,6 +347,7 @@ org:
       js-libp2p-auto-tls: *ipshipyard-repo
       js-libp2p-http: *ipshipyard-repo
       js-node-datachannel: *ipshipyard-repo
+      kubo: *ipshipyard-repo
       waterworks-community: *ipshipyard-repo
       waterworks-infra: *ipshipyard-repo
   libp2p:
