@@ -178,6 +178,7 @@ jobs:
               exit $status
             fi
             if [[ -n "$v" ]]; then
+              echo "version=${v#v}" | tee -a $GITHUB_OUTPUT
               echo "tag=$PREFIX${v#v}" | tee -a $GITHUB_OUTPUT
             fi
           fi
@@ -192,10 +193,14 @@ jobs:
           # ... then get the diff for all go.mod/Cargo.toml files in subdirectories.
           # Note that this command also finds go.mod/Cargo.toml files more than one level deep in the directory structure.
           output+=$(git diff "$PREV_TAG..HEAD" -- '*/go.mod' '*/Cargo.toml')
-          if [[ -z "$output" ]]; then
-            output="(empty)"
+          if [[ -n "$output" ]]; then
+            echo "output<<$EOF" >> $GITHUB_OUTPUT
+            echo "Changes in configuration file(s):" >> $GITHUB_OUTPUT
+            echo "\`\`\`diff" >> $GITHUB_OUTPUT
+            echo "$output" | tee -a $GITHUB_OUTPUT
+            echo "\`\`\`" >> $GITHUB_OUTPUT
+            echo "$EOF" >> $GITHUB_OUTPUT
           fi
-          printf "output<<$EOF\n%s\n$EOF" "$output" | tee -a $GITHUB_OUTPUT
         working-directory: ${{ steps.version.outputs.root }}
       - id: language
         name: Run language specific checks
@@ -238,14 +243,11 @@ jobs:
         env:
           SOURCE: ${{ matrix.source }}
           HEADER: |
-            Suggested version: `${{ steps.version.outputs.version }}`
+            Suggested tag: `${{ steps.version.outputs.tag }}`
           BODY: |
             Comparing to: [${{ steps.prev.outputs.tag }}](${{ fromJSON(steps.pr.outputs.json).base.repo.html_url }}/releases/tag/${{ steps.prev.outputs.tag }}) ([diff](${{ fromJSON(steps.pr.outputs.json).base.repo.html_url }}/compare/${{ steps.prev.outputs.tag }}..${{ fromJSON(steps.pr.outputs.json).head.label }}))
 
-            Changes in configuration file(s):
-            ```diff
             ${{ steps.git-diff.outputs.output }}
-            ```
 
             ${{ steps.language.outputs.output }}
           BODY_ALT: |
@@ -258,9 +260,9 @@ jobs:
             If you wish to cut a release once this PR is merged, please add the `release` label to this PR.
 
           DIFF_NOTICE: |
-            ## Cutting a Release (and modifying non-markdown files)
+            ## Cutting a Release (and modifying code files)
 
-            This PR is modifying both `${{ matrix.source }}` and non-markdown files.
+            This PR is modifying both `${{ matrix.source }}` and code files (not markdown, YAML, TOML or lock files).
             The Release Checker is not able to analyse files that are not checked in to `${{ fromJSON(steps.pr.outputs.json).base.ref }}`. This might cause the above analysis to be inaccurate.
             Please consider performing all the code changes in a separate PR before cutting the release.
 
@@ -297,7 +299,7 @@ jobs:
             else
               echo "$BODY_ALT" >> $GITHUB_OUTPUT
             fi
-            diff="$(gh api -X GET "repos/$GITHUB_REPOSITORY/compare/$BASE_REF...$HEAD_LABEL" --jq '.files | map(.filename)' | jq -r --arg source "$SOURCE" 'map(select(test("^(\($source)|.*\\.md)$") | not)) | .[]')"
+            diff="$(gh api -X GET "repos/$GITHUB_REPOSITORY/compare/$BASE_REF...$HEAD_LABEL" --jq '.files | map(.filename)' | jq -r --arg source "$SOURCE" 'map(select(test("^(\($source)|.*\\.md|.*\\.ya?ml|.*\\.toml|.*\\.lock|.*-lock\\.json|go\\.sum)$") | not)) | .[]')"
             if [[ "$diff" != "" ]]; then
               echo "$DIFF_NOTICE" >> $GITHUB_OUTPUT
             fi

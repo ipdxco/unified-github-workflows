@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [1.0.39] - 2026-03-18
+### Changed
+- improved release-check versioning and diff reporting
+
 ## [1.0.38] - 2026-02-22
 ### Changed
 - [revert] automerge only PRs with automerge label
