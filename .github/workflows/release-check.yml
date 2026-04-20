@@ -208,6 +208,7 @@ jobs:
         env:
           LANGUAGE: ${{ github.event.pull_request.base.repo.language }}
           PREV_TAG: ${{ steps.prev.outputs.tag }}
+          VERSION: v${{ steps.version.outputs.version }}
         # see https://github.com/golang/exp/commits/master/cmd/gorelease
         run: |
           git config advice.detachedHead false
@@ -219,7 +220,11 @@ jobs:
             echo "\`gorelease\` says:" >> $GITHUB_OUTPUT
             echo "\`\`\`" >> $GITHUB_OUTPUT
             echo "Run gorelease"
-            ((gorelease -base "$PREV_TAG") 2>&1 || true) | tee -a $GITHUB_OUTPUT
+            # Pass -version so gorelease uses the working tree as the release candidate.
+            # Without it, gorelease resolves the candidate via MVS over the module graph,
+            # which picks the wrong version when a dependency transitively requires an
+            # older version of the module being released (e.g. boxo -> kad-dht).
+            ((gorelease -base "$PREV_TAG" -version "$VERSION") 2>&1 || true) | tee -a $GITHUB_OUTPUT
             echo "\`\`\`" >> $GITHUB_OUTPUT
             echo "" >> $GITHUB_OUTPUT
             echo "\`gocompat\` says:" >> $GITHUB_OUTPUT
