@@ -81,6 +81,29 @@ jobs:
           fail_ci_if_error: false
           disable_safe_directory: ${{ runner.os == 'Windows' }} # NOTE: The workspace on Windows runners is on the C: drive and the codecov action is unable to lock the git directory on it
 
+  test-deno:
+    needs: build
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+        node: [lts/*]
+      fail-fast: true
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: ${{ matrix.node }}
+      - uses: ipfs/aegir/actions/cache-node-modules@main
+      - run: npm run --if-present test:deno
+      - uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2 # v6.0.0
+        with:
+          flags: deno
+          files: .coverage/*,packages/*/.coverage/*
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false
+          disable_safe_directory: ${{ runner.os == 'Windows' }} # NOTE: The workspace on Windows runners is on the C: drive and the codecov action is unable to lock the git directory on it
+
   test-chrome:
     needs: build
     runs-on: ubuntu-latest
@@ -240,7 +263,7 @@ jobs:
           fail_ci_if_error: false
 
   release-check:
-    needs: [test-node, test-chrome, test-chrome-webworker, test-firefox, test-firefox-webworker, test-webkit, test-webkit-webworker, test-electron-main, test-electron-renderer]
+    needs: [test-node, test-deno, test-chrome, test-chrome-webworker, test-firefox, test-firefox-webworker, test-webkit, test-webkit-webworker, test-electron-main, test-electron-renderer]
     runs-on: ubuntu-latest
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     outputs:
