@@ -119,6 +119,7 @@ If you want to disable cgo, you can do so by setting `cgo` to `false` in `.githu
   "cgo": false
 }
 ```
+This applies to the regular and 32-bit test runs. The race detector run always keeps cgo enabled because `go test -race` requires it; set `skipRace` to `true` if your module cannot build with cgo at all.
 
 ### Workflow Modification
 
