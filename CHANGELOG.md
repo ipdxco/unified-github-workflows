@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [1.0.43] - 2026-08-29
+### Added
+- fix CGO value in go-test workflow
+
 ## [1.0.42] - 2026-05-31
 ### Added
 - added optional test:bun invocation to the unified JS workflows
