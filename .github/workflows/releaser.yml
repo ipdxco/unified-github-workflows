@@ -38,7 +38,7 @@ jobs:
       matrix:
         source: ${{ fromJSON(inputs.sources) }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - id: version
         name: Determine version
         env:
@@ -88,7 +88,7 @@ jobs:
         env:
           BRANCHES: ${{ inputs.branches }}
           REF: ${{ github.ref }}
-        uses: actions/github-script@v8
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
             const branches = JSON.parse(process.env.BRANCHES);
@@ -108,7 +108,7 @@ jobs:
           REPOSITORY: ${{ github.repository }}
           REF: ${{ github.ref }}
           SHA: ${{ github.sha }}
-        uses: actions/github-script@v8
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
             const [owner, repo] = process.env.REPOSITORY.split('/');
@@ -153,7 +153,7 @@ jobs:
       - id: release
         name: Create release
         if: steps.tag.outputs.exists == 'false'
-        uses: galargh/action-gh-release@571276229e7c9e6ea18f99bad24122a4c3ec813f # https://github.com/galargh/action-gh-release/pull/1
+        uses: galargh/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844 # v0.1.15
         with:
           draft: ${{ inputs.draft }}
           tag_name: ${{ steps.version.outputs.tag }}
@@ -182,7 +182,7 @@ jobs:
           sed 's/[":<>|*?\r\n\\\/]/_/g' <<< "$SOURCE" | xargs -I {} -0 echo "name={}" | tee -a $GITHUB_OUTPUT
       - name: Upload release.json
         if: steps.release.outputs.id != ''
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: ${{ steps.json.outputs.name }}
           path: release.json
@@ -193,7 +193,7 @@ jobs:
     outputs:
       json: ${{ toJSON(fromJSON(steps.aggregate.outputs.json)) }}
     steps:
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
       - id: aggregate
         run: |
           shopt -s globstar

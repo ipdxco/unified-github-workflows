@@ -37,7 +37,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - id: releaser
-        uses: ipdxco/unified-github-workflows/.github/actions/inspect-releaser@main
+        uses: ipdxco/unified-github-workflows/.github/actions/inspect-releaser@6d814de11369bb725d26e8d350ac62fe6811ff0a # main
         with:
           artifacts-url: ${{ github.event.inputs.artifacts-url || github.event.workflow_run.artifacts_url }}
       - if: ${{ steps.releaser.outputs.id == '' }}

@@ -15,7 +15,7 @@ jobs:
       issues: write
       pull-requests: write
     steps:
-      - uses: galargh/stale@main # TODO: replace actions/stale once https://github.com/actions/stale/issues/1136 and https://github.com/actions/stale/issues/1133 are resolved
+      - uses: galargh/stale@b08983672a1d28acfb90b4c4473e94942192d289 # main; TODO: replace actions/stale once https://github.com/actions/stale/issues/1136 and https://github.com/actions/stale/issues/1133 are resolved
         with:
           repo-token: ${{ github.token }}
           stale-pr-message: |

@@ -34,7 +34,7 @@ runs:
   using: composite
   steps:
     - id: workflow-run
-      uses: ipdxco/workflow-run-context@v1
+      uses: ipdxco/workflow-run-context@492ea3967eb2ca7ed76b7888b42fa7649addd975 # v1.1.1
       with:
         artifacts-url: ${{ inputs.artifacts-url }}
         artifact-names: ${{ inputs.artifact-name }}

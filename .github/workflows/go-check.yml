@@ -52,13 +52,13 @@ jobs:
       - name: Create GitHub App installation token
         id: checkout-app
         if: steps.secrets.outputs.CHECKOUT_APP_ID == 'true' && steps.secrets.outputs.CHECKOUT_PRIVATE_KEY == 'true'
-        uses: actions/create-github-app-token@v2
+        uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v3.1.1
         with:
           app-id: ${{ secrets.CHECKOUT_APP_ID }}
           private-key: ${{ secrets.CHECKOUT_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
       - name: Check out the repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           submodules: recursive
           token: ${{ steps.checkout-app.outputs.token || secrets.CHECKOUT_TOKEN || github.token }}
@@ -77,20 +77,20 @@ jobs:
           fi
       - name: Check out the latest stable version of Go
         id: stable
-        uses: actions/setup-go@v6
+        uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
         with:
           go-version: stable
           cache: false
       - name: Read the Unified GitHub Workflows configuration
         id: config
-        uses: ipdxco/unified-github-workflows/.github/actions/read-config@main
+        uses: ipdxco/unified-github-workflows/.github/actions/read-config@6d814de11369bb725d26e8d350ac62fe6811ff0a # main
       - name: Read the go.mod file
         id: go-mod
-        uses: ipdxco/unified-github-workflows/.github/actions/read-go-mod@main
+        uses: ipdxco/unified-github-workflows/.github/actions/read-go-mod@6d814de11369bb725d26e8d350ac62fe6811ff0a # main
       - name: Set up the Go version read from the go.mod file
         id: go
         if: (inputs.go-version || fromJSON(steps.go-mod.outputs.json).Go) != steps.stable.outputs.go-version || inputs.go-cache != 'false'
-        uses: actions/setup-go@v6
+        uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
         with:
           go-version: ${{ inputs.go-version || fromJSON(steps.go-mod.outputs.json).Go }}
           cache: ${{ inputs.go-cache }}
@@ -170,7 +170,7 @@ jobs:
             go get github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$version ||
             go get github.com/golangci/golangci-lint/cmd/golangci-lint@$version
       - name: Check that go.mod is tidy
-        uses: protocol/multiple-go-modules@v1.4
+        uses: protocol/multiple-go-modules@ac694baecddc63fc5ba8fe8262d46659fbbf911d # v1.4
         with:
           run: |
             go mod tidy
@@ -189,19 +189,19 @@ jobs:
           fi
       - name: go vet
         if: success() || failure() # run this step even if the previous one failed
-        uses: protocol/multiple-go-modules@v1.4
+        uses: protocol/multiple-go-modules@ac694baecddc63fc5ba8fe8262d46659fbbf911d # v1.4
         with:
           run: go vet ./...
       - name: staticcheck
         if: success() || failure() # run this step even if the previous one failed
-        uses: protocol/multiple-go-modules@v1.4
+        uses: protocol/multiple-go-modules@ac694baecddc63fc5ba8fe8262d46659fbbf911d # v1.4
         with:
           run: |
             set -o pipefail
             staticcheck ./... | sed -e 's@\(.*\)\.go@./\1.go@g'
       - name: golangci-lint run
         if: (success() || failure()) && hashFiles('.golangci.yml', '.golangci.toml', '.golangci.json', '.golangci.yaml') != ''
-        uses: protocol/multiple-go-modules@v1.4
+        uses: protocol/multiple-go-modules@ac694baecddc63fc5ba8fe8262d46659fbbf911d # v1.4
         env:
           NEW_FROM_REV: ${{
               steps.github.outputs.base_sha && !(
@@ -218,7 +218,7 @@ jobs:
         with:
           run: golangci-lint run --disable govet --disable staticcheck --new=false --new-from-patch= --new-from-rev=$NEW_FROM_REV --verbose
       - name: go generate
-        uses: protocol/multiple-go-modules@v1.4
+        uses: protocol/multiple-go-modules@ac694baecddc63fc5ba8fe8262d46659fbbf911d # v1.4
         if: (success() || failure()) && fromJSON(steps.config.outputs.json).gogenerate == true
         env:
           IGNORE_PROTOC_VERSION_COMMENTS: ${{ inputs.go-generate-ignore-protoc-version-comments }}
