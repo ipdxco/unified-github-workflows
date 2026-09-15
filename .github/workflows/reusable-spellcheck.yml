@@ -12,7 +12,7 @@ jobs:
   spellcheck:
     runs-on: ${{ fromJSON(vars['UCI_SPELLCHECK_RUNNER'] || inputs['runner']) }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Extend the GitHub context
         id: github
@@ -29,7 +29,7 @@ jobs:
           fi
 
       - id: config
-        uses: actions/github-script@v8
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
             const fs = require("fs");
@@ -81,7 +81,7 @@ jobs:
           yq -o=json '.' "$CONFIG_PATH" > '.cspell.json'
           rm "$CONFIG_PATH"
 
-      - uses: actions/github-script@v8
+      - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
           IGNORE_WORDS: |
             Adin
@@ -108,7 +108,7 @@ jobs:
 
       - run: jq . .cspell.json
 
-      - uses: streetsidesoftware/cspell-action@d5d910b521ad408f1e7383c24609079f5a88bdca # v8.2.0
+      - uses: streetsidesoftware/cspell-action@de2a73e963e7443969755b648a1008f77033c5b2 # v8.4.0
         with:
           incremental_files_only: ${{
               steps.github.outputs.base_sha && !(

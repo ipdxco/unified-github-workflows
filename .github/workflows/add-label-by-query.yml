@@ -26,7 +26,7 @@ jobs:
           QUERY: ${{ github.event.inputs.query }}
           LABEL: ${{ github.event.inputs.label }}
           DRY_RUN: ${{ github.event.inputs.dry-run }}
-        uses: actions/github-script@v8
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           result-encoding: string
           script: |
