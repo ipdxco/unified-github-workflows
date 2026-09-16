@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [1.0.46] - 2026-09-16
+### Fixed
+- revert `releaser` workflow support for releasing a specific SHA with a separate policy ref
+
 ## [1.0.45] - 2026-09-16
 ### Added
 - allow the `releaser` workflow to release a specific SHA while evaluating release policy against a separate ref

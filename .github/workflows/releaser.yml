@@ -18,14 +18,6 @@ on:
         required: false
         type: boolean
         default: false
-      ref:
-        required: false
-        type: string
-        default: ${{ github.ref }}
-      sha:
-        required: false
-        type: string
-        default: ${{ github.sha }}
       runner:
         required: false
         type: string
@@ -46,10 +38,7 @@ jobs:
       matrix:
         source: ${{ fromJSON(inputs.sources) }}
     steps:
-      - id: checkout
-        uses: actions/checkout@v5
-        with:
-          ref: ${{ inputs.sha }}
+      - uses: actions/checkout@v5
       - id: version
         name: Determine version
         env:
@@ -127,7 +116,7 @@ jobs:
         if: steps.version.outputs.version != ''
         env:
           BRANCHES: ${{ inputs.branches }}
-          REF: ${{ inputs.ref }}
+          REF: ${{ github.ref }}
         uses: actions/github-script@v8
         with:
           script: |
@@ -146,8 +135,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
           REPOSITORY: ${{ github.repository }}
-          REF: ${{ inputs.ref }}
-          SHA: ${{ steps.checkout.outputs.commit }}
+          REF: ${{ github.ref }}
+          SHA: ${{ github.sha }}
         uses: actions/github-script@v8
         with:
           script: |
@@ -198,7 +187,7 @@ jobs:
           draft: ${{ inputs.draft }}
           tag_name: ${{ steps.version.outputs.tag }}
           generate_release_notes: true
-          target_commitish: ${{ steps.checkout.outputs.commit }}
+          target_commitish: ${{ github.sha }}
           make_latest: ${{ steps.version.outputs.prefix == 'v' && steps.version.outputs.suffix == '' && steps.version.outputs.tag == steps.latest.outputs.latest }}
           token: ${{ secrets.UCI_GITHUB_TOKEN || github.token }}
       - name: Create release.json
