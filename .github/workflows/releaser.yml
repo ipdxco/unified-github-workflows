@@ -114,7 +114,7 @@ jobs:
               printf '%s\n' "$TAG"
               git tag
             } | while IFS= read -r tag; do
-              if [[ "$tag" == "$PREFIX"* && "$tag" != *-* ]]; then
+              if [[ "$tag" == "$PREFIX"* && "${tag#"$PREFIX"}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
                 printf '%s\n' "$tag"
               fi
             done | sort -V | tail -n1
