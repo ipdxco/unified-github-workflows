@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+### Changed
+- run the `release-check` template on `pull_request` instead of `pull_request_target`, which GitHub blocks by default on public repositories from 2026-12-02; release pull requests from forks no longer get the sticky comment
+
 ### Fixed
 - only consider `X.Y.Z` tags when determining the latest release in the `releaser` workflow, so stray tags such as `v3actors` no longer stop final releases from being marked as latest
 
